@@ -1,0 +1,27 @@
+.font-sm {
+  font-size: 12px;
+  height: 28px;
+  margin-top: -5px;
+}
+
+.label-mb-0 {
+  margin-bottom: 0;
+}
+.form-control-alternative,
+.input-group-prepend {
+  font-size: 12px !important;
+  height: 29px !important;
+}
+
+.customer-item {
+  font-size: 12px !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.customer-item:hover {
+  background-color: #eeebeb;
+}
+.input-group-alternative .input-group,
+.input-group-append {
+  height: 29px;
+}

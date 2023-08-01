@@ -1,0 +1,755 @@
+import { useState, createContext, useEffect, useRef } from "react"
+import NewInvoice from "../components/Modals/NewInvoice"
+import { FaEye, FaPlus } from "react-icons/fa"
+import refund from "../assets/img/theme/refundimg.png"
+
+import {
+  Button,
+  Card,
+  CardHeader,
+  Table,
+  Container,
+  Row,
+  Col,
+  CardFooter,
+  Pagination,
+  PaginationItem,
+  PaginationLink,
+  Input,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroup,
+  FormGroup,
+  Form,
+} from "reactstrap"
+
+import Header from "components/Headers/Header.js"
+import { moneyInTxt } from "components/Invoice/InvoicePreview"
+import Loader from "components/Modals/Loader"
+import "@react-pdf-viewer/core/lib/styles/index.css"
+import { ToastContainer, toast } from "react-toastify"
+import Prompt from "components/Modals/Prompt"
+import InvoicePreviewRefund from "components/Modals/InvoicePreviewRefund"
+import { logout } from "services/AuthService"
+import PrintPreview from "components/Modals/PrintPreview"
+import NoInvoiceSignaturePopup from "components/Modals/NoInvoiceSignaturePopup"
+import ErrorBoundary from "components/ErrorBoundary"
+import { EvatTable } from "components/Tables/EvatTable"
+import ReactTooltip from "react-tooltip"
+import { useQuery } from "@tanstack/react-query"
+import { useDebounce } from "use-debounce"
+import useAuth from "hooks/useAuth"
+import { useCustomPaginationQuery } from "hooks/useCustomPaginationQuery"
+import { useCustomQueryById } from "hooks/useCustomQueryById"
+import useCustomAxios from "hooks/useCustomAxios"
+
+export const AppContext = createContext(null)
+
+const Index = () => {
+  const axios = useCustomAxios()
+  const { auth } = useAuth()
+  const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false)
+  const [invoices, setInvoices] = useState([])
+  const [showLoader, setShowLoader] = useState(false)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [pageSize] = useState(10)
+  const [pageInfo, setPageInfo] = useState({
+    totalItems: 10,
+    pageNumber: 1,
+    pageSize: 10,
+    totalPages: 5,
+  })
+  const [open, setOpen] = useState(false)
+  const [showPrompt, setshowPrompt] = useState(false)
+  const [refundInvoice, setrefundInvoice] = useState({})
+  const [isFocus, setIsFocus] = useState(false)
+  const [invoiceQuery, setinvoiceQuery] = useState("")
+  const [loggedInUser, setLoggedInUser] = useState(null)
+  const [isReportDownloading, setIsReportDownloading] = useState(false)
+  const [showReport, setShowReport] = useState(false)
+  const [formData, setFormData] = useState({})
+  const [promptMessage, setPromptMessage] = useState("")
+  const [refundType, setRefundType] = useState("Partial")
+  const [errorOpen, setErrorOpen] = useState(false)
+  const [selectedInvoiceNo, setSelectedInvoiceNo] = useState("")
+  const [summary, setSummary] = useState([])
+  const [period, setPeriod] = useState(0)
+  const [currencyFilter, setCurrencyFilter] = useState("")
+  const [showRetryLoader, setShowRetryLoader] = useState(false)
+  const [isFiltered, setIsFiltered] = useState(false)
+  const [message, setMessage] = useState(null)
+  const dayOfWeekSelRef = useRef()
+  const [value] = useDebounce(invoiceQuery, 500)
+  const [selectedRow, setSelectedRow] = useState("")
+  const [refundTypeForPost, setRefundTypeForPost] = useState("")
+  const [resetInvoicePreviewRefundComponent, setResetInvoicePreviewRefundComponent] = useState("")
+  const [pdfData, setPdfData] = useState("")
+
+  // console.log({ selectedInvoiceNo })
+
+  const columns = React.useMemo(
+    () => [
+      {
+        Header: "Invoice #",
+        accessor: "invoiceNo",
+        className: " text-left ",
+
+        width: 180,
+      },
+      {
+        Header: "Date",
+        accessor: "date",
+        className: " text-left ",
+
+        width: 140,
+        Cell: ({ cell: { value } }) => (
+          <>{new Date(value).toLocaleDateString("en-GB")}</>
+        ),
+      },
+      {
+        Header: "Customer",
+        accessor: "customerName",
+        className: " text-left ",
+
+        Cell: ({ cell: { value } }) => {
+          return (
+            <>
+              <span data-tip={value}>{value}</span>
+              <ReactTooltip />
+            </>
+          )
+        },
+        // minWidth: 340,
+        width: "auto",
+      },
+      // {
+      //   Header: "Currency",
+      //   accessor: "currency",
+      //   width: 90,
+
+      // },
+      {
+        Header: () => (
+          <span align="left" style={{ float: "left", width: "100%" }}>
+            Created By
+          </span>
+        ),
+        accessor: "nameOfUser",
+        className: " text-left ",
+        Cell: ({ cell: { value } }) => <>{value}</>,
+        width: "auto",
+      },
+      {
+        Header: () => (
+          <span align="right" style={{ float: "right", width: "100%" }}>
+            Currency
+          </span>
+        ),
+        accessor: "currency",
+        className: " text-right ",
+        // Cell: ({ cell: { value } }) => <>{moneyInTxt(value)}</>,
+        width: 141,
+      },
+      {
+        Header: () => (
+          <span align="right" style={{ float: "right", width: "100%" }}>
+            EX VAT amount
+          </span>
+        ),
+        accessor: "totalExVatAmount",
+        className: " text-right ",
+        Cell: ({ cell: { value } }) => <>{moneyInTxt(value)}</>,
+        width: 141,
+      },
+      {
+        Header: () => (
+          <span align="right" style={{ float: "right", width: "100%" }}>
+            Total Payable
+          </span>
+        ),
+        accessor: "totalAmount",
+        className: " text-right ",
+        Cell: ({ cell: { value } }) => <>{moneyInTxt(value)}</>,
+        width: 139,
+      },
+      {
+        Header: () => <div align="center">View</div>,
+        disableSortBy: true,
+        className: " text-center table-action",
+        Cell: ({ cell: { value } }) => {
+          return (
+            <Button
+              style={{ padding: "2px 8px" }}
+              className="badge-success"
+              onClick={(e) => {
+                // loadPreview(value);
+                setSelectedRow(value)
+              }}
+              title="Preview"
+            >
+              <FaEye />
+            </Button>
+          )
+        },
+        accessor: "id",
+      },
+    ],
+    []
+  )
+
+
+  const handleClose = () => {
+    setErrorOpen(false)
+  }
+
+  let userDetails = JSON.parse(
+    sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
+  )
+  const controller = new AbortController()
+
+  const getPrintPDF = async (invoiceNo) => {
+    setSelectedInvoiceNo(invoiceNo)
+    // toast.info('PDF document not available for invoice ' + invoiceNo + ' yet')
+    setIsReportDownloading(true)
+    // toast.info('Downloading report file. Please wait... ')
+    let base64 = ""
+
+    //https://api.cimsgh.com/api/v1/Reports/GenerateVATInvoiceReportAsync?InvoiceNo=2305229002
+
+    try {
+      const request = await axios.post(
+        `${process.env.REACT_APP_CLIENT_ROOT}/Reports/GenerateVATInvoiceReportAsync?Id=${invoiceNo}`,
+        invoiceNo
+      )
+      if (request) {
+        const { data } = request
+        base64 = `data:application/pdf;base64,` + data
+        const pdfContentType = "application/pdf"
+
+        setPdfData(base64)
+        setShowReport(true)
+
+
+        const base64toBlob = (data) => {
+          // Cut the prefix `data:application/pdf;base64` from the raw base 64
+          const base64WithoutPrefix = data.substr(
+            `data:${pdfContentType};base64,`.length
+          )
+
+          const bytes = atob(base64WithoutPrefix)
+          let length = bytes.length
+          let out = new Uint8Array(length)
+
+          while (length--) {
+            out[length] = bytes.charCodeAt(length)
+          }
+
+          return new Blob([out], { type: pdfContentType })
+        }
+
+        const link = document.createElement("a")
+        link.href = URL.createObjectURL(base64toBlob(base64))
+        link.download = "Invoice Report"
+        // link.click()
+        setIsReportDownloading(false)
+        // toast.success("Download complete")
+      }
+    } catch (error) {
+      console.log({ error });
+      setIsReportDownloading(false)
+      toast.error(error?.response?.data?.Message || error?.response?.data?.message || "System failed to download invoice")
+    }
+
+    // fetch(
+    //   `${process.env.REACT_APP_REPORT_URL}/GenerateVATInvoiceReportAsync?InvoiceNo=${invoiceNo}`,
+    //   {
+    //     method: "POST", // or 'PUT'
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${userDetails.access_token}`,
+    //     },
+    //     body: JSON.stringify(invoiceNo),
+    //   }
+    // )
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     // console.log(data)
+    //     base64 = `data:application/pdf;base64,` + data;
+    //     const pdfContentType = "application/pdf";
+
+    //     const base64toBlob = (data) => {
+    //       // Cut the prefix `data:application/pdf;base64` from the raw base 64
+    //       const base64WithoutPrefix = data.substr(
+    //         `data:${pdfContentType};base64,`.length
+    //       );
+
+    //       const bytes = atob(base64WithoutPrefix);
+    //       let length = bytes.length;
+    //       let out = new Uint8Array(length);
+
+    //       while (length--) {
+    //         out[length] = bytes.charCodeAt(length);
+    //       }
+
+    //       return new Blob([out], { type: pdfContentType });
+    //     };
+
+    //     const link = document.createElement("a");
+    //     link.href = URL.createObjectURL(base64toBlob(base64));
+    //     link.download = "Invoice Report";
+    //     link.click();
+    //     setIsReportDownloading(false);
+    //     toast.success("Download complete");
+    //   })
+    //   .catch((e) => {
+    //     setTimeout(() => {
+    //       setIsReportDownloading(false);
+    //     }, 1000);
+
+    //     toast.error("System failed to download invoice ");
+    //   });
+  }
+
+  const handleSearchInvoice = (e) => { }
+
+  useEffect(() => {
+    setCurrencyFilter("GHS")
+    // console.log(currencyFilter)
+  }, [])
+
+  // const getInvoiceById = async (id) =>{
+  //   setIsReportDownloading(true);
+  //   const res = await fetch(
+  //     `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/${id}`,
+  //     {
+  //       method: "GET", // or 'PUT'
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${userDetails.access_token}`,
+  //       },
+  //     }
+  //   );
+  //  return await res.json();
+
+  // }
+
+  // const {refetch:refetchGetById, data:invoceData, isLoading:isInvoiceLoading} = useQuery({
+  //   queryKey: ['invoice',selectedRow],
+  //   queryFn: () => getInvoiceById(selectedRow),
+  //   enabled:false,
+  //   onSuccess:(data) =>{
+  //     // console.log({signatureStatus: data});
+  //     setSelectedRow("")
+  //     setIsReportDownloading(false);
+  //     if (data.signatureStatus === "SUCCESS") {
+  //       setIsReportDownloading(false);
+  //       setFormData(data);
+  //       setShowReport(true);
+  //     } else {
+  //       setIsReportDownloading(false);
+  //       setErrorOpen(true);
+  //       setSelectedInvoiceNo(data);
+  //     }
+
+  //   },
+  //   onError:()=>{
+  //     setIsReportDownloading(false);
+  //   }
+  // })
+
+  const {
+    refetch: refetchGetById,
+    data: invoceData,
+    isLoading: isInvoiceLoading,
+    isFetching: isPageFetching,
+  } = useCustomQueryById(
+    `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/${selectedRow}`,
+    "invoice",
+    selectedRow,
+    (data) => {
+      setSelectedRow("")
+      setIsReportDownloading(false)
+      if (data.signatureStatus === "SUCCESS") {
+        setIsReportDownloading(false)
+        setFormData(data)
+        setShowReport(true)
+      } else {
+        setIsReportDownloading(false)
+        setErrorOpen(true)
+      }
+    },
+    (err) => {
+      setSelectedInvoiceNo(data)
+      setIsReportDownloading(false)
+    },
+    {
+      isEnabled: false,
+    }
+  )
+
+  useEffect(() => {
+    if (selectedRow.length > 0) {
+      refetchGetById()
+    }
+    return () => { }
+  }, [selectedRow])
+
+  // const getInvoice = async (pageNumber, searchText) =>{
+  //   let url, result;
+  //   if(searchText.length > 1){
+  //     url =   `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetSalesInvoicesByCompanyId/${userDetails.profile.company}/?filter=${searchText}`
+  //   }else{
+  //     url = `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetTransactionsSummaryByCompanyId/${period}?CompanyId=${userDetails.profile.company}&PageNumber=${pageNumber}&PageSize=${pageSize}`
+  //   }
+  //   const request = await fetch(url,
+  //   {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${userDetails.access_token}`,
+  //     },
+  //   })
+
+  //   if(searchText.length > 1){
+  //     result = await request.json()
+  //     let obj ={},pageObj={}
+  //     pageObj.paging = 1
+  //     pageObj.items = result
+  //     obj.invoices = pageObj
+  //     obj.summaries = result
+  //     return obj
+
+  //   }else{
+  //     result = await request.json()
+  //     console.log({result});
+  //     setPageInfo(result.invoices?.paging);
+  //     setSummary(result?.summaries);
+
+  //     return result
+  //   }
+  // }
+
+  /**
+   * useCustomPaginationQuery(url,key,page="",period="",text="", onsuccess=()=>{}, onError=()=>{},options ={isEnabled: true,filterUrl:""})
+   */
+
+  const { data, refetch, isFetching, isLoading } = useCustomPaginationQuery(
+    `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetTransactionsSummaryByCompanyId/${period}?CompanyId=${userDetails.profile.company}&PageNumber=${pageNumber}&PageSize=${pageSize}`,
+    "invoices",
+    pageNumber,
+    Number(period),
+    value,
+    (data) => {
+      setInvoices(data?.invoices?.items || [])
+      setPageInfo(data.invoices?.paging)
+      setSummary(data?.summaries || [])
+
+      if (data?.invoices?.items.length === 0) {
+        const msg = !value ?
+          "No Invoice Available For " +
+          dayOfWeekSelRef?.current?.options[
+            dayOfWeekSelRef?.current?.selectedIndex
+          ]?.innerText : "No invoice matched your search: " + value
+        toast.info(msg)
+        setMessage(msg)
+        return
+      }
+      setMessage(null);
+
+    },
+    (err) => { },
+    {
+      filterUrl: `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetSalesInvoicesByCompanyId/${userDetails.profile.company}/?filter=${value}`,
+    }
+  )
+
+  useEffect(() => {
+    if (pageNumber === 0) {
+      setPageInfo({
+        totalItems: 10,
+        pageNumber: 1,
+        pageSize: 10,
+        totalPages: 5,
+      })
+      setPageNumber(1)
+    }
+    refetch()
+    return () => { }
+  }, [period, pageNumber])
+
+  useEffect(() => {
+    if (value.length > 1) {
+      refetch()
+    }
+    return () => { }
+  }, [value])
+
+  // console.log({ use: pageInfo?.pageNumber })
+
+  return (
+    <>
+      {/* {showRetryLoader || isFetching && <Loader />} */}
+      <AppContext.Provider value={{ invoices, setInvoices }}>
+        <ErrorBoundary>
+          <Header
+            summary={summary}
+            currencyFilter={currencyFilter}
+            setCurrencyFilter={setCurrencyFilter}
+            period={period}
+            setPeriod={setPeriod}
+            dayOfWeekSelRef={dayOfWeekSelRef}
+            pageName="Sales Invoice"
+          />
+          {/* Page content */}
+          <Container className="mt--7" fluid>
+            <ToastContainer />
+
+            <Row className="my-5">
+              <Col className="mb-5 mb-xl-0" xl="12">
+                <Card className="shadow">
+                  <CardHeader className="border-0">
+                    <Row className="align-items-center">
+                      <div className="col">
+                        {/* <h3 className='mb-2'>Transactions</h3> */}
+
+                        {/* <h5 className='mb-0'>List of all invoices</h5> */}
+                        <Form
+                          className="navbar-search navbar-search-light form-inline "
+                          onSubmit={(e) => {
+                            e.preventDefault()
+                            handleSearchInvoice(e)
+                          }}
+                        >
+                          <FormGroup className="mb-0">
+                            {" "}
+                            <InputGroup className="input-group-alternative">
+                              <InputGroupAddon
+                                addonType="prepend"
+                                style={{ marginTop: 7 }}
+                              >
+                                <InputGroupText>
+                                  <i className="fas fa-search" />
+                                </InputGroupText>
+                              </InputGroupAddon>
+                              <Input
+                                placeholder="Search Transactions by Invoice No or Customer name"
+                                type="text"
+                                value={invoiceQuery}
+                                onChange={(e) => {
+                                  if (invoiceQuery?.length > 25) {
+                                    setinvoiceQuery(prev => prev.substring(0, 16))
+                                    setMessage("Your search query is too long")
+                                    return
+                                  }
+                                  setinvoiceQuery(e.target.value)
+                                }}
+                                style={{ width: 400 }}
+                              />
+                              <InputGroupAddon addonType="append">
+                                <InputGroupText
+                                  onClick={() => setinvoiceQuery("")}
+                                >
+                                  {isFocus && <i className="fas fa-times" />}
+                                </InputGroupText>
+                              </InputGroupAddon>
+                            </InputGroup>
+                            {invoiceQuery.length > 0 && (
+                              <button
+                                onClick={() => {
+                                  // loadInvoices(1, 6);
+                                  setPageNumber(1)
+                                  setinvoiceQuery("")
+                                  refetch()
+                                }}
+                                className="ml-4 btn btn-secondary"
+                              >
+                                Reset
+                              </button>
+                            )}
+                          </FormGroup>
+                        </Form>
+                      </div>
+                      <div className="col text-right mt-0">
+                        <Button
+                          className="badge-success"
+                          onClick={() => {
+                            setOpen((prev) => true)
+                            // setrefundItems(invoice)
+                          }}
+                          title="Refund"
+                        >
+                          <img
+                            src={refund}
+                            alt="refund"
+                            style={{ height: 20 }}
+                          />{" "}
+                          Refund Invoice
+                        </Button>
+                        <Button
+                          color="primary"
+                          //href='#pablo'
+                          onClick={(e) =>
+                            setShowNewInvoiceModal(!showNewInvoiceModal)
+                          }
+                          size="md"
+                        >
+                          <FaPlus /> Create Invoice
+                        </Button>
+                      </div>
+                    </Row>
+                  </CardHeader>
+                  <div style={styles.body}>
+                    {isReportDownloading && <Loader />}
+                    <EvatTable
+                      isLoading={isLoading}
+                      columns={columns}
+
+                      data={data?.invoices?.items || []}
+                      data2={invoices}
+                      setSelectedRow={setSelectedRow}
+                      getPrintPDF={getPrintPDF}
+                      pdfData={pdfData}
+
+                    />
+                  </div>
+                  {message && (
+                    <p className="text-info text-center" >{message}</p>
+                  )}
+                  {(pageInfo?.pageNumber) && pageInfo.totalItems > 0 && (
+                    <CardFooter className="py-1">
+                      <nav aria-label="...">
+                        <Pagination
+                          className="pagination justify-content-center mb-0"
+                          listClassName="justify-content-center mb-0"
+                        >
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault()
+                                if (pageInfo.pageNumber > 1) {
+                                  if (pageNumber < 1) {
+                                    return
+                                  }
+
+                                  setPageNumber((prev) => Number(prev) - 1)
+                                } else {
+                                  return
+                                }
+                              }}
+                            >
+                              <i className="fas fa-angle-left" />
+                              <span className="sr-only">Previous</span>
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink onClick={(e) => setPageNumber(1)}>
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem className="active">
+                            <PaginationLink onClick={(e) => e.preventDefault()}>
+                              {pageInfo.pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) =>
+                                setPageNumber(pageInfo.totalPages)
+                              }
+                            >
+                              {pageInfo.totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                if (pageInfo.pageNumber < pageInfo.totalPages) {
+                                  if (pageNumber === pageInfo.totalPages) {
+                                    return
+                                  } else {
+                                    setPageNumber((prev) => Number(prev) + 1)
+                                  }
+                                } else {
+                                  return
+                                }
+                              }}
+                            >
+                              <i className="fas fa-angle-right" />
+                              <span className="sr-only">Next</span>
+                            </PaginationLink>
+                          </PaginationItem>
+                        </Pagination>
+                      </nav>
+                    </CardFooter>
+                  )}
+                </Card>
+              </Col>
+            </Row>
+            {showNewInvoiceModal ? (
+              <NewInvoice
+                refetch={refetch}
+                setShowNewInvoiceModal={setShowNewInvoiceModal}
+              />
+            ) : null}
+            <Prompt
+              refundType={refundType}
+              refundTypeForPost={refundTypeForPost}
+              message={promptMessage}
+              showPrompt={showPrompt}
+              setshowPrompt={setshowPrompt}
+              showLoader={showLoader}
+              setShowLoader={setShowLoader}
+              refundInvoice={refundInvoice}
+              reset={setResetInvoicePreviewRefundComponent}
+              setOpen={setOpen}
+            />
+            <InvoicePreviewRefund
+              setPromptMessage={setPromptMessage}
+              setRefundType={setRefundType}
+              refundType={refundType}
+              setRefundTypeForPost={setRefundTypeForPost}
+              show={open}
+              setOpen={setOpen}
+              setshowPrompt={setshowPrompt}
+              setrefundInvoice={setrefundInvoice}
+              reset={setResetInvoicePreviewRefundComponent}
+              key={resetInvoicePreviewRefundComponent}
+            />
+            {showReport && (
+              <PrintPreview
+                setShowReport={setShowReport}
+                formData={formData}
+                getPrintPDF={getPrintPDF}
+                pdfData={pdfData}
+                selectedInvoiceNo={selectedInvoiceNo}
+              />
+            )}
+            <NoInvoiceSignaturePopup
+              handleClose={handleClose}
+              open={errorOpen}
+              selectedInvoiceNo={selectedInvoiceNo}
+              setShowRetryLoader={setShowRetryLoader}
+            />
+          </Container>
+        </ErrorBoundary>
+      </AppContext.Provider>
+    </>
+  )
+}
+
+export default Index
+
+const styles = {
+  body: {
+    marginTop: 0,
+    height: 420,
+    maxHeight: "450px",
+    overflow: "auto",
+    // maxHeight: '450px',
+    // overflowX: 'scroll',
+  },
+}
