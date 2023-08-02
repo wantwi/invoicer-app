@@ -1,12 +1,12 @@
 import { Button, Container, Row, Col } from "reactstrap";
 import React from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { logout } from "services/AuthService";
 
 const UserHeader = ({ message, pageName = "" }) => {
   const [profile, setProfile] = React.useState("");
 
-  const history = useHistory();
+  // const history = useNavigate();
   React.useEffect(() => {
     //check if its logged in
     const user = sessionStorage.getItem(process.env.REACT_APP_OIDC_USER);
@@ -17,7 +17,7 @@ const UserHeader = ({ message, pageName = "" }) => {
     if (!userOBJ) {
       logout();
       setTimeout(() => {
-        history.push("/auth/login");
+        // history("/auth/login");
       });
     } else {
       //console.log('UserData', userOBJ)

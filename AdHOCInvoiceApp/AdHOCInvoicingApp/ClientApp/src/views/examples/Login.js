@@ -3,7 +3,8 @@ import Loader from "components/Modals/Loader";
 import React, { useState } from "react";
 const Login = () => {
   const [show, setshow] = useState(false);
-  const { login } = useAuth();
+    const { login } = useAuth();
+
   return (
     <>
       <div style={styles.container}>

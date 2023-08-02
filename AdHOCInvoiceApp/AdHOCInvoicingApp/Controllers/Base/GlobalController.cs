@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AdHOCInvoicingApp.Helpers;
-
+using System.IdentityModel.Tokens.Jwt;
 
 namespace AdHOCInvoicingApp.Controllers.Base
 {
@@ -23,6 +23,17 @@ namespace AdHOCInvoicingApp.Controllers.Base
             var token = await HttpContext.GetUserAccessTokenAsync();
 
             return token.AccessToken ?? string.Empty;
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        protected async Task<string> UserInfo()
+        {
+            var token = await HttpContext.GetUserAccessTokenAsync();
+            var handler = new JwtSecurityTokenHandler();
+            var decodeToken = handler.ReadJwtToken(token.AccessToken);
+            //var tin = decodeToken.Claims.Where(x => x.Type == "TIN");
+            var userInfo = decodeToken.Claims.First(claim => claim.Type == "sub").Value;
+            return userInfo ?? string.Empty;
         }
 
     }

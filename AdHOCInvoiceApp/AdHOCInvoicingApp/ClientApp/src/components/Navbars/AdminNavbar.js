@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { logout } from "services/AuthService";
+//import { logout } from "../../hooks/useAuth"
+import { useAuth } from "context/AuthContext";
 import React from "react";
 // reactstrap components
 import {
@@ -18,31 +19,19 @@ import {
   Container,
   Media,
 } from "reactstrap";
-import useAuth from "hooks/useAuth";
+//import useAuth from "hooks/useAuth";
 
 const AdminNavbar = (props) => {
+    const { logout } = useAuth();
   const [profile, setProfile] = React.useState("");
-  const { auth } = useAuth();
-  React.useEffect(() => {
-    //check if its logged in
-    const user = sessionStorage.getItem(process.env.REACT_APP_OIDC_USER);
-    const userOBJ = JSON.parse(user);
-    //console.log('OIDC User:', userOBJ)
-
-    if (!userOBJ) {
-      logout();
-      setTimeout("location.reload(true);", 1500);
-    } else {
-      //console.log('UserData', userOBJ)
-      setProfile((profile) => userOBJ.profile.name);
-    }
-  }, []);
+  const { getUser } = useAuth();
+ 
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
         <Container fluid>
           <h1 className="h1 mb-0 text-white text-uppercase d-none d-lg-inline-block">
-            {auth.profile?.companyname}
+                     {/* {data?.profile?.companyname}*/}
           </h1>
 
           {/* <Form className='navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto'>
@@ -69,7 +58,7 @@ const AdminNavbar = (props) => {
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                      {profile}
+                      {/*{profile}*/}
                     </span>
                   </Media>
                 </Media>

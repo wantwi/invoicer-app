@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
-import { useHistory } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { moneyInTxt } from "components/Invoice/InvoicePreview";
 import { logout } from "services/AuthService";
 import { FcMoneyTransfer, FcOvertime } from "react-icons/fc";
@@ -14,13 +14,13 @@ const Header = ({
   period,
   setPeriod,
   dayOfWeekSelRef,
-  displayRecent = true
+  displayRecent = true,
 }) => {
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
   );
 
-  const history = useHistory();
+  // const history = useNavigate();
   // console.log({ history });
 
   const [dashboardSummary, setDashboardSummary] = useState(summary[1]);
@@ -37,17 +37,6 @@ const Header = ({
 
   useEffect(() => {
     setDashboardSummary(summary[1]);
-  }, []);
-
-  useEffect(() => {
-    if (!userDetails) {
-      logout();
-      setTimeout(() => {
-        history.push("/auth/login");
-      });
-    }
-
-    return () => { };
   }, []);
 
   useEffect(() => {

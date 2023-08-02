@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState, useRef } from "react"
-import Autocomplete from "./Autocomplete"
-import AutocompleteItems from "./AutocompleteItems"
-import { ToastContainer, toast } from "react-toastify"
-import "../../views/App.css"
-import "./invoicestyle.css"
+import React, { useContext, useEffect, useState, useRef } from "react";
+import Autocomplete from "./Autocomplete";
+import AutocompleteItems from "./AutocompleteItems";
+import { ToastContainer, toast } from "react-toastify";
+import "../../views/App.css";
+import "./invoicestyle.css";
 import {
   FormGroup,
   Form,
@@ -13,24 +13,24 @@ import {
   Button,
   Card,
   CardBody,
-} from "reactstrap"
-import { AppContext } from "views/Index"
-import { FormContext } from "components/Modals/NewInvoice"
-import "react-toastify/dist/ReactToastify.css"
-import Loader from "components/Modals/Loader"
-import { useHistory } from "react-router-dom"
-import DatePicker from "react-datepicker"
-import subDays from "date-fns/subDays"
-import addDays from "date-fns/addDays"
+} from "reactstrap";
+import { AppContext } from "views/Index";
+import { FormContext } from "components/Modals/NewInvoice";
+import "react-toastify/dist/ReactToastify.css";
+import Loader from "components/Modals/Loader";
+// import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import subDays from "date-fns/subDays";
+import addDays from "date-fns/addDays";
 import {
   useMutation,
   useQueries,
   useQuery,
   useQueryClient,
-} from "@tanstack/react-query"
+} from "@tanstack/react-query";
 // import axios from 'axios'
-import useCustomAxios from "../../hooks/useCustomAxios"
-import { getPayableAmount } from "utils/util"
+import useCustomAxios from "../../hooks/useCustomAxios";
+import { getPayableAmount } from "utils/util";
 // import 'react-tooltip/dist/react-tooltip.css'
 
 // import SelectSearch from 'react-select-search'
@@ -60,16 +60,16 @@ const currenciesInit = [
     name: "Great Britain Pounds",
     homeCurrency: false,
   },
-]
+];
 
 function InvoiceForm({ refetch }) {
-  const history = useHistory()
-  const queryClient = useQueryClient()
+  // const history = useNavigate();
+  const queryClient = useQueryClient();
 
-  const axios = useCustomAxios()
+  const axios = useCustomAxios();
 
   // const searchInput = useRef()
-  const { invoices } = useContext(AppContext)
+  const { invoices } = useContext(AppContext);
   const {
     formData,
     setFormData,
@@ -78,22 +78,22 @@ function InvoiceForm({ refetch }) {
     setShowNewInvoiceModal,
     comments,
     setComments,
-  } = useContext(FormContext)
+  } = useContext(FormContext);
 
-  const [isItemAdded, setIsItemAdded] = useState(false)
+  const [isItemAdded, setIsItemAdded] = useState(false);
 
-  const [products, setProducts] = useState([])
-  const [showAddItem, setShowAddItem] = useState(false)
-  const [customers, setCustomers] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [isTaxable, setIsTaxable] = useState(false)
-  const [disabled, setDisabled] = useState(true)
-  const [discount, setDiscount] = useState(0.0)
-  const [currencies, setCurrencies] = useState([])
-  const [currency, setCurrency] = useState("GHS")
-  const [isCurrencyDisabled, setIsCurrencyDisbled] = useState(false)
-  const [exchangeRate, setExchangeRate] = useState(1)
-  const [forex, setForex] = useState(1)
+  const [products, setProducts] = useState([]);
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isTaxable, setIsTaxable] = useState(false);
+  const [disabled, setDisabled] = useState(true);
+  const [discount, setDiscount] = useState(0.0);
+  const [currencies, setCurrencies] = useState([]);
+  const [currency, setCurrency] = useState("GHS");
+  const [isCurrencyDisabled, setIsCurrencyDisbled] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(1);
+  const [forex, setForex] = useState(1);
   // const [discount, setDiscount] = useState({
   //   type: "",
   //   amount: 0.0,
@@ -102,13 +102,13 @@ function InvoiceForm({ refetch }) {
   const [discountTypeToShow, setDiscountTypeToShow] = useState({
     discountAmount: false,
     itemDiscountAmnt: false,
-  })
+  });
 
-  const [cashCustomerTin, setCashCustomerTin] = useState("")
+  const [cashCustomerTin, setCashCustomerTin] = useState("");
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  )
+  );
 
   //Ensure an item is added before taking discount amount
   useEffect(() => {
@@ -117,28 +117,28 @@ function InvoiceForm({ refetch }) {
       !gridData?.length &&
       formData?.totalDiscount
     ) {
-      toast.error("Please add Item(s) first")
-      setFormData((prev) => ({ ...prev, totalDiscount: "" }))
-      return
+      toast.error("Please add Item(s) first");
+      setFormData((prev) => ({ ...prev, totalDiscount: "" }));
+      return;
     }
 
     //ensure discount amount is not greater than total payable
     let totalPayable = gridData.reduce(
       (total, item) => total + item.totalPayable,
       0
-    )
+    );
 
     // console.log({ totalPayable, key: formData?.totalDiscount })
     if (parseFloat(formData?.totalDiscount) >= totalPayable) {
-      toast.error("Discount amount must be less than total payable")
-      setFormData((prev) => ({ ...prev, totalDiscount: 0 }))
-      return
+      toast.error("Discount amount must be less than total payable");
+      setFormData((prev) => ({ ...prev, totalDiscount: 0 }));
+      return;
     }
 
-    return () => { }
-  }, [formData?.discountType, formData?.totalDiscount])
+    return () => {};
+  }, [formData?.discountType, formData?.totalDiscount]);
 
-  const handleOnchangeOfDiscountAmt = () => { }
+  const handleOnchangeOfDiscountAmt = () => {};
 
   // const handleCustomerList = async () => {
   //   try {
@@ -248,14 +248,14 @@ function InvoiceForm({ refetch }) {
   const getCustomers = async () => {
     const request = await axios.get(
       `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}`
-    )
+    );
 
-    return request?.data
-  }
+    return request?.data;
+  };
   const getCurrency = async () => {
     const request = await axios.get(
       `${process.env.REACT_APP_CLIENT_ROOT}/Currency`
-    )
+    );
 
     //  await fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Currency`, {
     //     method: 'GET', // or 'PUT'
@@ -265,12 +265,12 @@ function InvoiceForm({ refetch }) {
     //     },
     //   })
 
-    return request.data
-  }
+    return request.data;
+  };
   const getProductList = async () => {
     const request = await axios.get(
       `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`
-    )
+    );
 
     // fetch(
     //   `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`,
@@ -285,8 +285,8 @@ function InvoiceForm({ refetch }) {
 
     //const response =
 
-    return request.data
-  }
+    return request.data;
+  };
   const renderProducts = (data) => {
     let options = data.map((item, index) => {
       return {
@@ -302,40 +302,44 @@ function InvoiceForm({ refetch }) {
         isTaxInclusive: item.isTaxInclusive,
         id: item.id,
         status: item.status,
-      }
-    })
-    return options.filter((item) => item.status === "A")
-  }
+      };
+    });
+    return options.filter((item) => item.status === "A");
+  };
 
   const postInvoice = async (postData) => {
-    setLoading(true)
+    setLoading(true);
     return await axios.post(
       `${process.env.REACT_APP_CLIENT_ROOT_V3}/Invoices/Sales`,
       postData
-    )
-  }
+    );
+  };
 
   const { data: customerList } = useQuery({
     queryKey: ["customers"],
     queryFn: getCustomers,
     onSuccess: (data) => {
-      let filteredCustomers = data.filter((customer) => customer.status === "A")
-      setCustomers(filteredCustomers)
-      setCashCustomerTin(data.find((cust) => cust.name == "cash customer")?.tin)
+      let filteredCustomers = data.filter(
+        (customer) => customer.status === "A"
+      );
+      setCustomers(filteredCustomers);
+      setCashCustomerTin(
+        data.find((cust) => cust.name == "cash customer")?.tin
+      );
     },
-  })
+  });
 
   const { data: currencyList, refetch: refetchCurrency } = useQuery({
     queryKey: ["currency"],
     queryFn: getCurrency,
     onSuccess: (data) => {
       if (data.length > 0) {
-        setCurrencies(data)
+        setCurrencies(data);
       } else {
-        setCurrencies(currenciesInit)
+        setCurrencies(currenciesInit);
       }
     },
-  })
+  });
 
   const {
     data: productsList = [],
@@ -345,62 +349,65 @@ function InvoiceForm({ refetch }) {
     queryKey: ["products"],
     queryFn: getProductList,
     select: (data) => renderProducts(data),
-  })
+  });
 
   const { mutate } = useMutation({
     mutationFn: postInvoice,
     onSuccess: () => {
-      toast.success("Invoice successfully saved")
-      refetch()
+      toast.success("Invoice successfully saved");
+      refetch();
       //queryClient.invalidateQueries({ queryKey: ["invoices", 1, 1, ""] });
-      setShowNewInvoiceModal(false)
-      setLoading(false)
+      setShowNewInvoiceModal(false);
+      setLoading(false);
     },
     onError: (error) => {
       if (error?.response?.status === 500) {
-
-        toast.error(error?.response?.data?.Message || error?.response?.data?.message)
-        setLoading(false)
-        return
+        toast.error(
+          error?.response?.data?.Message || error?.response?.data?.message
+        );
+        setLoading(false);
+        return;
       }
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data?.message || error?.response?.data?.Message || "Invoice could not be saved."
-      )
-      setLoading(false)
+        error?.response?.data?.message ||
+          error?.response?.data?.Message ||
+          "Invoice could not be saved."
+      );
+      setLoading(false);
     },
-  })
+  });
 
   //used for setting the min value of Issued Date input field
-  let today = new Date().toISOString().split("T")[0]
+  let today = new Date().toISOString().split("T")[0];
 
   const validateInput = (value) => {
     // console.log(value)
 
     if ((value != "" && value < 0.00001) || value == "e") {
       // setFormData({ ...formData, quantity: 1 })
-      toast.info("Please make sure quantity is at greater than 0")
+      toast.info("Please make sure quantity is at greater than 0");
     }
-  }
+  };
 
   const addRecordToData = (item) => {
     // setIsCurrencyDisbled(true)
 
-    let csttourism = 0
+    let csttourism = 0;
     if (item.otherLevies === "NON") {
-      csttourism = 0
+      csttourism = 0;
     } else if (item.otherLevies === "CST") {
-      csttourism = 0.05 * item.price * item.quantity
+      csttourism = 0.05 * item.price * item.quantity;
     } else if (item.otherLevies === "TRSM") {
-      csttourism = 0.01 * item.price * item.quantity
+      csttourism = 0.01 * item.price * item.quantity;
     }
 
     if (item.itemName === "") {
-      toast.warning("Please select an item first")
+      toast.warning("Please select an item first");
     } else if (item.quantity === "") {
-      toast.warning("Please provide a value for quantity")
+      toast.warning("Please provide a value for quantity");
     } else if (item.price === "") {
-      toast.warning("Please provide a value for price")
+      toast.warning("Please provide a value for price");
     } else {
       // let obj = {};
       // let vatableAmt = 0;
@@ -514,7 +521,7 @@ function InvoiceForm({ refetch }) {
       // console.log({ item });
       // return;
 
-      const gridItem = getPayableAmount({ ...item, isTaxable }, discount)
+      const gridItem = getPayableAmount({ ...item, isTaxable }, discount);
 
       // let gridItem2 = {
       //   ...obj,
@@ -529,18 +536,18 @@ function InvoiceForm({ refetch }) {
       setGridData((gridData) => [
         ...gridData,
         { ...gridItem, otherLeviesType: item.otherLevies },
-      ])
-      setFormData({ ...formData, itemName: "", quantity: 1, price: "" })
-      setDiscount(0.0)
-      setIsItemAdded(true)
-      setDisabled(true)
+      ]);
+      setFormData({ ...formData, itemName: "", quantity: 1, price: "" });
+      setDiscount(0.0);
+      setIsItemAdded(true);
+      setDisabled(true);
     }
-  }
+  };
 
   const saveInvoice = async () => {
     if (!Boolean(gridData?.length)) {
-      toast.error("Please add invoice item(s)")
-      return
+      toast.error("Please add invoice item(s)");
+      return;
     }
     let postData = {
       companyId: userDetails.profile.company,
@@ -567,39 +574,39 @@ function InvoiceForm({ refetch }) {
           quantity: item.quantity,
           vatItemId: item.vatItemId,
           //isTaxable,
-        }
+        };
       }),
-    }
+    };
     //if discount is applied add it to data to post
     if (formData?.discountType) {
       if (formData?.discountType === "selective" && !formData?.totalDiscount) {
-        toast.error("Provide discount amount")
-        return
+        toast.error("Provide discount amount");
+        return;
       }
       const subTotalAmt = gridData.reduce(
         (total, item) => total + item.taxableAmount,
         0
-      )
+      );
       if (
         (formData?.discountType === "selective") &
         (formData?.totalDiscount >= subTotalAmt)
       ) {
-        toast.error("Discount amount is invalid")
-        return
+        toast.error("Discount amount is invalid");
+        return;
       }
-      postData["totalDiscount"] = parseFloat(formData.totalDiscount).toFixed(2)
-      postData["discountType"] = String(formData.discountType).toUpperCase()
+      postData["totalDiscount"] = parseFloat(formData.totalDiscount).toFixed(2);
+      postData["discountType"] = String(formData.discountType).toUpperCase();
     }
 
     if (isCashCustomer) {
-      postData["customerTinghcard"] = cashCustomerTin
-      postData["customerName"] = `${formData.customer}(cash customer)`
+      postData["customerTinghcard"] = cashCustomerTin;
+      postData["customerName"] = `${formData.customer}(cash customer)`;
     }
     // console.log({cashCustomerTin, postData })
     // return
 
     if (isItemAdded) {
-      mutate(postData)
+      mutate(postData);
       // console.log('Invoice to save:', postData)
       // setLoading(true)
       // fetch(`${process.env.REACT_APP_CLIENT_ROOT_V2}/Invoices/Sales`, {
@@ -631,28 +638,30 @@ function InvoiceForm({ refetch }) {
       //     }, 2000)
       //   })
     } else {
-      toast.warning("Please add an item first")
+      toast.warning("Please add an item first");
     }
-  }
+  };
 
   const checkIfRatesExist = async (currency) => {
-    let today = new Date().toISOString()
+    let today = new Date().toISOString();
     const request = await axios.get(
       `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${userDetails.profile.company}/${today}?currencyCode=${currency}`
-    )
+    );
     // "(GHS" + data[0].exchangeRate + " / " + data[0].currencyCode
     if (request) {
-      const { data } = request
+      const { data } = request;
       if (data.length > 0) {
-        setForex(data[0].exchangeRate)
-        setExchangeRate(`(GHS ${data[0].exchangeRate}/${data[0].currencyCode})`)
+        setForex(data[0].exchangeRate);
+        setExchangeRate(
+          `(GHS ${data[0].exchangeRate}/${data[0].currencyCode})`
+        );
       } else {
         toast.warning(
           "There are no exchange rates set for today. Redirecting you to currency set up to add exchange rates"
-        )
+        );
         setTimeout(() => {
-          history.push("/admin/currency")
-        }, 3000)
+          // history("/admin/currency");
+        }, 3000);
       }
     }
 
@@ -693,44 +702,44 @@ function InvoiceForm({ refetch }) {
     //     }
     //   })
     //   .catch((err) => console.log(err))
-  }
+  };
 
   const handleCurrencySelect = (e) => {
-    setCurrency(e.target.value)
+    setCurrency(e.target.value);
     if (e.target.value !== "GHS") {
-      checkIfRatesExist(e.target.value)
+      checkIfRatesExist(e.target.value);
     } else {
-      setExchangeRate("")
+      setExchangeRate("");
     }
-  }
+  };
 
   const handleDiscountTypeOnchange = (e) => {
     setFormData({
       ...formData,
       discountType: e.target.value,
-    })
+    });
 
     switch (e.target.value) {
       case "general":
         setDiscountTypeToShow({
           discountAmount: false,
           itemDiscountAmnt: true,
-        })
-        break
+        });
+        break;
       case "selective":
         setDiscountTypeToShow({
           discountAmount: true,
           itemDiscountAmnt: false,
-        })
-        break
+        });
+        break;
       default:
         setDiscountTypeToShow({
           discountAmount: false,
           itemDiscountAmnt: false,
-        })
-        break
+        });
+        break;
     }
-  }
+  };
 
   useEffect(() => {
     // handleCustomerList()
@@ -738,30 +747,30 @@ function InvoiceForm({ refetch }) {
 
     return () => {
       //cleanup
-    }
-  }, [invoices])
+    };
+  }, [invoices]);
 
   useEffect(() => {
     //console.log('Currency', currency)
-    refetchProducts()
-    setFormData((prev) => ({ ...prev, currency: currency }))
-  }, [currency])
+    refetchProducts();
+    setFormData((prev) => ({ ...prev, currency: currency }));
+  }, [currency]);
 
-  const [isCashCustomer, setIsCashCustomer] = useState(true)
+  const [isCashCustomer, setIsCashCustomer] = useState(true);
 
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       identity: "",
       date: new Date(Date.now()),
-    }))
+    }));
     // if (isCashCustomer) {
     // } else {
     //   setFormData((prev) => ({ ...prev, date: "" }));
     // }
 
-    return () => { }
-  }, [isCashCustomer])
+    return () => {};
+  }, [isCashCustomer]);
 
   // useEffect(() => {
   //   if(){
@@ -806,8 +815,7 @@ function InvoiceForm({ refetch }) {
                     className="form-control-label label-mb-0 "
                     style={{ alignSelf: "center" }}
                   >
-                    Customer{" "}<code style={{ color: "darkred" }}>
-                      *</code>
+                    Customer <code style={{ color: "darkred" }}>*</code>
                   </label>
                   <span>
                     <input
@@ -816,9 +824,9 @@ function InvoiceForm({ refetch }) {
                       className="m-2 mb-1"
                       type="checkbox"
                       onChange={(e) => {
-                        setIsCashCustomer(e.target.checked)
-                        setFormData((prev) => ({ ...prev, customer: "" }))
-                        setShowAddItem(false)
+                        setIsCashCustomer(e.target.checked);
+                        setFormData((prev) => ({ ...prev, customer: "" }));
+                        setShowAddItem(false);
                       }}
                       checked={Boolean(isCashCustomer)}
                       value={isCashCustomer}
@@ -903,8 +911,7 @@ function InvoiceForm({ refetch }) {
                   htmlFor="invoiceDate"
                   className="form-control-label label-mb-0"
                 >
-                  Invoice Date{" "}<code style={{ color: "darkred" }}>
-                      *</code>
+                  Invoice Date <code style={{ color: "darkred" }}>*</code>
                 </label>
                 <DatePicker
                   id="invoiceDate"
@@ -918,7 +925,7 @@ function InvoiceForm({ refetch }) {
                   minDate={new Date(2023, 0, 1)}
                   onChange={(e) => {
                     //set invoice date and reset due date when invoice date changes
-                    setFormData({ ...formData, date: e, dueDate: null })
+                    setFormData({ ...formData, date: e, dueDate: null });
                   }}
                   style={{ height: 29, padding: "0px 5px" }}
                 />
@@ -940,10 +947,9 @@ function InvoiceForm({ refetch }) {
                   dateFormat="yyyy/MM/dd"
                   selected={formData.dueDate}
                   onChange={(e) => {
-                    
-                    console.log({e})
-                    setFormData({ ...formData, dueDate: e })}
-                  }
+                    console.log({ e });
+                    setFormData({ ...formData, dueDate: e });
+                  }}
                   style={{ height: 29, padding: "0px 5px" }}
                 />
               </Col>
@@ -1027,16 +1033,16 @@ function InvoiceForm({ refetch }) {
                   type="button"
                   onClick={() => {
                     if (!formData?.date) {
-                      toast.warning("Please enter invoice date first")
-                      return
+                      toast.warning("Please enter invoice date first");
+                      return;
                     }
                     if (
                       formData.customer ||
                       (isCashCustomer && formData.customer)
                     ) {
-                      setShowAddItem(true)
+                      setShowAddItem(true);
                     } else {
-                      toast.warning("Please enter customer name first")
+                      toast.warning("Please enter customer name first");
                     }
                   }}
                 >
@@ -1095,7 +1101,7 @@ function InvoiceForm({ refetch }) {
                       type="checkbox"
                       checked={isTaxable}
                       onClick={() => {
-                        return
+                        return;
                       }}
                       hidden
                     />
@@ -1135,15 +1141,15 @@ function InvoiceForm({ refetch }) {
                       type="text"
                       value={formData?.quantity}
                       onChange={(e) => {
-                        let valNum = new RegExp(/^\d*(\.\d{0,2})?$/)
+                        let valNum = new RegExp(/^\d*(\.\d{0,2})?$/);
                         if (valNum.test(e.target.value)) {
                           setFormData({
                             ...formData,
                             quantity: e.target.value,
-                          })
+                          });
                         }
                       }}
-                    // onKeyUp={validateInput(formData.quantity)}
+                      // onKeyUp={validateInput(formData.quantity)}
                     />
                   </Col>
                   <Col lg="6">
@@ -1169,7 +1175,7 @@ function InvoiceForm({ refetch }) {
                           price: e.target.value,
                         })
                       }
-                    // onKeyDown={validateInput(formData.price)}
+                      // onKeyDown={validateInput(formData.price)}
                     />
                   </Col>
                 </Row>
@@ -1186,7 +1192,7 @@ function InvoiceForm({ refetch }) {
                       id="isTaxable"
                       type="checkbox"
                       checked={isTaxable}
-                    // disabled
+                      // disabled
                     />
                     &nbsp; &nbsp;
                     <label className="form-control-label" htmlFor="isTaxable">
@@ -1272,10 +1278,10 @@ function InvoiceForm({ refetch }) {
         <div className="modal-footer"></div>
       </Card>
     </>
-  )
+  );
 }
 
-export default InvoiceForm
+export default InvoiceForm;
 
 const styles = {
   th: {
@@ -1283,4 +1289,4 @@ const styles = {
     position: "sticky",
     top: 0 /* Don't forget this, required for the stickiness */,
   },
-}
+};

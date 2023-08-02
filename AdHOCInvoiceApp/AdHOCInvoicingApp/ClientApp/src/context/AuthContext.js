@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react"
-import useCustomAxios from "../hook/useCustomAxios"
+import useCustomAxios from "../hooks/useCustomAxios"
 import { useQuery } from "@tanstack/react-query"
 export const AuthContext = React.createContext()
 export const useAuth = () => useContext(AuthContext)
@@ -17,10 +17,14 @@ export const AuthProvider = ({
         return response?.data
     }
     const login = () => {
-        window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/adin/index`
+        //window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
+        console.log("green")
+        window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
+        console.log("Location", process.env.REACT_APP_BASENAME, window.location.href)
     }
 
     const logout = () => {
+        console.log("logout called")
         const logoutUrl = user["bff:logout_url"]
         window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_BASENAME}/auth/login`
        

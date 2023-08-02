@@ -22,7 +22,7 @@ import UserHeader from "components/Headers/UserHeader"
 import { ToastContainer, toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import Loader from "components/Modals/Loader"
-import excelFile from "../assets/GRA_INVOICER_ITEMS_TEMPLATE.xlsx"
+// import excelFile from "../assets/GRA_INVOICER_ITEMS_TEMPLATE.xlsx"
 import ItemsUploadExcel from "components/Modals/ItemsUploadExcel"
 import { moneyInTxt } from "components/Invoice/InvoicePreview"
 import { GrEdit, GrClose } from "react-icons/gr"
@@ -774,7 +774,7 @@ const Items = () => {
                         title="Download Customer List Excel Template"
                         style={{ paddingLeft: 0, marginLeft: 0 }}
                       >
-                        <a href={excelFile} style={{ color: "white" }}>
+                        <a href={"excelFile"} style={{ color: "white" }}>
                           Download Template
                         </a>
                       </Button>

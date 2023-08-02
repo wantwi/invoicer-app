@@ -24,11 +24,32 @@ namespace AdHOCInvoicingApp.Controllers
             _hTTPClientInterface = hTTPClientInterface;
             _httpClientFactory = httpClientFactory;
         }
-       
+
+        [HttpGet("GetTransactionSummary/{period}/{pageNumber}/{pageSize}")]
+        public async Task<IActionResult> GetTransactionSummary(int period, int pageNumber, int pageSize)
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetTransactionsSummaryByCompanyId/{period}?CompanyId={user}&PageNumber{pageNumber}1&PageSize={pageSize}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+        [HttpGet("GetSalesInvoicesByCompanyId/{value}")]
+        public async Task<IActionResult> GetSalesInvoicesByCompanyId(string value)
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetSalesInvoicesByCompanyId/{user}?filter={value}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
         [HttpGet("GetItemCategories")]
         public async Task<IActionResult> GetInvoicesData()
         {
-           
+
             string url = $"{EvatAdHOCBaseUrl}/v1/Generic/GetItemCategories";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
@@ -56,14 +77,14 @@ namespace AdHOCInvoicingApp.Controllers
             string url = $"{EvatAdHOCBaseUrl}/v1/Invoice/TaxSummary";
 
             var response = await client.PostAsync(url, content);
-            
+
             if (response.StatusCode.ToString() == "BadRequest")
             {
                 throw new Exception("Error Occured");
             }
             else
             {
-               var result = await response.Content.ReadAsStringAsync();
+                var result = await response.Content.ReadAsStringAsync();
                 return new JsonResult(new { result });
             }
         }
@@ -83,7 +104,7 @@ namespace AdHOCInvoicingApp.Controllers
             if (response.IsSuccessStatusCode)
             {
                 dataObj = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new {status = int.Parse(response.StatusCode.ToString()), data = dataObj });
+                return new JsonResult(new { status = int.Parse(response.StatusCode.ToString()), data = dataObj });
             }
             else
             {

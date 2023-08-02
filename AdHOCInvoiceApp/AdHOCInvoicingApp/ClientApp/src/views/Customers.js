@@ -22,7 +22,7 @@ import Loader from "components/Modals/Loader";
 import UserHeader from "components/Headers/UserHeader";
 import { FcCancel } from "react-icons/fc";
 import UploadExcel from "components/Modals/UploadExcel";
-import excelFile from "../assets/GRA_INVOICER_BUSINESS_PARTNERS.xlsx";
+// import excelFile from "../assets/GRA_INVOICER_BUSINESS_PARTNERS.xlsx";
 import { GrEdit, GrClose } from "react-icons/gr";
 import { useRef } from "react";
 import { debounce } from "lodash";
@@ -866,7 +866,7 @@ const Customers = () => {
                             title="Download Customer List Excel Template"
                             style={{ width: "100%", height: 29 }}
                           >
-                            <a href={excelFile} style={{ color: "white" }}>
+                            <a href={""} style={{ color: "white" }}>
                               Download Template
                             </a>
                           </Button>

@@ -27,13 +27,15 @@ const Admin = (props) => {
   const mainContent = React.useRef(null);
   const [role, setRole] = useState(null);
   let [routes, setRoutes] = useState(routesData || []);
-  const { auth } = useAuth();
+    const { getUser } = useAuth();
 
   React.useLayoutEffect(() => {
-    const user = sessionStorage.getItem(process.env.REACT_APP_OIDC_USER);
-    const userOBJ = JSON.parse(user);
-    // console.log(userOBJ.profile)
-    setRole((prev) => userOBJ?.profile?.role);
+    //const user = sessionStorage.getItem(process.env.REACT_APP_OIDC_USER);
+    //const userOBJ = JSON.parse(user);
+    //// console.log(userOBJ.profile)
+    //setRole((prev) => userOBJ?.profile?.role);
+      //const data = await getUser()
+      //console.log({data})
   }, []);
 
   React.useLayoutEffect(() => {
@@ -75,9 +77,7 @@ const Admin = (props) => {
     console.log("Logging", error, errorInfo);
   };
 
-  if (!auth?.access_token) {
-    login();
-  }
+
 
   return (
     <>
@@ -95,10 +95,10 @@ const Admin = (props) => {
 
         <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
           <div className="main-content" ref={mainContent}>
-            <AdminNavbar
-              {...props}
-              brandText={getBrandText(props.location.pathname)}
-            />
+            {/*<AdminNavbar*/}
+            {/*  {...props}*/}
+            {/*  brandText={getBrandText(props.location.pathname)}*/}
+            {/*/>*/}
             <Switch>
               {getRoutes()}
               <Redirect from="*" to="/admin/index" />

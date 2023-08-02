@@ -434,7 +434,7 @@ const Index = () => {
    */
 
   const { data, refetch, isFetching, isLoading } = useCustomPaginationQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetTransactionsSummaryByCompanyId/${period}?CompanyId=${userDetails.profile.company}&PageNumber=${pageNumber}&PageSize=${pageSize}`,
+      `/api/GetTransactionSummary/${period}/${pageNumber}/${pageSize}`,
     "invoices",
     pageNumber,
     Number(period),
@@ -459,7 +459,7 @@ const Index = () => {
     },
     (err) => { },
     {
-      filterUrl: `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetSalesInvoicesByCompanyId/${userDetails.profile.company}/?filter=${value}`,
+        filterUrl: `/api/GetSalesInvoicesByCompanyId/${value}`,
     }
   )
 
