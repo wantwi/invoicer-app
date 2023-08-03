@@ -7,6 +7,7 @@ import { GrEdit } from "react-icons/gr";
 import { FaTrashAlt } from "react-icons/fa";
 import EditInvoiceItem from "components/Modals/EditInvoiceItem";
 import moment from "moment";
+import { getUser } from "services/AuthService";
 
 export const moneyInTxt = (value, standard, dec = 2) => {
   var nf = new Intl.NumberFormat(standard, {
@@ -15,13 +16,17 @@ export const moneyInTxt = (value, standard, dec = 2) => {
   });
   return nf.format(Number(value) ? value : 0.0);
 };
-let userDetails = JSON.parse(
-  sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-);
+let userDetails = null;
 
 function InvoicePreview() {
   const { formData, gridData, setGridData, comments } = useContext(FormContext);
-  // const [isVATinclusive, setIsvatinclusive] = useState(true)
+  const [userDetails, setUserDetails] = useState(null);
+  useEffect(async () => {
+    let temp = await getUser();
+    setUserDetails(temp);
+    return () => {};
+  }, []);
+
   const [updateItemData, setUpdateItemData] = useState({
     itemName: "",
     quantity: 0,
@@ -64,7 +69,7 @@ function InvoicePreview() {
 
           <div style={styles.rightHeader}>
             {/* <img src={companyLogo} style={{ height: 30, width: '40%' }} /> */}
-            <h3>{userDetails.profile.companyname}</h3>
+            <h3>{userDetails?.profile?.companyname}</h3>
             <h4 style={{ margin: 0 }}>INVOICE</h4>
             <h6>
               Issued on :{" "}

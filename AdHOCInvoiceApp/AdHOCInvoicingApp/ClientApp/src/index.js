@@ -3,11 +3,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 
-// import "assets/plugins/nucleo/css/nucleo.css";
-// import "@fortawesome/fontawesome-free/css/all.min.css";
-// import "assets/scss/argon-dashboard-react.scss";
-// import "react-datepicker/dist/react-datepicker.css";
-import "assets/css/index.css";
+import "assets/plugins/nucleo/css/nucleo.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "assets/scss/argon-dashboard-react.scss";
+import "react-datepicker/dist/react-datepicker.css";
+// import "assets/css/index.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -19,6 +19,11 @@ import { registerLicense } from "@syncfusion/ej2-base";
 registerLicense(
   "ORg4AjUWIQA/Gnt2VFhhQlJBfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hSn5VdkRiW31bcXRTQWhe"
 );
+
+import "assets/plugins/nucleo/css/nucleo.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "assets/scss/argon-dashboard-react.scss";
+import "react-datepicker/dist/react-datepicker.css";
 
 const queryClient = new QueryClient();
 

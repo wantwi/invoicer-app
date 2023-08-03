@@ -138,111 +138,7 @@ function InvoiceForm({ refetch }) {
     return () => {};
   }, [formData?.discountType, formData?.totalDiscount]);
 
-  const handleOnchangeOfDiscountAmt = () => {};
-
-  // const handleCustomerList = async () => {
-  //   try {
-  //     let allCustomers = await (
-  //       await fetch(
-  //         `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}`,
-  //         {
-  //           method: 'GET', // or 'PUT'
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             Authorization: `Bearer ${userDetails.access_token}`,
-  //           },
-  //         }
-  //       )
-  //     ).json()
-
-  //     let filteredCustomers = allCustomers.filter(
-  //       (customer) => customer.status === 'A'
-  //     )
-  //     setCustomers(filteredCustomers)
-
-  //     setCashCustomerTin((allCustomers.find(cust => cust.name == "cash customer")?.tin))
-  //   } catch (error) {
-  //     console.error(error.message)
-  //   }
-  // }
-
-  // const getCurrencies = () => {
-  //   // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/VatItems`)
-  //   fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Currency`, {
-  //     method: 'GET', // or 'PUT'
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${userDetails.access_token}`,
-  //     },
-  //   })
-  //     .then((res) => {
-  //       // console.log(res)
-  //       if (res.status === 401) {
-  //         toast.error('Token timed out. Logging you out')
-  //         setTimeout(() => {
-  //           window.location = '/'
-  //         }, 3000)
-  //       } else {
-  //         return res.json()
-  //       }
-  //     })
-  //     .then((data) => {
-  //       if (data.length > 0) {
-  //         setCurrencies(data)
-  //       } else {
-  //         setCurrencies(currenciesInit)
-  //       }
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
-
-  // const getProducts = () => {
-  //   // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/VatItems`)
-  //   fetch(
-  //     `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`,
-  //     {
-  //       method: 'GET', // or 'PUT'
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${userDetails.access_token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((res) => {
-  //       // console.log(res)
-  //       if (res.status === 401) {
-  //         toast.error('Token timed out. Logging you out')
-  //         setTimeout(() => {
-  //           window.location = '/'
-  //         }, 3000)
-  //       } else {
-  //         return res.json()
-  //       }
-  //     })
-  //     .then((data) => {
-  //       let options = data.map((item, index) => {
-  //         return {
-  //           name: item.name,
-  //           key: index,
-  //           value: item.id,
-  //           code: item.code,
-  //           description: item.description,
-  //           price: item.price,
-  //           taxRate: item.taxRate,
-  //           taxable: item.taxable,
-  //           otherLevies: item.otherLevies,
-  //           isTaxInclusive: item.isTaxInclusive,
-  //           id: item.id,
-  //           status: item.status,
-  //         }
-  //       })
-  //       // console.log(options)
-  //       let activeItems = options.filter((item) => item.status === 'A')
-  //       // console.log(activeItems)
-  //       setProducts(activeItems)
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
+ 
 
   // *****   NEW IMPLEMENTATION *********//
   const getCustomers = async () => {
@@ -257,13 +153,7 @@ function InvoiceForm({ refetch }) {
       `${process.env.REACT_APP_CLIENT_ROOT}/Currency`
     );
 
-    //  await fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Currency`, {
-    //     method: 'GET', // or 'PUT'
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${userDetails.access_token}`,
-    //     },
-    //   })
+   
 
     return request.data;
   };
@@ -271,20 +161,6 @@ function InvoiceForm({ refetch }) {
     const request = await axios.get(
       `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`
     );
-
-    // fetch(
-    //   `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`,
-    //   {
-    //     method: 'GET', // or 'PUT'
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${userDetails.access_token}`,
-    //     },
-    //   }
-    // )
-
-    //const response =
-
     return request.data;
   };
   const renderProducts = (data) => {
@@ -409,130 +285,7 @@ function InvoiceForm({ refetch }) {
     } else if (item.price === "") {
       toast.warning("Please provide a value for price");
     } else {
-      // let obj = {};
-      // let vatableAmt = 0;
-      // let vat = 0;
-      // let totalPayable = 0;
-      // let isINC = false;
-      // let cstTaxableAmount = 0;
-
-      //console.log(item)
-
-      // if (!item.isTaxInclusive) {
-      //   obj = {
-      //     taxable: isTaxable,
-      //     discount: Number(discount),
-      //     itemCode: item.itemCode,
-      //     itemName: item.itemName,
-      //     quantity: Number(item.quantity),
-      //     price: Number(item.price),
-      //     taxableAmount: item.quantity * item.price,
-      //     nhil: 0.025 * item.quantity * item.price,
-      //     getf: 0.025 * item.quantity * item.price,
-      //     covid: 0.01 * item.quantity * item.price,
-      //     otherLevies: csttourism,
-      //     vatItemId: item.vatItemId,
-      //   };
-
-      //   if (isTaxable) {
-      //     vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
-      //     vat = 0.15 * vatableAmt;
-
-      //     //checking for cst conditions
-      //     if (csttourism > 0) {
-      //       cstTaxableAmount =
-      //         obj.nhil +
-      //         obj.covid +
-      //         obj.getf +
-      //         obj.otherLevies +
-      //         obj.taxableAmount;
-      //       vat = 0.15 * cstTaxableAmount;
-      //       totalPayable = cstTaxableAmount + vat - obj.discount;
-      //     } else {
-      //       totalPayable = vatableAmt + vat + obj.otherLevies - obj.discount;
-      //     }
-      //   } else {
-      //     obj.nhil = 0;
-      //     obj.getf = 0;
-      //     obj.covid = 0;
-      //     vatableAmt = obj.taxableAmount;
-      //     // vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid
-      //     totalPayable = vatableAmt - obj.discount;
-      //   }
-      // } else {
-      //   isINC = true;
-      //   obj = {
-      //     discount: Number(discount) || 0,
-      //     itemCode: item.itemCode, //'ITM' + Math.floor(Math.random() * 1000 + 1),
-      //     itemName: item.itemName,
-      //     quantity: Number(item.quantity),
-      //     price: Number(item.price),
-
-      //     nhil: 0.025 * ((item.quantity * item.price * 100) / 121.9),
-      //     getf: 0.025 * ((item.quantity * item.price * 100) / 121.9),
-      //     covid: 0.01 * ((item.quantity * item.price * 100) / 121.9),
-      //     otherLevies: csttourism,
-      //     vatItemId: item.vatItemId,
-      //     // taxableAmount: (item.quantity * item.price * 100) / 121.9,
-      //     taxableAmount: (item.quantity * item.price * 100) / 121.9,
-      //   };
-
-      //   if (isTaxable) {
-      //     vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
-      //     vat = 0.15 * vatableAmt;
-
-      //     let inclusiveAmt = item.quantity * item.price;
-
-      //     //checking for cst conditions
-      //     if (csttourism > 0) {
-      //       //re-calculate all levies in reverse
-      //       obj.taxableAmount = (item.quantity * item.price * 100) / 127.65;
-      //       csttourism = 0.05 * obj.taxableAmount;
-      //       obj.nhil = 0.025 * ((item.quantity * item.price * 100) / 127.65);
-      //       obj.getf = 0.025 * ((item.quantity * item.price * 100) / 127.65);
-      //       obj.covid = 0.01 * ((item.quantity * item.price * 100) / 127.65);
-      //       obj.otherLevies = csttourism;
-      //       cstTaxableAmount =
-      //         obj.nhil +
-      //         obj.covid +
-      //         obj.getf +
-      //         obj.otherLevies +
-      //         obj.taxableAmount;
-      //       vat = 0.15 * cstTaxableAmount;
-      //       totalPayable = cstTaxableAmount + vat - obj.discount;
-      //     } else {
-      //       totalPayable = inclusiveAmt - discount;
-      //     }
-      //   } else {
-      //     obj.nhil = 0;
-      //     obj.getf = 0;
-      //     obj.covid = 0;
-      //     vatableAmt = obj.taxableAmount;
-      //     // vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid
-      //     totalPayable =
-      //       obj.nhil +
-      //       obj.covid +
-      //       obj.getf +
-      //       obj.otherLevies +
-      //       obj.taxableAmount;
-      //   }
-      // }
-
-      // console.log({ item });
-      // return;
-
       const gridItem = getPayableAmount({ ...item, isTaxable }, discount);
-
-      // let gridItem2 = {
-      //   ...obj,
-      //   vatableAmt,
-      //   vat,
-      //   totalPayable,
-      //   isINC,
-      // };
-      // console.log({ gridItem }, { gridItem2 });
-      // console.log({ addRecordToData: item });
-
       setGridData((gridData) => [
         ...gridData,
         { ...gridItem, otherLeviesType: item.otherLevies },
@@ -602,41 +355,8 @@ function InvoiceForm({ refetch }) {
       postData["customerTinghcard"] = cashCustomerTin;
       postData["customerName"] = `${formData.customer}(cash customer)`;
     }
-    // console.log({cashCustomerTin, postData })
-    // return
-
     if (isItemAdded) {
       mutate(postData);
-      // console.log('Invoice to save:', postData)
-      // setLoading(true)
-      // fetch(`${process.env.REACT_APP_CLIENT_ROOT_V2}/Invoices/Sales`, {
-      //   method: 'POST', // or 'PUT'
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${userDetails.access_token}`,
-      //   },
-      //   body: JSON.stringify(postData),
-      // })
-      //   .then((response) => {
-      //     if (response.ok && response.status == 201) {
-      //       toast.success('Invoice successfully saved')
-      //       setTimeout(() => {
-      //         setLoading(false)
-      //         setShowNewInvoiceModal(false)
-      //         location.reload()
-      //       }, 2000)
-      //     } else {
-      //       toast.error('Invoice could not be saved. Please try again')
-      //       setLoading(false)
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     toast.error('Could not save invoice')
-
-      //     setTimeout(() => {
-      //       setLoading(false)
-      //     }, 2000)
-      //   })
     } else {
       toast.warning("Please add an item first");
     }
@@ -665,43 +385,6 @@ function InvoiceForm({ refetch }) {
       }
     }
 
-    // fetch(
-    //   `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${userDetails.profile.company}/${today}?currencyCode=${currency}`,
-    //   {
-    //     method: 'GET', // or 'PUT'
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${userDetails.access_token}`,
-    //     },
-    //   }
-    // )
-    //   .then((res) => {
-    //     if (res.status === 401) {
-    //       toast.error('Token timed out. Logging you out')
-    //       setTimeout(() => {
-    //         window.location = '/'
-    //       }, 3000)
-    //     } else {
-    //       return res.json()
-    //     }
-    //   })
-    //   .then((data) => {
-    //     if (data.length > 0) {
-    //       setForex(data[0].exchangeRate)
-    //       setExchangeRate(
-    //         'at GHS' + data[0].exchangeRate + ' per ' + data[0].currencyCode
-    //       )
-    //     } else {
-    //       toast.warning(
-    //         'There are no exchange rates set for today. Redirecting you to currency set up to add exchange rates'
-    //       )
-    //       setTimeout(() => {
-    //         window.location = '/admin/currency'
-    //         history.push('/admin/currency')
-    //       }, 3000)
-    //     }
-    //   })
-    //   .catch((err) => console.log(err))
   };
 
   const handleCurrencySelect = (e) => {

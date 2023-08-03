@@ -15,6 +15,7 @@ namespace AdHOCInvoicingApp.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class APIController : GlobalController
     {
         private readonly HTTPClientInterface _hTTPClientInterface;
@@ -46,27 +47,6 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
-        [HttpGet("GetItemCategories")]
-        public async Task<IActionResult> GetInvoicesData()
-        {
-
-            string url = $"{EvatAdHOCBaseUrl}/v1/Generic/GetItemCategories";
-
-            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
-            return Ok(response);
-
-        }
-
-        [HttpGet("GetTransactionCurrencies")]
-        public async Task<IActionResult> GetTransactionCurrencies()
-        {
-
-            string url = $"{EvatAdHOCBaseUrl}/v1/Generic/GetTransactionCurrencies";
-
-            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
-            return Ok(response);
-
-        }
 
         [HttpPost("TaxSummary")]
         public async Task<IActionResult> PostTaxSummary([FromBody] CreateInvoiceDto data)
@@ -112,19 +92,6 @@ namespace AdHOCInvoicingApp.Controllers
                 return new JsonResult(new { status = int.Parse(response.StatusCode.ToString()), data = dataObj });
             }
         }
-
-        [HttpGet("Invoice")]
-        public async Task<IActionResult> GetInvoices()
-        {
-
-            string url = $"{EvatAdHOCBaseUrl}/v1/Invoice/GetRecent";
-
-            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
-            return Ok(response);
-
-        }
     }
 
 }
-
-// api / v1 / Invoice / GetRecent
