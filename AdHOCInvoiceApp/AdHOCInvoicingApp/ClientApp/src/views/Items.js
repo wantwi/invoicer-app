@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Table,
@@ -15,70 +15,73 @@ import {
   InputGroupAddon,
   InputGroupText,
   InputGroup,
-} from "reactstrap"
-import { FcCancel } from "react-icons/fc"
+} from "reactstrap";
+import { FcCancel } from "react-icons/fc";
 
-import UserHeader from "components/Headers/UserHeader"
-import { ToastContainer, toast } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
-import Loader from "components/Modals/Loader"
-// import excelFile from "../assets/GRA_INVOICER_ITEMS_TEMPLATE.xlsx"
-import ItemsUploadExcel from "components/Modals/ItemsUploadExcel"
-import { moneyInTxt } from "components/Invoice/InvoicePreview"
-import { GrEdit, GrClose } from "react-icons/gr"
-import { debounce } from "lodash"
-import { logout } from "services/AuthService"
-import { FaCircle } from "react-icons/fa"
-import DeletePrompt from "components/Modals/DeletePrompt"
-import { useQuery } from "@tanstack/react-query"
-import { useCustomQuery } from "hooks/useCustomQuery"
-import { useCustomPost } from "hooks/useCustomPost"
-import { useDebounce } from "use-debounce"
-import { useCustomPut } from "hooks/useCustomPut"
-import useAuth from "hooks/useAuth"
+import UserHeader from "components/Headers/UserHeader";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Loader from "components/Modals/Loader";
+import excelFile from "../assets/GRA_INVOICER_ITEMS_TEMPLATE.xlsx"
+import ItemsUploadExcel from "components/Modals/ItemsUploadExcel";
+import { moneyInTxt } from "components/Invoice/InvoicePreview";
+import { GrEdit, GrClose } from "react-icons/gr";
+import { debounce } from "lodash";
+import { FaCircle } from "react-icons/fa";
+import DeletePrompt from "components/Modals/DeletePrompt";
+import { useQuery } from "@tanstack/react-query";
+import { useCustomQuery } from "hooks/useCustomQuery";
+import { useCustomPost } from "hooks/useCustomPost";
+import { useDebounce } from "use-debounce";
+import { useCustomPut } from "hooks/useCustomPut";
+import useAuth from "hooks/useAuth";
 
 const Items = () => {
-  const { auth } = useAuth()
-  // let auth = JSON.parse(
-  //   sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  // );
+  const { getUser, user, logout } = useAuth();
+
+  useEffect(async () => {
+    await getUser();
+
+    return () => {};
+  }, []);
 
   const [formData, setFormData] = useState({
-    companyId: auth.profile.company,
+    companyId: user?.sub,
     productName: "",
     description: "",
     taxable: false,
     code: "",
     taxRate: "",
     price: "",
-  })
-  const [itemsList, setItemsList] = useState([])
-  const [istaxable, setIstaxable] = useState(false)
-  const [isTaxInclusive, setIsTaxInclusive] = useState(false)
-  const [hasTourismLevy, setHasTourismLevy] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [show, setShow] = useState(false)
-  const [isViewMode, setIsviewMode] = useState(false)
-  const [showBulkListButt, setshowBulkListButt] = useState(false)
-  const [itemSelected, setitemSelected] = useState(false)
-  const [isSearched, setIsSearched] = useState(false)
-  const [status, setStatus] = useState(true)
-  const [showPrompt, setShowPrompt] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState(null)
-  const [currencies, setCurrencies] = useState([])
-  const [showList, setShowList] = useState(false)
-  const [currencyCode, setCurrencyCode] = useState("")
-  const [otherLevies, setOtherLevies] = useState("NON")
-  const [searchText, setSearchText] = useState("")
-  const [value] = useDebounce(searchText, 500)
-  const [isViewed, setIsViewed] = useState(false)
+  });
+  const [itemsList, setItemsList] = useState([]);
+  const [istaxable, setIstaxable] = useState(false);
+  const [isTaxInclusive, setIsTaxInclusive] = useState(false);
+  const [hasTourismLevy, setHasTourismLevy] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
+  const [isViewMode, setIsviewMode] = useState(false);
+  const [showBulkListButt, setshowBulkListButt] = useState(false);
+  const [itemSelected, setitemSelected] = useState(false);
+  const [isSearched, setIsSearched] = useState(false);
+  const [status, setStatus] = useState(true);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [currencies, setCurrencies] = useState([]);
+  const [showList, setShowList] = useState(false);
+  const [currencyCode, setCurrencyCode] = useState("");
+  const [otherLevies, setOtherLevies] = useState("NON");
+  const [searchText, setSearchText] = useState("");
+  const [value] = useDebounce(searchText, 500);
+  const [isViewed, setIsViewed] = useState(false);
 
-  const { refetch: getItemsList } = useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${auth.profile.company}`,
+    const { refetch: getItemsList, isLoading, isFetching } = useCustomQuery(
+      //if search value is defined the url is different
+      !value ?`/api/GetItemsList`:`/api/GetItemsList/${value}`,
     "items",
     value,
     (data) => {
-      setIsViewed(true)
+      setIsViewed(true);
       if (data.length > 0) {
         let results = data.map((item) => {
           return {
@@ -94,26 +97,26 @@ const Items = () => {
             status: item.status,
             hasTrans: item.hasTrans,
             currencyCode: item.currencyCode,
-          }
-        })
-        setLoading(false)
-        setItemsList(results)
-        setIsSearched(true)
+          };
+        });
+        setLoading(false);
+        setItemsList(results);
+        setIsSearched(true);
       } else {
-        setItemsList([])
+        setItemsList([]);
       }
     },
     (err) => {
-      setLoading(false)
-      toast.warning("You have no products/services saved yet")
+      setLoading(false);
+      toast.warning("You have no products/services saved yet");
     },
-    { isEnabled: false, queryTag: "?filter=" }
-  )
+    { isEnabled: false, queryTag: "DONT_USE_QUERY_BECAUSE_OF_BFF" }
+  );
 
   const postSuccess = (data) => {
-    toast.success("Item successfully saved")
-    setLoading(false)
-    setSearchText(formData?.productName)
+    toast.success("Item successfully saved");
+    setLoading(false);
+    setSearchText(formData?.productName);
     setFormData({
       id: "",
       productName: "",
@@ -122,20 +125,21 @@ const Items = () => {
       code: "",
       taxRate: "",
       price: "",
-    })
-    setOtherLevies("")
-    setCurrencyCode("")
-    setIstaxable(false)
-    setIsTaxInclusive(false)
-  }
+    });
+    setOtherLevies("");
+    setCurrencyCode("");
+    setIstaxable(false);
+    setIsTaxInclusive(false);
+  };
   const postError = (err) => {
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const putSuccess = (data) => {
-    toast.success("Successfully Updated")
-    setLoading(false)
-    setSearchText(formData?.productName)
+    toast.success("Successfully Updated");
+    setLoading(false);
+      setSearchText(formData?.productName);
+      getItemsList()
     setFormData({
       id: "",
       productName: "",
@@ -144,25 +148,25 @@ const Items = () => {
       code: "",
       taxRate: "",
       price: "",
-    })
-    setOtherLevies("")
-    setCurrencyCode("")
-    setIstaxable(false)
-    setIsTaxInclusive(false)
-  }
+    });
+    setOtherLevies("");
+    setCurrencyCode("");
+    setIstaxable(false);
+    setIsTaxInclusive(false);
+  };
 
-  const { mutate } = useCustomPost(
-    `${process.env.REACT_APP_CLIENT_ROOT}/VatItems`,
+    const { mutate, isLoading:isPostLoading } = useCustomPost(
+    `/api/CreateItem`,
     "items",
     postSuccess,
     postError
-  )
+  );
   const { mutate: putmutate } = useCustomPut(
-    `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/${formData?.id}`,
-    "users",
+    `/api/UpdateItem/${formData?.id}`,
+    "updatedItems",
     putSuccess,
     postError
-  )
+  );
 
   const saveItem = (item) => {
     let itemOBJ = {
@@ -171,12 +175,12 @@ const Items = () => {
       isTaxInclusive: isTaxInclusive,
       otherLevies: otherLevies,
       currencyCode: currencyCode,
-    }
+    };
     //console.log(itemOBJ)
     if (!item.productName || !item.price || currencyCode === "") {
-      toast.warning("Please fill all necessary information")
+      toast.warning("Please fill all necessary information");
     } else {
-      let newList = [itemOBJ]
+      let newList = [itemOBJ];
 
       let postData = newList.map((item) => {
         return {
@@ -192,48 +196,46 @@ const Items = () => {
           currencyCode: item.currencyCode,
           taxRate: item.istaxable ? 0.125 : 0,
           price: Number(item.price),
-          companyId: auth.profile.company,
+          companyId: user?.sub,
           // hasTourismLevy: item.hasTourismLevy,
-        }
-      })
+        };
+      });
+      
 
-      setLoading(true)
-      mutate(postData)
+        setLoading(true);
+      mutate(postData);
     }
-  }
+  };
 
-  const updateItem = (item) => {
-    
-    let postData = {
-      id: item.id,
-      name: item.productName,
-      status: status ? "A" : "I",
-      description: item.description,
-      taxable: istaxable,
-      code: item.code,
-      taxRate: item.taxRate,
-      price: item.price,
-      currencyCode: item.currencyCode,
-      isTaxInclusive: isTaxInclusive,
-      // hasTourismLevy: hasTourismLevy,
-      otherLevies: otherLevies,
-    }
-    console.log(postData,otherLevies, item)
+    const updateItem = (item) => {
+        let postData = {
+            id: item.id,
+            name: item.productName,
+            status: status ? "A" : "I",
+            description: item.description,
+            taxable: istaxable,
+            code: item.code,
+            taxRate: item.taxRate,
+            price: item.price,
+            currencyCode: item.currencyCode,
+            isTaxInclusive: isTaxInclusive,
+            // hasTourismLevy: hasTourismLevy,
+            otherLevies: otherLevies,
+        };
+        console.log({postData}, otherLevies, item);
     // return
-    putmutate(postData)
-  }
+    putmutate(postData);
+  };
 
   const handleSaveOrUpdate = () => {
-    itemSelected ? updateItem(formData) : saveItem(formData)
-  }
+    itemSelected ? updateItem(formData) : saveItem(formData);
+  };
 
-  const handleEditItem = (item) => {
-    console.log(item)
-    // return
-    setIstaxable(item.istaxable)
-    setHasTourismLevy(item.hasTourismLevy)
-    setIsTaxInclusive(item.isTaxInclusive)
-    setitemSelected(true)
+    const handleEditItem = (item) => {
+    setIstaxable(item.istaxable);
+    setHasTourismLevy(item.hasTourismLevy);
+    setIsTaxInclusive(item.isTaxInclusive);
+    setitemSelected(true);
     setFormData((prev) => {
       return {
         id: item.id,
@@ -244,90 +246,50 @@ const Items = () => {
         taxRate: item?.taxRate,
         price: item?.price,
         currencyCode: item?.currencyCode,
-        // hasTourismLevy: item?.hasTourismLevy,
         isTaxInclusive: item?.isTaxInclusive,
         otherLevies: item?.otherLevies,
-      }
-    })
-    setCurrencyCode(item.currencyCode)
-    setOtherLevies(item.otherLevies)
+      };
+    });
+    setCurrencyCode(item.currencyCode);
+    setOtherLevies(item.otherLevies);
 
     if (item.status === "A") {
-      setStatus(true)
+      setStatus(true);
     } else if (item.status !== "A") {
-      setStatus(false)
+      setStatus(false);
     }
-  }
+  };
 
   const handleDeleteItem = (item) => {
-    setItemToDelete(item)
-    setShowPrompt(true)
-  }
+    setItemToDelete(item);
+    setShowPrompt(true);
+  };
 
   const handleEnterSearch = (event) => {
     if (event.key === "Enter") {
-      // console.log({ event: event.target.value })
-      setSearchText(event.target.value)
+      setSearchText(event.target.value);
     }
-  }
+  };
 
-  // const handleSearch = debounce((value) => {
-  //   // if (value.length > 2) {
-  //   fetch(
-  //     `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${auth.profile.company}/?filter=${value}`,
-  //     {
-  //       method: "GET", // or 'PUT'
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${auth.access_token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       let results = data.map((item) => {
-  //         return {
-  //           id: item.id,
-  //           name: item.name,
-  //           istaxable: item.taxable,
-  //           code: item.code,
-  //           price: item.price,
-  //           taxRate: item.taxRate,
-  //           description: item.description,
-  //           // hasTourismLevy: item.hasTourismLevy,
-  //           otherLevies: item.otherLevies,
-  //           isTaxInclusive: item.isTaxInclusive,
-  //           currencyCode: item.currencyCode,
-  //           status: item.status,
-  //           hasTrans: item.hasTrans,
-  //         };
-  //       });
-  //       setLoading(false);
-  //       setItemsList(results);
-  //       setIsSearched(true);
-  //     });
-  //   // }
-  // }, 300);
-  //const debouncedOnChange = debounce(handleSearch, 200)
-
-  const { mutate: bultData } = useCustomPost(
-    `${process.env.REACT_APP_CLIENT_ROOT}/VatItems`,
-    "items",
+    const { mutate: bultData, isLoading:isPutLoading } = useCustomPost(
+      `/api/CreateItem`,
+      "items",
     () => {
-      setLoading(false)
-      toast.success("Items List successfully Added")
-      setItemsList([])
-      setSearchText("")
+      setLoading(false);
+        toast.success("Items List successfully Added");
+        setItemsList([]);
+        setshowBulkListButt(false)
+        getItemsList()
+      setSearchText("");
     },
     (err) => {
-      toast.error("Could not submit list. Please try again.")
-      setLoading(false)
+      toast.error("Could not submit list. Please try again.");
+      setLoading(false);
     }
-  )
+  );
 
   const submitItemList = () => {
-    setLoading(true)
-    // console.log(itemsList)
+    setLoading(true);
     let postData = itemsList.map((item) => {
       return {
         name: item.name,
@@ -337,152 +299,65 @@ const Items = () => {
           "TXC00" +
           Math.ceil(Math.random() * 1000) +
           new Date().toISOString().substring(8, 10),
-        // taxRate: 0.125,
         taxRate: item.istaxable ? 0.125 : 0,
         price: Number(item.price),
-        companyId: auth.profile.company,
+        companyId: user?.sub,
         isTaxInclusive: item.isTaxInclusive,
         currencyCode: item.currencyCode,
         otherLevies: item.otherLevies,
 
-        // hasTourismLevy: item.hasTourismLevy,
-      }
-    })
+      };
+    });
 
-    bultData(postData)
-    // console.log(postData)
-    // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/VatItems`, {
-    //   method: "POST", // or 'PUT'
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${auth.access_token}`,
-    //   },
-    //   body: JSON.stringify(postData),
-    // })
-    //   .then((response) => {
-    //     if (response.status == 201) {
-    //       toast.success("Items List successfully Added");
-    //       setTimeout(() => {
-    //         setLoading(false);
-    //         setItemsList([]);
-    //       }, 2000);
-    //     } else {
-    //       toast.error("Could not submit list. Please try again.");
-    //       setTimeout(() => {
-    //         setLoading(false);
-    //       }, 2000);
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     toast.error("Could not submit list. Please try again.");
-    //     setTimeout(() => {
-    //       setLoading(false);
-    //     }, 2000);
-    //   });
-  }
-
-  // const getItemsList = async () => {
-  //   setLoading(true)
-  //   fetch(
-  //     `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${auth.profile.company}/`,
-  //     {
-  //       method: 'GET', // or 'PUT'
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${auth.access_token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((res) => {
-  //       if (res.status === 401) {
-  //         toast.warning('Token expired. Logging you out')
-  //         setTimeout(() => {
-  //           logout()
-  //         }, 2000)
-  //       } else {
-  //         return res.json()
-  //       }
-  //     })
-  //     .then((data) => {
-  //       if (data.length > 0) {
-  //         let results = data.map((item) => {
-  //           return {
-  //             id: item.id,
-  //             name: item.name,
-  //             istaxable: item.taxable,
-  //             code: item.code,
-  //             price: item.price,
-  //             taxRate: item.taxRate,
-  //             description: item.description,
-  //             isTaxInclusive: item.isTaxInclusive,
-  //             otherLevies: item.otherLevies,
-  //             status: item.status,
-  //             hasTrans: item.hasTrans,
-  //             currencyCode: item.currencyCode,
-  //           }
-  //         })
-  //         setLoading(false)
-  //         setItemsList(results)
-  //         setIsSearched(true)
-  //       } else {
-  //         setLoading(false)
-  //         toast.warning('You have no products/services saved yet')
-  //       }
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
+    bultData(postData);
+  };
 
   const query = useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Currency`,
+    `/api/GetCurrency`,
     "currency",
     "",
     (data) => {
       if (data.length > 0) {
-        setLoading(false)
-        let res = data.map((item) => {
+        setLoading(false);
+        let res = data?.map((item) => {
           return {
             name: item.name,
             iso: item.code,
             homeCurrency: item.homeCurrency,
             rate: 0,
-          }
-        })
-        setCurrencies(res)
+          };
+        });
+        setCurrencies(res);
       }
     },
     (err) => {
-      console.log(err)
+      console.log(err);
     }
-  )
-
-  // const toggleStatus = (item) => {
-  //   const index = itemsList.indexOf(item)
-  //   const newList = [...itemsList]
-  //   newList[index]['status'] = item['status'] === 'I' ? 'A' : 'I'
-  //   setItemsList(newList)
-  // }
+  );
 
   useEffect(() => {
     if (isTaxInclusive === true) {
-      setIstaxable(true)
+      setIstaxable(true);
     }
-  }, [isTaxInclusive, istaxable])
+  }, [isTaxInclusive, istaxable]);
 
   useEffect(() => {
     if (value.length > 1) {
-      getItemsList()
+      getItemsList();
     }
     if (searchText.length === 0 && isViewed) {
-      getItemsList()
+      getItemsList();
     }
-  }, [value, searchText])
+  }, [value, searchText]);
 
   return (
     <>
       <UserHeader
         message={"This is your products setup page. Manage your products here"}
         pageName="Item Setup"
-      />
+          />
+          {( isPostLoading || isPutLoading) && <Loader />}
+
       <ToastContainer />
       <Container className="mt--7" fluid>
         <Row className="mt-5">
@@ -513,7 +388,7 @@ const Items = () => {
                               type="text"
                               value={searchText}
                               onChange={(e) => {
-                                setSearchText(e.target.value)
+                                setSearchText(e.target.value);
                               }}
                               style={{ width: 300 }}
                               onKeyDown={handleEnterSearch}
@@ -522,8 +397,8 @@ const Items = () => {
                           {value ? (
                             <Button
                               onClick={() => {
-                                setItemsList([])
-                                setSearchText("")
+                                setItemsList([]);
+                                setSearchText("");
                               }}
                             >
                               Reset
@@ -540,11 +415,11 @@ const Items = () => {
                     >
                       <Button
                         onClick={() => {
-                          setitemSelected(false)
-                          setshowBulkListButt(false)
-                          setIsviewMode(!isViewMode)
-                          setItemsList([])
-                          setIsSearched(false)
+                          setitemSelected(false);
+                          setshowBulkListButt(false);
+                          setIsviewMode(!isViewMode);
+                          setItemsList([]);
+                          setIsSearched(false);
                           setFormData({
                             id: "",
                             productName: "",
@@ -553,7 +428,7 @@ const Items = () => {
                             code: "",
                             taxRate: "",
                             price: "",
-                          })
+                          });
                         }}
                         size="sm"
                       >
@@ -753,9 +628,9 @@ const Items = () => {
                       <Button
                         color="info"
                         onClick={() => {
-                          getItemsList()
-                          setIsviewMode(!isViewMode)
-                          setshowBulkListButt(false)
+                          getItemsList();
+                          setIsviewMode(!isViewMode);
+                          setshowBulkListButt(false);
                         }}
                         size="sm"
                         style={{
@@ -764,7 +639,7 @@ const Items = () => {
                           marginLeft: 0,
                           textAlign: "center",
                         }}
-                        disabled={isViewMode ? true : false}
+                        disabled={(isViewMode || showBulkListButt) ? true : false}
                       >
                         View Existing Items List
                       </Button>
@@ -774,7 +649,7 @@ const Items = () => {
                         title="Download Customer List Excel Template"
                         style={{ paddingLeft: 0, marginLeft: 0 }}
                       >
-                        <a href={"excelFile"} style={{ color: "white" }}>
+                        <a href={excelFile} style={{ color: "white" }}>
                           Download Template
                         </a>
                       </Button>
@@ -783,10 +658,10 @@ const Items = () => {
                         title="Upload your  excel file"
                         color="primary"
                         onClick={() => {
-                          setshowBulkListButt(true)
-                          setItemsList([])
-                          setLoading(false)
-                          setShow(true)
+                          setshowBulkListButt(true);
+                          setItemsList([]);
+                          setLoading(false);
+                          setShow(true);
                           // setIsSearched(true)
                         }}
                         size="sm"
@@ -929,8 +804,8 @@ const Items = () => {
                                     md="3"
                                     key={i}
                                     onClick={() => {
-                                      setCurrencyCode(country.iso)
-                                      setShowList(false)
+                                      setCurrencyCode(country.iso);
+                                      setShowList(false);
                                     }}
                                   >
                                     <div
@@ -960,7 +835,7 @@ const Items = () => {
                                       </div>
                                     </div>
                                   </Col>
-                                )
+                                );
                               })}
                             </Card>
                           )}
@@ -973,7 +848,7 @@ const Items = () => {
                             type="checkbox"
                             value={isTaxInclusive}
                             onChange={() => {
-                              setIsTaxInclusive(!isTaxInclusive)
+                              setIsTaxInclusive(!isTaxInclusive);
                             }}
                             checked={isTaxInclusive}
                           />
@@ -1115,10 +990,10 @@ const Items = () => {
                       color="secondary"
                       disabled={loading}
                       onClick={() => {
-                        setitemSelected(false)
-                        setHasTourismLevy(false)
-                        setIstaxable(false)
-                        setIsTaxInclusive(false)
+                        setitemSelected(false);
+                        setHasTourismLevy(false);
+                        setIstaxable(false);
+                        setIsTaxInclusive(false);
                         setFormData({
                           id: "",
                           productName: "",
@@ -1127,9 +1002,9 @@ const Items = () => {
                           code: "",
                           taxRate: "",
                           price: "",
-                        })
-                        setCurrencyCode("")
-                        setOtherLevies("")
+                        });
+                        setCurrencyCode("");
+                        setOtherLevies("");
                       }}
                       size="sm"
                     >
@@ -1151,20 +1026,21 @@ const Items = () => {
       />
 
       <DeletePrompt
-        message={`Are you sure you want to proceed with deleting the item "${itemToDelete?.name}"?`}
-        showPrompt={showPrompt}
-        setShowPrompt={setShowPrompt}
-        itemToDelete={itemToDelete}
-        setItemsList={setItemsList}
-        setLoading={setLoading}
-        setSearchText={setSearchText}
-        value={value}
+              message={`Are you sure you want to proceed with deleting the item "${itemToDelete?.name}"?`}
+              showPrompt={showPrompt}
+              setShowPrompt={setShowPrompt}
+              itemToDelete={itemToDelete}
+              setItemsList={setItemsList}
+              setLoading={setLoading}
+              setSearchText={setSearchText}
+              value={value}
+              refetch={getItemsList}
       />
     </>
-  )
-}
+  );
+};
 
-export default Items
+export default Items;
 
 const styles = {
   body: {
@@ -1174,4 +1050,4 @@ const styles = {
     overflow: "auto",
     marginBottom: 40,
   },
-}
+};

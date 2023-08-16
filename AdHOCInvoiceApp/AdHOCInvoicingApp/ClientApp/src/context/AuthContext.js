@@ -18,7 +18,7 @@ export const AuthProvider = ({
     }
     const login = () => {
         //window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
-        console.log("green")
+        console.log("green", process.env.REACT_APP_CLIENT_ROOT)
         window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
         console.log("Location", process.env.REACT_APP_BASENAME, window.location.href)
     }

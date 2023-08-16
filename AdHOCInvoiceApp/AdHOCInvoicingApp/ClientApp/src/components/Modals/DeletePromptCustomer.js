@@ -117,7 +117,7 @@ export default function DeletePromptCustomer({
   //   }
   // }
 
- const {mutate} = useCustomDelete(`${process.env.REACT_APP_CLIENT_ROOT}/Customers/${customerToDelete?.customerID}`,"customer",customerToDelete?.customerID,
+    const { mutate } = useCustomDelete(`/api/DeleteCustomer/${customerToDelete?.customerID}`,"customer",customerToDelete?.customerID,
   (data)=>{
     if (customerToDelete.type === 'CUS') {
       toast.success('Customer successfully deleted from system')

@@ -62,7 +62,7 @@ function PurchaseInvoiceForm() {
 
   //get currency
   useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Currency`,
+    `/api/GetCurrency`,
     "currency",
     "",
     (data) => {
@@ -80,7 +80,7 @@ function PurchaseInvoiceForm() {
   // Get products list
 
   useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`,
+    `/api/GetProductList/${currency}`,
     "products",
     "",
     (data) => {
@@ -113,7 +113,7 @@ function PurchaseInvoiceForm() {
   //customers list
 
   useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetSuppliersByCompanyId/${userDetails.profile.company}`,
+    `/api/GetCompanySuppliers`,
     "suppliers",
     "",
     (data) => {
@@ -256,7 +256,7 @@ function PurchaseInvoiceForm() {
   };
 
   const { mutate } = useCustomPost(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/Purchase`,
+    `/api/CreatePurchaseInvoice`,
     "purchase-invoices",
     () => {
       toast.success("Invoice successfully saved");

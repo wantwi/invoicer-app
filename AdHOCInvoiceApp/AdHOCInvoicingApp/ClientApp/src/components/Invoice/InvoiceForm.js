@@ -31,6 +31,7 @@ import {
 // import axios from 'axios'
 import useCustomAxios from "../../hooks/useCustomAxios";
 import { getPayableAmount } from "utils/util";
+import { useAuth } from "context/AuthContext";
 // import 'react-tooltip/dist/react-tooltip.css'
 
 // import SelectSearch from 'react-select-search'
@@ -67,6 +68,15 @@ function InvoiceForm({ refetch }) {
   const queryClient = useQueryClient();
 
   const axios = useCustomAxios();
+  const { getUser, user, logout } = useAuth();
+
+  useEffect(async () => {
+    await getUser();
+
+    return () => {};
+  }, []);
+
+  console.log({ user });
 
   // const searchInput = useRef()
   const { invoices } = useContext(AppContext);
@@ -138,33 +148,23 @@ function InvoiceForm({ refetch }) {
     return () => {};
   }, [formData?.discountType, formData?.totalDiscount]);
 
- 
-
   // *****   NEW IMPLEMENTATION *********//
   const getCustomers = async () => {
-    const request = await axios.get(
-      `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}`
-    );
-
+    const request = await axios.get(`/api/GetCustomers`);
+    console.log({ request });
     return request?.data;
   };
   const getCurrency = async () => {
-    const request = await axios.get(
-      `${process.env.REACT_APP_CLIENT_ROOT}/Currency`
-    );
-
-   
+    const request = await axios.get(`/api/GetCurrency`);
 
     return request.data;
   };
   const getProductList = async () => {
-    const request = await axios.get(
-      `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`
-    );
+    const request = await axios.get(`/api/GetProductList/${currency}`);
     return request.data;
   };
   const renderProducts = (data) => {
-    let options = data.map((item, index) => {
+    let options = data?.map((item, index) => {
       return {
         name: item.name,
         key: index,
@@ -185,25 +185,22 @@ function InvoiceForm({ refetch }) {
 
   const postInvoice = async (postData) => {
     setLoading(true);
-    return await axios.post(
-      `${process.env.REACT_APP_CLIENT_ROOT_V3}/Invoices/Sales`,
-      postData
-    );
+    return await axios.post(`/api/PostInvoice`, postData);
   };
 
   const { data: customerList } = useQuery({
-    queryKey: ["customers"],
-    queryFn: getCustomers,
-    onSuccess: (data) => {
-      let filteredCustomers = data.filter(
-        (customer) => customer.status === "A"
-      );
-      setCustomers(filteredCustomers);
-      setCashCustomerTin(
-        data.find((cust) => cust.name == "cash customer")?.tin
-      );
-    },
-  });
+     queryKey: ["customers"],
+   queryFn: getCustomers,
+     onSuccess: (data = []) => {
+       let filteredCustomers = data?.filter(
+         (customer) => customer.status === "A"
+       );
+       setCustomers(filteredCustomers);
+       setCashCustomerTin(
+         data.find((cust) => cust.name == "cash customer")?.tin
+       );
+     },
+   });
 
   const { data: currencyList, refetch: refetchCurrency } = useQuery({
     queryKey: ["currency"],
@@ -236,10 +233,12 @@ function InvoiceForm({ refetch }) {
       setShowNewInvoiceModal(false);
       setLoading(false);
     },
-    onError: (error) => {
-      if (error?.response?.status === 500) {
+      onError: (error) => {
+          console.log({error})
+          if (error?.response?.status === 500) {
+          console.log("500 error")
         toast.error(
-          error?.response?.data?.Message || error?.response?.data?.message
+            error?.response?.data?.Message || error?.response?.data?.message ||  "Serever Error"
         );
         setLoading(false);
         return;
@@ -303,7 +302,6 @@ function InvoiceForm({ refetch }) {
       return;
     }
     let postData = {
-      companyId: userDetails.profile.company,
       date: new Date(formData?.date).toISOString(),
       dueDate: formData.dueDate
         ? new Date(formData.dueDate).toISOString()
@@ -315,20 +313,20 @@ function InvoiceForm({ refetch }) {
       currency: formData.currency,
       forexRate: forex,
       amount: gridData.reduce((total, item) => total + item.totalPayable, 0),
-
+     
       invoiceItems: gridData.map((item) => {
-        return {
-          price: item.taxableAmount,
-          itemCode: item.itemCode,
-          itemDescription: item.itemName,
-          unitPrice: item.price,
-          itemDiscount: item.discount,
-          taxCode: "",
-          quantity: item.quantity,
-          vatItemId: item.vatItemId,
-          //isTaxable,
-        };
-      }),
+         return {
+           price: item.taxableAmount,
+         itemCode: item.itemCode,
+           itemDescription: item.itemName,
+           unitPrice: item.price,
+           itemDiscount: item.discount,
+           taxCode: "",
+           quantity: item.quantity,
+           vatItemId: item.vatItemId,
+           //isTaxable,
+         };
+       }),
     };
     //if discount is applied add it to data to post
     if (formData?.discountType) {
@@ -347,7 +345,7 @@ function InvoiceForm({ refetch }) {
         toast.error("Discount amount is invalid");
         return;
       }
-      postData["totalDiscount"] = parseFloat(formData.totalDiscount).toFixed(2);
+        postData["totalDiscount"] = formData.totalDiscount ? parseFloat(formData.totalDiscount).toFixed(2) : 0;
       postData["discountType"] = String(formData.discountType).toUpperCase();
     }
 
@@ -355,7 +353,8 @@ function InvoiceForm({ refetch }) {
       postData["customerTinghcard"] = cashCustomerTin;
       postData["customerName"] = `${formData.customer}(cash customer)`;
     }
-    if (isItemAdded) {
+      if (isItemAdded) {
+          console.log({ postData })
       mutate(postData);
     } else {
       toast.warning("Please add an item first");
@@ -365,7 +364,7 @@ function InvoiceForm({ refetch }) {
   const checkIfRatesExist = async (currency) => {
     let today = new Date().toISOString();
     const request = await axios.get(
-      `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${userDetails.profile.company}/${today}?currencyCode=${currency}`
+      `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${user?.sub}/${today}?currencyCode=${currency}`
     );
     // "(GHS" + data[0].exchangeRate + " / " + data[0].currencyCode
     if (request) {
@@ -384,7 +383,6 @@ function InvoiceForm({ refetch }) {
         }, 3000);
       }
     }
-
   };
 
   const handleCurrencySelect = (e) => {
@@ -574,7 +572,7 @@ function InvoiceForm({ refetch }) {
                   disabled={Boolean(gridData.length)}
                   style={{ height: 29, padding: "0px 5px" }}
                 >
-                  {currencies.map((currency, index) => (
+                  {currencies?.map((currency, index) => (
                     <option
                       key={index}
                       name={currency.name}

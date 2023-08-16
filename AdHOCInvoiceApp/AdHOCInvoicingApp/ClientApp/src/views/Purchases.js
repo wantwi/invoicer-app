@@ -165,7 +165,7 @@ const Purchases = () => {
   const getInvoiceById = async (id) => {
     setIsReportDownloading(true);
     const res = await axios.post(
-      `${process.env.REACT_APP_CLIENT_ROOT}/Reports/GeneratePurchaseVATInvoiceReportAsync?id=${id}`
+      `/api/GetPurchaseById/${id}`
     );
     return res?.data;
 
@@ -205,9 +205,9 @@ const Purchases = () => {
     setShowLoader(true)
     let url, result;
     if (searchText.length > 1) {
-      url = `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetPurchaseInvoicesByCompnyId/${userDetails.profile.company}/?filter=${searchText}`;
+      url = `/api/GetPurchaseSearch/${period}/${pageNumber}/${pageSize}/${searchText}`;
     } else {
-      url = `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetPurchaseInvoicesByCompanyId/${period}?CompanyId=${userDetails.profile.company}&PageNumber=${pageNumber}&PageSize=${pageSize}`;
+      url = `/api/GetPurchase/${period}/${pageNumber}/${pageSize}`;
     }
 
     const request = await axios.get(url);
@@ -357,7 +357,7 @@ const Purchases = () => {
                 </div>
                 {message && <p className="text-info text-center">{message}</p>}
 
-                {pageInfo?.pageNumber && (
+                {pageInfo?.totalItems > 0 && (
                   <CardFooter className="py-4">
                     <nav aria-label="...">
                       <Pagination

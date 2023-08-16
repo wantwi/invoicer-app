@@ -220,10 +220,10 @@ const Index = () => {
 
     try {
       const request = await axios.post(
-        `${process.env.REACT_APP_CLIENT_ROOT}/Reports/GenerateVATInvoiceReportAsync?Id=${invoiceNo}`,
+        `/api/GenerateVATInvoiceReportAsync`,
         invoiceNo
       );
-      if (request) {
+        if (request) {
         const { data } = request;
         base64 = `data:application/pdf;base64,` + data;
         const pdfContentType = "application/pdf";
@@ -278,7 +278,7 @@ const Index = () => {
     isLoading: isInvoiceLoading,
     isFetching: isPageFetching,
   } = useCustomQueryById(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/${selectedRow}`,
+    `/api/GetSalesInvoicesDetail/${selectedRow}`,
     "invoice",
     selectedRow,
     (data) => {
@@ -311,12 +311,12 @@ const Index = () => {
 
   const { data, refetch, isFetching, isLoading } = useCustomPaginationQuery(
     `/api/GetTransactionSummary/${period}/${pageNumber}/${pageSize}`,
-    "invoices",
+    "invoicesfd",
     pageNumber,
     Number(period),
     value,
     (data) => {
-      // console.log({ data });
+      console.log({ data });
       // data = JSON.parse(data);
       // const res = JSON.parse(data.data);
       // console.log({ res });
@@ -481,7 +481,6 @@ const Index = () => {
                     </Row>
                   </CardHeader>
                   <div style={styles.body}>
-                    {isReportDownloading && <Loader />}
                     <EvatTable
                       isLoading={isLoading}
                       columns={columns}
@@ -494,8 +493,8 @@ const Index = () => {
                   </div>
                   {message && (
                     <p className="text-info text-center">{message}</p>
-                  )}
-                  {pageInfo?.pageNumber && pageInfo.totalItems > 0 && (
+                                  )}
+                                  {pageInfo?.pageNumber && pageInfo?.totalItems?.length > 0 && (
                     <CardFooter className="py-1">
                       <nav aria-label="...">
                         <Pagination

@@ -2,43 +2,52 @@
 
 namespace AdHOCInvoicingApp.model
 {
+    public class InvoiceItem
+    {
+        public decimal? price { get; set; }
+        public string? itemCode { get; set; }
+        public string? itemDescription { get; set; }
+        public decimal? unitPrice { get; set; }
+        public decimal? itemDiscount { get; set; }
+        public string? taxCode { get; set; }
+        public int? quantity { get; set; }
+        public string? vatItemId { get; set; }
+    }
+
     public class CreateInvoiceDto
     {
-
-        public string? CustomerTinghcard { get; set; }
-
-        public string CustomerName { get; set; } = null!;
-
-        public string? Currency { get; set; }
-
-        public string? Status { get; set; }
-        public string? DueDate { get; set; }
-        public string? Date { get; set; }
-
-        public decimal? ForexRate { get; set; }
-
-        public decimal Amount { get; set; }
-        public string DiscountType { get; set; } = "GENERAL";
-        public decimal TotalDiscount { get; set; } = 0;
-
-        public string Remarks { get; set; } = null!;
-        [Required]
-        public List<CreateInvoiceItemsDto>? InvoiceItems { get; set; }
+        public string? companyId { get; set; }
+        public DateTime? date { get; set; }
+        public DateTime? dueDate { get; set; }
+        public string? remarks { get; set; }
+        public string? customerName { get; set; }
+        public string? transactionType { get; set; }
+        public string? customerTinghcard { get; set; }
+        public string? currency { get; set; }
+        public decimal? forexRate { get; set; }
+        public decimal? amount { get; set; }
+        public string? discountType { get; set; } = "";
+        public double? totalDiscount { get; set; } = 0.00;
+        public List<InvoiceItem> invoiceItems { get; set; }
     }
-    public class CreateInvoiceItemsDto
+
+    public class PartialRefundDto
     {
-
-        public string ItemDescription { get; set; } = null!;
-
-        public decimal UnitPrice { get; set; }
-
-        public decimal Quantity { get; set; }
-
-        public Guid? ItemCategoryId { get; set; }
-        public decimal ItemDiscount { get; set; }
-
-
-
-
+        public string id { get; set; }
+        public string invoiceNumber { get; set; }
+        public string? companyId { get; set; }
+        public string customerTinghcard { get; set; }
+        public List<RefundItems>? invoiceItems { get; set; }
     }
+
+    public class RefundItems
+    {
+        public Guid vatItemId { get; set; }
+        public decimal refundAmount { get; set; }  
+        public int refundQuantity { get; set; }  
+    }
+
+
 }
+
+

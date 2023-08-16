@@ -160,6 +160,7 @@ html.themecolor-toodark.darkmode {
     --themecolor-light: #8a98eb !important;
 }
 
+
 body {
     background: var(--color-background) !important;
     font-family: var(--font);

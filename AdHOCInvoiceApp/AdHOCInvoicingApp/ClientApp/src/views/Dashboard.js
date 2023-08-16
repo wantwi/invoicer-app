@@ -13,27 +13,29 @@ import UserHeader from "components/Headers/UserHeader";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import { Modal, Button } from "reactstrap";
-import { FcEmptyFilter } from "react-icons/fc";
-import { useCallback } from "react";
-
-let userDetails = JSON.parse(
-  sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-);
-
-// console.log({ userDetails });
+import { useCustomQuery } from "hooks/useCustomQuery"
+import Fallback from "components/Fallback"
+import { ErrorBoundary } from "react-error-boundary"
 
 const Dashboard = () => {
   const [period, setPeriod] = useState("today");
   const [from, setfrom] = useState("");
   const [to, setTo] = useState("");
 
-  const [isCustom, setIsCustom] = useState(false);
+    const [isCustom, setIsCustom] = useState(false);
+    const { data="" } = useCustomQuery("/api/GetDashboard")
+    console.log({ data })
 
   const handleSubmit = ({ from, to }) => {
     setfrom(from);
     setTo(to);
     setIsCustom(false);
-  };
+    };
+
+    const errorHandler = (error, errorInfo) => {
+        console.log("Logging", error, errorInfo)
+    }
+
 
   useEffect(() => {
     let temp = null;
@@ -58,12 +60,12 @@ const Dashboard = () => {
         break;
     }
 
-    return () => { };
+    return () => {};
   }, [period]);
 
   return (
     <>
-      {/* Page content */}
+          <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
       <UserHeader message={"Dashboard"} />
       {isCustom && (
         <CustomDateFormModal
@@ -88,66 +90,26 @@ const Dashboard = () => {
                   }}
                 >
                   <span>Business&nbsp;Insights</span>
-                  {/* <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: "45px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <CustomDateComponent
-                      period={period}
-                      setPeriod={setPeriod}
-                    />
-                    <div className="icon icon-shape bg-info text-white rounded-circle shadow">
-                      <FcEmptyFilter />
-                    </div>
-                  </div> */}
+                  
                 </div>
               </CardHeader>
-              <EmbededDashboard
-                companyId={userDetails?.profile?.company}
-                from={from}
-                to={to}
-              />
+              {data && <EmbededDashboard from={from} to={to} companyId={data} />}
             </Card>
           </Col>
         </Row>
-      </Container>
+              </Container>
+          </ErrorBoundary >
     </>
   );
 };
 
-const CustomDateComponent = ({ period, setPeriod }) => {
-  return (
-    <Row>
-      <select
-        style={{ width: "358px" }}
-        className="form-control mb-0"
-        value={period}
-        onChange={(e) => setPeriod(e.target.value)}
-      >
-        <option value={undefined} disabled>
-          Select period
-        </option>
-        <option value={"today"}>Today</option>
-        <option value={"week"}>This Week</option>
-        <option value={"month"}>This Month</option>
-        <option value={"year"}>This Year</option>
-        <option value={"all"}>All</option>
-        <option value={"custom"}>Custom</option>
-      </select>
-    </Row>
-  );
-};
-
-const EmbededDashboard = ({ companyId, from, to }) => {
-  return (
+const EmbededDashboard = ({ from, to, companyId }) => {
+    const dashboardUrl = "https://reports.cimsgh.com/bi/site/newsite2/dashboards/d3624c35-3aa3-45a1-bbfc-15efadd916be/Sales/Dashboard?isembed=true&hide_tool=dp&export=true%27&CompanyId=B129E013-19C5-485D-B2B8-6334B68E55E2"
+    return (
     <>
       <CardBody>
         <iframe
-          src={`${process.env.REACT_APP_DASHBOARD_URL}&CompanyId=${companyId}&FromDate=${from}&ToDate=${to}`}
+                    src={`${dashboardUrl}&CompanyId=${companyId}&FromDate=${from}&ToDate=${to}`}
           id="dashboard-frame"
           width="100%"
           height="900px"

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Modal, Button } from 'reactstrap'
 import { toast } from 'react-toastify'
 import { useCustomDelete } from 'hooks/useCustomDelete'
+import Loader from "components/Modals/Loader";
 
 export default function DeletePrompt({
   message,
@@ -11,67 +12,19 @@ export default function DeletePrompt({
   setItemsList,
   setLoading,
   setSearchText,
-  value
+    value,
+  refetch=()=>null
 }) {
-  let userDetails = JSON.parse(
-    sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  )
+  
 
-  // const getItemsList = async () => {
-  //   setLoading(true)
-  //   fetch(
-  //     `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}`,
-  //     {
-  //       method: 'GET', // or 'PUT'
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${userDetails.access_token}`,
-  //       },
-  //     }
-  //   )
-  //     .then((res) => {
-  //       if (res.status === 401) {
-  //         toast.warning('Unauthorized. Logging you out')
-  //         setTimeout(() => {
-  //           logout()
-  //         }, 2000)
-  //       } else {
-  //         return res.json()
-  //       }
-  //     })
-  //     .then((data) => {
-  //       if (data.length > 0) {
-  //         let results = data.map((item) => {
-  //           return {
-  //             id: item.id,
-  //             name: item.name,
-  //             istaxable: item.taxable,
-  //             code: item.code,
-  //             price: item.price,
-  //             taxRate: item.taxRate,
-  //             description: item.description,
-  //             isTaxInclusive: item.isTaxInclusive,
-  //             hasTourismLevy: item.hasTourismLevy,
-  //             status: item.status,
-  //             hasTrans: item.hasTrans,
-  //           }
-  //         })
-  //         setLoading(false)
-  //         setItemsList(results)
-  //       } else {
-  //         setLoading(false)
-  //         toast.warning('You have no products/services saved yet')
-  //       }
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
-
-  const {mutate} = useCustomDelete(`${process.env.REACT_APP_CLIENT_ROOT}/VatItems/${itemToDelete?.id}`,"items",value,
+    const { mutate, isLoading } = useCustomDelete(`/api/DeleteItem/${itemToDelete?.id}`,"items",value,
   ()=>{
     toast.success('Item successfully deleted from system')
     setLoading(false)
     setSearchText("")
-    setShowPrompt(false)
+      setShowPrompt(false)
+      refetch()
+      console.log("hjhj", refetch())
     
   },
   (error)=>{
@@ -92,34 +45,12 @@ export default function DeletePrompt({
     } else {
 
       mutate()
-      // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/VatItems/${item.id}`, {
-      //   method: 'DELETE', // or 'PUT'
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${userDetails.access_token}`,
-      //   },
-      // })
-      //   .then((response) => {
-      //     if (response.ok) {
-      //       toast.success('Item successfully deleted from system')
-      //       setLoading(false)
-      //       // getItemsList()
-      //     }
-      //     return response.json()
-      //   })
-      //   .catch((error) => {
-      //     setLoading(false)
-      //     toast.error('Could not delete item. Please try again.')
-      //   })
-      //   .finally(() => {
-      //     setLoading(false)
-      //     setShowPrompt(false)
-      //   })
     }
   }
 
   return (
-    <>
+      <>
+          {isLoading && <Loader /> }
       <Modal
         className='modal-dialog-centered modal-danger'
         contentClassName='bg-gradient-danger'

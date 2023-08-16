@@ -22,20 +22,8 @@ import { FcCancel } from "react-icons/fc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
-import useCustomAxios from "hooks/useCustomAxios2";
+import useCustomAxios from "hooks/useCustomAxios";
 
-// const allCountries = Object.keys(countries)
-//   .filter((k) => k !== 'AQ')
-//   .map((k) => ({ ...countries[k], iso: k }))
-//   .sort((a, b) => a.name.localeCompare(b.name))
-//   .filter(
-//     (country) =>
-//       country.name == 'Ghana' ||
-//       country.name == 'United Kingdom' ||
-//       country.name == 'United States' ||
-//       country.name == 'France'
-//   )
-// console.log(allCountries)
 const init = {
   currencyName: "",
   iso: "",
@@ -53,7 +41,8 @@ const CurrencySetupWithReset = ({ reset }) => {
   const [loading, setLoading] = useState(false);
   const [showList, setShowList] = useState(false);
   const [currencyList, setCurrencyList] = useState([]);
-  const axios = useCustomAxios()
+    const axios = useCustomAxios();
+
 
   const handleClick = (currency) => {
     setShowList(false);
@@ -65,57 +54,10 @@ const CurrencySetupWithReset = ({ reset }) => {
     }));
   };
 
-  // const getCurrencies = () => {
-  //   setLoading(true)
-  //   fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Currency`, {
-  //     method: 'GET', // or 'PUT'
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${userDetails.access_token}`,
-  //     },
-  //   })
-  //     .then((res) => {
-  //       // console.log(res)
-  //       if (res.status === 401) {
-  //         toast.error('Token timed out. Logging you out')
-  //         setTimeout(() => {
-  //           window.location = '/'
-  //         }, 3000)
-  //       } else {
-  //         return res.json()
-  //       }
-  //     })
-  //     .then((data) => {
-  //       if (data.length > 0) {
-  //         setLoading(false)
-  //         let res = data.map((item) => {
-  //           return {
-  //             name: item.name,
-  //             iso: item.code,
-  //             homeCurrency: item.homeCurrency,
-  //             rate: 0,
-  //           }
-  //         })
-  //         setCurrencies(res.filter((item) => item.homeCurrency === false))
-  //       }
-  //     })
-  //     .catch((err) => console.log(err))
-  // }
-
   const getCurrency = async () => {
-    const request = await axios.get("/Currency")
-    // const request = await fetch(
-    //   `${process.env.REACT_APP_CLIENT_ROOT}/Currency`,
-    //   {
-    //     method: "GET", // or 'PUT'
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${userDetails.access_token}`,
-    //     },
-    //   }
-    // );
+    const request = await axios.get("/api/GetCurrency");
 
-    return request.data
+    return request.data;
   };
 
   const { data: currencyList2, refetch: refetchCurrency } = useQuery({
@@ -137,14 +79,9 @@ const CurrencySetupWithReset = ({ reset }) => {
   const postExRate = async (postData) => {
     setLoading(true);
     return await axios.post(
-      `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency`,
+        `/api/AddExcahngeRate`,
       postData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userDetails.access_token}`,
-        },
-      }
+      
     );
   };
 
@@ -159,7 +96,7 @@ const CurrencySetupWithReset = ({ reset }) => {
       console.log({ useMutationError: error });
       toast.error(
         error?.response?.data?.message ||
-        "Invoice could not be saved. Please try again"
+          "Invoice could not be saved. Please try again"
       );
       setLoading(false);
     },
@@ -168,7 +105,11 @@ const CurrencySetupWithReset = ({ reset }) => {
   const handleAdd = () => {
     // setShowForm(false)
     // console.log(exchangeFormData)
-    if (exchangeFormData.newRate == "" || exchangeFormData.currencyName == "" || exchangeFormData.date == "") {
+    if (
+      exchangeFormData.newRate == "" ||
+      exchangeFormData.currencyName == "" ||
+      exchangeFormData.date == ""
+    ) {
       toast.warning(
         "Please make sure all required information has been filled"
       );
@@ -179,11 +120,10 @@ const CurrencySetupWithReset = ({ reset }) => {
     }
   };
 
-  const handleSaveList = () => {
+    const handleSaveList = () => {
     let postData = currencyList.map((item) => {
       return {
         currencyCode: item.iso,
-        companyId: userDetails.profile.company,
         transactionDate: item.date,
         exchangeRate: item.newRate,
       };
@@ -260,7 +200,8 @@ const CurrencySetupWithReset = ({ reset }) => {
                           htmlFor="input-username"
                           onClick={() => setShowList(!showList)}
                         >
-                          Select Currency{" "}<code style={{ color: "darkred" }}>*</code>
+                          Select Currency{" "}
+                          <code style={{ color: "darkred" }}>*</code>
                           <i
                             className={
                               !showList

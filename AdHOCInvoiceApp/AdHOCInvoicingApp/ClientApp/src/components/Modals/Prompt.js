@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { Modal, Button } from 'reactstrap'
-import refund from '../../assets/img/theme/refundimg.png'
-import { toast } from 'react-toastify'
-import Loader from '../Modals/Loader'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import React, { useEffect, useState } from "react";
+import { Modal, Button } from "reactstrap";
+import refund from "../../assets/img/theme/refundimg.png";
+import { toast } from "react-toastify";
+import Loader from "../Modals/Loader";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import useCustomAxios from 'hooks/useCustomAxios'
+import useCustomAxios from "hooks/useCustomAxios";
 import { v4 as uuid } from "uuid";
 
 export default function Prompt({
@@ -15,106 +15,105 @@ export default function Prompt({
   refundInvoice,
   reset,
   setOpen,
-  refundTypeForPost
+  refundTypeForPost,
 }) {
-  const [loading, setLoading] = useState(false)
-  const queryClient = useQueryClient()
-  const axios = useCustomAxios()
-
-  let userDetails = JSON.parse(
-    sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  )
+  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const axios = useCustomAxios();
 
   const submitRefund = async ({ postData, refundType }) => {
-    const url = process.env.REACT_APP_CLIENT_ROOT_V3
 
-    setLoading(true)
-    const request = await axios.post(`${url}/Refunds/${refundType}`, postData, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userDetails.access_token}`,
-      },
-    })
+    setLoading(true);
+    const request = await axios.post(
+      `/api/PostRefund/${refundType}`,
+      postData
+    );
 
-    return request.data
-
-  }
+    return request.data;
+  };
   // console.log({refundTypeForPost, refundInvoice})
 
   const { mutate } = useMutation({
     mutationFn: submitRefund,
     onSuccess: () => {
-      toast.success('Invoice successfully refunded')
-      setLoading(false)
-      setshowPrompt(false)
-      setOpen(false)
-      queryClient.invalidateQueries("invoices")
-      reset(uuid())
+      toast.success("Invoice successfully refunded");
+      setLoading(false);
+      setshowPrompt(false);
+      setOpen(false);
+      queryClient.invalidateQueries("invoices");
+      reset(uuid());
     },
     onError: (error) => {
       // console.log({ useMutationError: error });
-      toast.error(error?.response?.data?.Message || error?.response?.data?.message || "Could not refund invoice. Please try again")
-      setLoading(false)
-      setshowPrompt(false)
-    }
-  })
+      toast.error(
+        error?.response?.data?.Message ||
+          error?.response?.data?.message ||
+          "Could not refund invoice. Please try again"
+      );
+      setLoading(false);
+      setshowPrompt(false);
+    },
+  });
 
   const postRefund = (invoice) => {
     // const isPartialRefund = invoice?.invoiceItemsToPost.every((item) => Boolean(item?.refundQuantity))
     // const isFullRefund = invoice?.invoiceItemsToPost.every((item) => item.quantity == 0)
-    let postData = {}
-    let refundTypeVal = ""
+    let postData = {};
+    let refundTypeVal = "";
     // console.log({ refundTypeForPost })
     // return
     if (refundInvoice?.refundType === "NO REFUNDS") {
-
       if (refundTypeForPost == "Full") {
         postData = {
           id: invoice.id,
           invoiceNumber: invoice.invoiceNo,
-          companyId: userDetails.profile.company,
           customerTinghcard: invoice.customerTinghcard,
-        }
-        refundTypeVal = "Full"
+        };
+        refundTypeVal = "Full";
       } else {
-
         //get all items whose refundQty have been updated
-        let temp = invoice?.invoiceItemsToPost.filter(item => Boolean(item.refundQuantity))
+        let temp = invoice?.invoiceItemsToPost.filter((item) =>
+          Boolean(item.refundQuantity)
+        );
         postData = {
           id: invoice.id,
           invoiceNumber: invoice.invoiceNo,
-          companyId: userDetails.profile.company,
           customerTinghcard: invoice.customerTinghcard,
           invoiceItems: temp.map((item, idx) => {
             return {
               refundQuantity: item.refundQuantity,
-              refundAmount: item.refundQuantity * invoice?.invoiceItems[idx]?.payablePrice / invoice?.invoiceItems[idx]?.quantity,
+              refundAmount:
+                (item.refundQuantity *
+                  invoice?.invoiceItems[idx]?.payablePrice) /
+                invoice?.invoiceItems[idx]?.quantity,
               vatItemId: item.id,
-            }
-          })
-        }
-        refundTypeVal = "Partial"
+            };
+          }),
+        };
+        refundTypeVal = "Partial";
       }
     } else {
-      let temp = invoice?.invoiceItemsToPost.filter(item => Boolean(item.refundQuantity))
+      let temp = invoice?.invoiceItemsToPost.filter((item) =>
+        Boolean(item.refundQuantity)
+      );
       postData = {
         id: invoice.id,
         invoiceNumber: invoice.invoiceNo,
-        companyId: userDetails.profile.company,
         customerTinghcard: invoice.customerTinghcard,
         invoiceItems: temp.map((item, idx) => {
           return {
             refundQuantity: item.refundQuantity,
-            refundAmount: item.refundQuantity * invoice?.invoiceItems[idx]?.price / invoice?.invoiceItems[idx]?.quantity,
+            refundAmount:
+              (item.refundQuantity * invoice?.invoiceItems[idx]?.price) /
+              invoice?.invoiceItems[idx]?.quantity,
             vatItemId: item.id,
-          }
-        })
-      }
-      refundTypeVal = "Partial"
-
+          };
+        }),
+      };
+      refundTypeVal = "Partial";
     }
 
-    mutate({ postData, refundType: refundTypeVal })
+    mutate({ postData, refundType: refundTypeVal });
 
     // return -1
     // setLoading(true)
@@ -154,57 +153,55 @@ export default function Prompt({
     //     setLoading(false)
     //     setshowPrompt(false)
     //   })
-  }
-
-
+  };
 
   return (
     <>
       <Modal
-        className='modal-dialog-centered modal-danger'
-        contentClassName='bg-gradient-info'
+        className="modal-dialog-centered modal-danger"
+        contentClassName="bg-gradient-info"
         isOpen={showPrompt}
       >
-        {' '}
+        {" "}
         {loading ? <Loader /> : null}
-        <div className='modal-header'>
-          <h6 className='modal-title' id='modal-title-notification'>
+        <div className="modal-header">
+          <h6 className="modal-title" id="modal-title-notification">
             Your attention is required
           </h6>
           <button
-            aria-label='Close'
-            className='close'
-            data-dismiss='modal'
-            type='button'
+            aria-label="Close"
+            className="close"
+            data-dismiss="modal"
+            type="button"
             onClick={() => setshowPrompt(false)}
           >
             <span aria-hidden={true}>×</span>
           </button>
         </div>
-        <div className='modal-body'>
-          <div className='py-3 text-center'>
+        <div className="modal-body">
+          <div className="py-3 text-center">
             {/* <i className='ni ni-bell-55 ni-3x' /> */}
-            <img src={refund} alt='refund' />
-            <h4 className='heading mt-4'>Hi there...</h4>
+            <img src={refund} alt="refund" />
+            <h4 className="heading mt-4">Hi there...</h4>
             <p>{message}</p>
           </div>
         </div>
-        <div className='modal-footer'>
+        <div className="modal-footer">
           <Button
-            className='btn-white'
-            color='default'
-            type='button'
+            className="btn-white"
+            color="default"
+            type="button"
             onClick={() => postRefund(refundInvoice)}
           >
             Confirm
           </Button>
           <Button
-            className='text-white ml-auto'
-            color='link'
-            data-dismiss='modal'
-            type='button'
+            className="text-white ml-auto"
+            color="link"
+            data-dismiss="modal"
+            type="button"
             onClick={() => {
-              setshowPrompt(false)
+              setshowPrompt(false);
             }}
           >
             Decline
@@ -212,5 +209,5 @@ export default function Prompt({
         </div>
       </Modal>
     </>
-  )
+  );
 }

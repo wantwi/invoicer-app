@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 //import { logout } from "../../hooks/useAuth"
 import { useAuth } from "context/AuthContext";
-import React from "react";
+import React, { useEffect } from "react";
 // reactstrap components
 import {
   DropdownMenu,
@@ -22,16 +22,23 @@ import {
 //import useAuth from "hooks/useAuth";
 
 const AdminNavbar = (props) => {
-    const { logout } = useAuth();
   const [profile, setProfile] = React.useState("");
-  const { getUser } = useAuth();
- 
+  const { getUser, user, logout } = useAuth();
+
+  useEffect(async () => {
+    await getUser();
+
+    return () => {};
+  }, []);
+
+  console.log({user})
+
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
         <Container fluid>
           <h1 className="h1 mb-0 text-white text-uppercase d-none d-lg-inline-block">
-                     {/* {data?.profile?.companyname}*/}
+            {/* {data?.profile?.companyname}*/}
           </h1>
 
           {/* <Form className='navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto'>
@@ -58,7 +65,7 @@ const AdminNavbar = (props) => {
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                      {/*{profile}*/}
+                      {user?.name}
                     </span>
                   </Media>
                 </Media>
@@ -76,19 +83,19 @@ const AdminNavbar = (props) => {
                   <i className="ni ni-single-02" />
                   <span>Profile Settings</span>
                 </DropdownItem>
-                {/* <DropdownItem to='/admin/user-profile' tag={Link}>
-                  <i className='ni ni-settings-gear-65' />
+                {/* <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <i className="ni ni-settings-gear-65" />
                   <span>Settings</span>
-                </DropdownItem>
-                <DropdownItem to='/admin/user-profile' tag={Link}>
-                  <i className='ni ni-calendar-grid-58' />
+                </DropdownItem> */}
+                {/* <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <i className="ni ni-calendar-grid-58" />
                   <span>Activity</span>
-                </DropdownItem> */}
-                {/* <DropdownItem to='/admin/user-profile' tag={Link}>
-                  <i className='ni ni-support-16' />
+                </DropdownItem>
+                <DropdownItem to="/admin/user-profile" tag={Link}>
+                  <i className="ni ni-support-16" />
                   <span>Support</span>
-                </DropdownItem> */}
-                <DropdownItem divider />
+                </DropdownItem>
+                <DropdownItem divider /> */}
                 <DropdownItem
                   onClick={() => {
                     logout();

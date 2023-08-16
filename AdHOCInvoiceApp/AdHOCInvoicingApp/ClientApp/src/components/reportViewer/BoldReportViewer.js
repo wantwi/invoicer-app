@@ -23,7 +23,7 @@ const BoldReportViewer = ({
 }) => {
   //<bold-report-viewer id="reportviewer1" report-service-url="../SyncReport" report-path="~/WHT/AllTransactionsReport" report-server-url="http://psl-dbserver-vm/Reports_SSRS/" processing-mode="Remote" ajax-before-load="ajaxBeforeLoad" />
   const reportviewrinstance = useRef(null);
-  const { auth } = useAuth();
+  const  auth  = useAuth();
 
   const [params, setparams] = useState([]);
 
@@ -49,7 +49,9 @@ const BoldReportViewer = ({
     });
 
     return arr;
-  };
+    };
+
+    console.log({auth})
 
   useEffect(() => {
     // dReportDateFrom
@@ -83,22 +85,19 @@ const BoldReportViewer = ({
     //   key: "Authorization",
     //   value: `Bearer ${auth?.access_token}`,
     // });
-    args?.headers.push({
-      Key: "Authorization",
-      Value: `Bearer ${auth?.access_token}`,
-    });
+  
   };
 
   return (
     <BoldReportViewerComponent
       id="reportviewer-container"
-      reportServerUrl={process.env.REACT_APP_REPORTSERVERURL}
-      // reportServerUrl={"http://192.168.0.71/Reports_SSRS/"}
+          //reportServerUrl={"/api/GetReportMeta" + reportPath}
+       reportServerUrl={"http://192.168.0.71/Reports_SSRS/"}
       // reportServiceUrl={"http://192.168.0.26/BReport/api/ReportViewer"}
-      reportServiceUrl={process.env.REACT_APP_REPORTSERVICEURL}
+          reportServiceUrl={"https://psl-app-vm3/EvatApi/api/v1/ReportViewer"}
       reportPath={`${REACT_APP_REPORTSERVERPath}${reportPath}`}
       onShowError={onShowError}
-      ajaxBeforeLoad={onAjaxRequest}
+      //ajaxBeforeLoad={onAjaxRequest}
 
       toolbarSettings={toolbarSettings}
       parameters={renderD()}

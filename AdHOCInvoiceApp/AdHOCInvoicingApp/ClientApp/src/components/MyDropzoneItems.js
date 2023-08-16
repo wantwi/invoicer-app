@@ -4,6 +4,7 @@ import "../views/App.css";
 import { ToastContainer, toast } from "react-toastify";
 import { FormGroup, Row, Col, Button } from "reactstrap";
 import { FaCheckCircle } from "react-icons/fa";
+import { useAuth } from "context/AuthContext";
 
 function MyDropzone({
   setuploadedData,
@@ -32,9 +33,7 @@ function MyDropzone({
     },
   });
 
-  // const [startrows, setStartRowIndices] = useState([])
-  // const [endRows, setEndRows] = useState([])
-  // const [headerrow, setheaderrow] = useState([])
+    const { user } = useAuth();
   const [importedRecords, setimportedRecords] = useState([]);
   const [header, setheader] = useState(0);
   const [first, setfirst] = useState(0);
@@ -43,12 +42,6 @@ function MyDropzone({
   React.useEffect(() => {
     setuploadedData(acceptedFiles);
   }, [acceptedFiles]);
-
-  React.useEffect(() => {
-    // console.log('header:', header)
-    // console.log('start', first)
-    // console.log('end:', last)
-  }, [header]);
 
   const files = acceptedFiles.map((file) => (
     <li key={file.path}>
@@ -63,8 +56,6 @@ function MyDropzone({
     let xData = Object.keys(xdt).map((key) => {
       return [key, xdt[key].v];
     });
-    // console.log(xData)
-
     let xCells = [],
       vCells = [],
       xRows = [],
@@ -90,9 +81,6 @@ function MyDropzone({
       }
     }
 
-    // setheaderrow([...new Set(xRows)])
-    // setStartRowIndices([...new Set(xRows)])
-    // setEndRows([...new Set(xRows)])
 
     let excelSheets = [];
     excelSheets.push({
@@ -106,7 +94,6 @@ function MyDropzone({
     });
 
     setimportedRecords(excelSheets[0].Data);
-    // console.log(excelSheets[0]);
     setlast(Number(excelSheets[0].Last.Row));
   };
 
@@ -118,7 +105,6 @@ function MyDropzone({
     let descriptions = keys.filter((item) => item.Column === "C");
     let taxables = keys.filter((item) => item.Column === "D");
     let vatinclusives = keys.filter((item) => item.Column === "E");
-    // let toursimlevyapplicables = keys.filter((item) => item.Column === 'F')
     let currencies = keys.filter((item) => item.Column === "F");
     let CST = keys.filter((item) => item.Column === "G");
 
@@ -188,12 +174,8 @@ function MyDropzone({
       results.push(newObject);
     });
 
-    let userDetails = JSON.parse(
-      sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-    );
-
     const renderData = results.map((value) => ({
-      companyId: userDetails.profile.company,
+        companyId: user?.sub,
       name: value.ItemName,
       price: value.Price,
       description: value.Description,

@@ -5,40 +5,56 @@
 // import { toast } from "react-toastify"
 // import { logout } from "services/AuthService"
 
-import axios from "axios"
-
- 
+import axios from "axios";
 
 const CustomAxios = axios.create({
-
   baseURL: process.env.REACT_APP_BASENAME,
 
   headers: {
-
     Accept: "application/json",
 
     "Content-Type": "application/json",
 
-    "X-CSRF": 1
-
-  }
+    "X-CSRF": 1,
+  },
 
   //withCredentials: true
-
-})
-
- 
+});
 
 function useCustomAxios() {
+  
+    CustomAxios.interceptors.response.use(
+        (response) => {
+            try {
+                let temp = JSON.parse(response?.data);
+                response.data = JSON.parse(temp?.data);
+                return response;
+            } catch (error) {
+                return response;
+            }
+        }, (error) => {
+            if (!error.response) {
+                alert('NETWORK ERROR')
+            } else {
+                const code = error.response.status
+                const response = error.response.data
+                const originalRequest = error.config;
 
-  return CustomAxios
+                if (code === 401 && !originalRequest._retry) {
+                    originalRequest._retry = true
+                    const logoutUrl = user["bff:logout_url"]
+                    window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_BASENAME}/auth/login`
+                }
 
+                return Promise.reject(error)
+            }
+        }
+  );
+
+  return CustomAxios;
 }
 
- 
-
-export default useCustomAxios
-
+export default useCustomAxios;
 
 // const useCustomAxios = () => {
 //   const { auth } = useAuth()
@@ -62,7 +78,7 @@ export default useCustomAxios
 //         if (error?.response?.status === 401 && !prevRequest?.sent) {
 //           prevRequest.sent = true
 //           try {
-            
+
 //             const newAccesstoken = await refresh()
 //             prevRequest.headers.Authorization = `Bearer ${newAccesstoken}`
 //             return CustomAxios(prevRequest)

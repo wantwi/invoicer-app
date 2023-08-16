@@ -18,8 +18,9 @@ import BoldReportViewer from "components/reportViewer/BoldReportViewer"
 // import { CustomAxios } from "utils/CustomAxios";
 
 import * as Yup from "yup"
-import useCustomAxios from "hooks/useCustomAxios2"
+import useCustomAxios from "hooks/useCustomAxios"
 import DatePicker from "react-datepicker"
+import { useAuth } from "hooks/useAuth";
 
 const reportList = [
   { value: "JournalInvoiceReport", name: "Invoice Journal Report" },
@@ -62,7 +63,9 @@ const Reports = () => {
   const [reportParams, setReportParams] = useState([])
   const [intialValue, setInitialValue] = useState({})
   const [showBtn, setshowBtn] = useState(true)
-  const submitBtn = useRef(null)
+    const submitBtn = useRef(null)
+    const { user } = useAuth();
+
 
   const [showReportPramasModal, setShowReportPramasModal] = useState(false)
 
@@ -72,7 +75,7 @@ const Reports = () => {
     // const { data } = await CustomAxios.get(
     //   `/ReportMetadata/Get${name.slice(2)}Meta`
     // )
-    const { data } = await CustomAxios.get(`/ReportMetadata/Get${name}Meta`)
+    const { data } = await CustomAxios.get(`/api/GetReportMeta/Get${name}Meta`)
 
     // console.log({ data });
 
@@ -85,7 +88,7 @@ const Reports = () => {
 
       data.forEach((x) => {
         if (x.paramName.toLowerCase() === "userid") {
-          params[`${x.paramName}`] = userDetails.profile.sub
+            params[`${x.paramName}`] = user.sub
         } else {
           params[`${x.paramName}`] = ""
         }
@@ -140,30 +143,8 @@ const Reports = () => {
     setreportHight("70vh")
     setshowBtn(false)
 
-    // setReportPath(`/eVAT/eVAT_Report/${reportName}`);
-    // setreportHight("70vh");
-
-    // setShowReport(true);
   }
 
-  //   const readUploadFile = (e) => {
-  //     alert("clicked")
-  //     e.preventDefault();
-  //     if (e.target.files) {
-  //         const reader = new FileReader();
-  //         reader.onload = (e) => {
-  //             const data = e.target.result;
-  //             const workbook = xlsx.read(data, { type: "array" });
-  //             const sheetName = workbook.SheetNames[0];
-  //             const worksheet = workbook.Sheets[sheetName];
-  //             const json = xlsx.utils.sheet_to_json(worksheet);
-  //             console.log(json);
-  //         };
-  //         reader.readAsArrayBuffer(e.target.files[0]);
-  //     }
-  // }
-
-  // console.log({ paramData2: reportParams, intialValue, schema })
 
   const handleFormChange = (e) => {
     setReportParam((prev) => ({
@@ -178,7 +159,6 @@ const Reports = () => {
     return isNull.length === 0 ? true : false
   }
 
-  // console.log({ reportParam })
 
   useEffect(() => {
     closeModal()
@@ -286,8 +266,8 @@ const Reports = () => {
           >
             <span aria-hidden={true}>×</span>
           </button>
-        </div>
-        <div className="modal-body">
+              </div>
+              <div className="modal-body" id="report-modal">
           {reportParams.map((x, i) => {
             const { type, isRequired, placeholder, value, paramName } = x
             return (

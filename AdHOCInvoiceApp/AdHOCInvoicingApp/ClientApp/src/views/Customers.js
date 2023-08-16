@@ -35,11 +35,11 @@ import { useCustomQuery } from "hooks/useCustomQuery";
 import { useDebounce } from "use-debounce";
 import { useCustomPost } from "hooks/useCustomPost";
 import { useCustomPut } from "hooks/useCustomPut";
+import { useAuth } from "context/AuthContext";
 
 const Customers = () => {
-  let userDetails = JSON.parse(
-    sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  );
+    const { getUser, user, logout } = useAuth();
+
   // const [formData, setFormData] = React.useState({
   //   companyId: userDetails.profile.company,
   //   customerName: '',
@@ -53,7 +53,7 @@ const Customers = () => {
 
   const formik = useFormik({
     initialValues: {
-      companyId: userDetails.profile.company,
+          companyId: user?.sub,
       customerName: "",
       customerTin: "",
       customerEmail: "",
@@ -150,7 +150,7 @@ const Customers = () => {
   };
 
   const { refetch: getCustomerList } = useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}`,
+      !value ? `/api/GetCompanyCustomers` : `/api/GetCompanyCustomers/${value}`,
     "customers",
     value,
     onSuccess,
@@ -161,8 +161,8 @@ const Customers = () => {
     { isEnabled: false, queryTag: "?search=" }
   );
 
-  const { refetch: getSupplierList } = useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetSuppliersByCompanyId/${userDetails.profile.company}`,
+    const { refetch: getSupplierList } = useCustomQuery(
+        !value_sup ? `/api/GetCompanySuppliers` : `/api/GetCompanySuppliers/${value_sup}`,
     "suppliers",
     value_sup,
     onSuccess,
@@ -256,14 +256,14 @@ const Customers = () => {
   };
 
   const { mutate } = useCustomPost(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Customers`,
+      `/api/CreateCustomer`,
     value,
     postSuccess,
     postError
   );
 
   const { mutate: putmutate } = useCustomPut(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Customers/${formik?.values?.customerID}`,
+      `/api/UpdateCreateCustomer/${formik?.values?.customerID}`,
     value_sup,
     putSuccess,
     postError
@@ -300,37 +300,11 @@ const Customers = () => {
       setcusType(postData[0]?.type);
       mutate(postData);
       setLoading(true);
-
-      // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Customers`, {
-      //   method: 'POST', // or 'PUT'
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     Authorization: `Bearer ${userDetails.access_token}`,
-      //   },
-      //   body: JSON.stringify(postData),
-      // })
-      //   .then((response) => {
-      //     //console.log(response)
-      //     if (!response.ok) {
-      //       toast.error('Could not save customer. Please try again.')
-      //     } else {
-      //       toast.success('Customer successfully saved')
-      //       setTimeout(() => {
-      //         setLoading(false)
-      //         formik.resetForm()
-      //       }, 2000)
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     console.log(error)
-      //     setLoading(false)
-      //   })
     }
   };
 
   const updateCustomer = (customer) => {
     customer = formik.values;
-    // console.log('customer', customer)
     let postData = {
       id: customer.customerID,
       tin: customer.customerTin,
@@ -350,61 +324,13 @@ const Customers = () => {
     setcusType(postData?.type);
     setLoading(true);
     putmutate(postData);
-    // return
-    // fetch(
-    //   `${process.env.REACT_APP_CLIENT_ROOT}/Customers/${customer.customerID}`,
-    //   {
-    //     method: 'PUT', // or 'PUT'
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${userDetails.access_token}`,
-    //     },
-    //     body: JSON.stringify(postData),
-    //   }
-    // )
-    //   .then((res) => {
-    //     if (res.ok) {
-    //     } else {
-    //       toast.error('Could not update record. Please try again.')
-    //       setTimeout(() => {
-    //         setLoading(false)
-    //       }, 2000)
-    //     }
-    //     return res
-    //   })
-    //   .then((data) => {
-    //     if (data.status == 200) {
-    //       if (customer.type === 'SUP') {
-    //         toast.success('Supplier List Updated')
-    //         getSupplierList()
-    //       } else {
-    //         toast.success('Customer List Updated')
-    //         getCustomerList()
-    //       }
-
-    //       setTimeout(() => {
-    //         formik.resetForm()
-    //       }, 2000)
-    //     } else if (data.status === 401) {
-    //       toast.error('Token timd out. Logging you out')
-    //       setTimeout(() => {
-    //         window.location = '/'
-    //       }, 5000)
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     setLoading(false)
-    //     console.log(error)
-    //   })
   };
 
   const handleSaveOrUpdate = () => {
-    // itemSelected ? updateCustomer(formData) : saveCustomer(formData)
     itemSelected ? updateCustomer(formik) : saveCustomer(formik);
   };
 
   const handleEditCustomer = (customer) => {
-    //setFormData(customer)
     if (customer.customerAddress == null) {
       customer = { ...customer, customerAddress: "" };
     }
@@ -422,11 +348,9 @@ const Customers = () => {
     } else if (customer.status !== "A") {
       setStatus(false);
     }
-    // console.log('Customer:', customer)
 
     formik.setValues(customer);
     setitemSelected(true);
-    //console.log(customerRef)
   };
 
   const handleDeleteCustomer = (item) => {
@@ -436,7 +360,7 @@ const Customers = () => {
   };
 
   const { mutate: bultData } = useCustomPost(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Customers`,
+    `/api/Customers`,
     "",
     () => {
       setLoading(false);
@@ -454,192 +378,19 @@ const Customers = () => {
   const submitCustomerList = () => {
     setLoading(true);
     bultData(customerList);
-    // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Customers`, {
-    //   method: 'POST', // or 'PUT'
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer ${userDetails.access_token}`,
-    //   },
-    //   body: JSON.stringify(customerList),
-    // })
-    //   .then((response) => {
-    //     console.log(response)
-    //     if (response.status == 201) {
-    //       toast.success('Customer List successfully Added')
-    //       setTimeout(() => {
-    //         setLoading(false)
-    //         setCustomerList([])
-    //       }, 2000)
-    //     } else {
-    //       toast.error('Could not submit list. Please try again.')
-    //       setTimeout(() => {
-    //         setLoading(false)
-    //       }, 2000)
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     toast.error('Could not submit list. Please try again.')
-    //     setTimeout(() => {
-    //       setLoading(false)
-    //     }, 2000)
-    //   })
+    
   };
 
-  // const getCustomerList = async () => {
-  //   setinvoiceQuery('')
-  //   setBusinessPartnerType('Customers List')
-
-  //   try {
-  //     let results = await fetch(
-  //       `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}`,
-  //       {
-  //         method: 'GET', // or 'PUT'
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Authorization: `Bearer ${userDetails.access_token}`,
-  //         },
-  //       }
-  //     )
-
-  //     if (results.ok) {
-  //       let apiResponse = await results.json()
-  //       // console.log(apiResponse)
-  //       let allCustomers = apiResponse.map((customer) => {
-  //         return {
-  //           customerID: customer.id,
-  //           customerName: customer.name,
-  //           customerTin: customer.tin,
-  //           customerEmail: customer.email,
-  //           customerPhone: customer.telephone,
-  //           customerAddress: customer.address,
-  //           customerCity: customer.city,
-  //           customerDigitalAddress: customer.digitalAddress,
-  //           type: customer.type,
-  //           status: customer.status || 'A',
-  //           hasTrans: customer.hasTrans || false,
-  //         }
-  //       })
-  //       // console.log(allCustomers)
-  //       if (allCustomers.length < 1) {
-  //         setLoading(false)
-  //         toast.warning('You dont have any customers on your list yet')
-  //       } else {
-  //         setLoading(false)
-  //         setIsSearched(true)
-  //         setCustomerList(allCustomers)
-  //       }
-  //     } else {
-  //       if (results.status === 401) {
-  //         toast.error('Unauthorized. Logging you out')
-  //         setTimeout(() => {
-  //           window.location = '/'
-  //         }, 3000)
-  //       }
-  //     }
-  //   } catch (error) {
-  //     setLoading(false)
-  //     console.error(error.message)
-  //   }
-  // }
-
-  // const getSupplierList = async () => {
-  //   setinvoiceQuery('')
-  //   setBusinessPartnerType('Suppliers List')
-
-  //   try {
-  //     let apiResponse = await (
-  //       await fetch(
-  //         `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetSuppliersByCompanyId/${userDetails.profile.company}`,
-  //         {
-  //           method: 'GET', // or 'PUT'
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             Authorization: `Bearer ${userDetails.access_token}`,
-  //           },
-  //         }
-  //       )
-  //     ).json()
-  //     // console.log(apiResponse)
-  //     let allCustomers = apiResponse.map((customer) => {
-  //       return {
-  //         customerID: customer.id,
-  //         customerName: customer.name,
-  //         customerTin: customer.tin,
-  //         customerEmail: customer.email,
-  //         customerPhone: customer.telephone,
-  //         customerAddress: customer.address,
-  //         customerCity: customer.city,
-  //         customerDigitalAddress: customer.digitalAddress,
-  //         type: customer.type,
-  //         status: customer.status || 'A',
-  //         hasTrans: customer.hasTrans || false,
-  //       }
-  //     })
-  //     // console.log(allCustomers)
-  //     if (allCustomers.length < 1) {
-  //       setLoading(false)
-  //       toast.warning('You dont have any suppliers on your list yet')
-  //       setCustomerList([])
-  //     } else {
-  //       setLoading(false)
-  //       setIsSearched(true)
-  //       setCustomerList(allCustomers)
-  //     }
-  //   } catch (error) {
-  //     setLoading(false)
-  //     console.error(error.message)
-  //   }
-  // }
-
-  // const handleSearch = debounce(async (value) => {
-  //   let apiResponse = await (
-  //     await fetch(
-  //       `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}?search=${value}`,
-  //       {
-  //         method: 'GET', // or 'PUT'
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Authorization: `Bearer ${userDetails.access_token}`,
-  //         },
-  //       }
-  //     )
-  //   ).json()
-  //   // console.log(apiResponse)
-  //   let allCustomers = apiResponse.map((customer) => {
-  //     return {
-  //       customerID: customer.id,
-  //       customerName: customer.name,
-  //       customerTin: customer.tin,
-  //       customerEmail: customer.email,
-  //       customerPhone: customer.telephone,
-  //       customerAddress: customer.address,
-  //       customerCity: customer.city,
-  //       customerDigitalAddress: customer.digitalAddress,
-  //       type: customer.type,
-  //       status: customer.status,
-  //       hasTrans: customer.hasTrans || false,
-  //     }
-  //   })
-  //   setLoading(false)
-  //   setIsSearched(true)
-  //   setCustomerList(allCustomers)
-  // }, 300)
-
-  // const toggleStatus = (customer) => {
-  //   const index = customerList.indexOf(customer)
-  //   const newList = [...customerList]
-  //   newList[index]['status'] = customer['status'] === 'I' ? 'A' : 'I'
-  //   setCustomerList(newList)
-  // }
-
-  useEffect(() => {
-    if (
-      formik.values.customerTin?.length == 12 ||
-      formik.values.customerTin?.length == 13 ||
-      formik.values.customerTin?.length == 14
-    ) {
-      formik.errors.customerTin = "Must be 11 or 15 characters";
-    }
+    useEffect(() => {
+        //console.log("kl", formik.values?.customerTin?.length)
+        //if (
+        //    formik.values.customerTin?.length !== 11 ||
+        //    formik.values.customerTin?.length == 15
+        //) {
+        //    formik.errors.customerTin = "Must be 11 or 15 characters";
+        //} else {
+        //    formik.errors.cusromerTin = ""
+        //}
   }, [formik]);
   return (
     <>
@@ -982,7 +733,8 @@ const Customers = () => {
                               placeholder="Ghana Card/TIN"
                               id="customerTin"
                               name="customerTin"
-                              type="text"
+                                                          type="text"
+                                                          disabled={itemSelected}
                               value={formik.values.customerTin}
                               onBlur={formik.handleBlur}
                               onChange={formik.handleChange}
@@ -1165,7 +917,7 @@ const Customers = () => {
                             // onClick={handleSaveOrUpdate}
                             onClick={formik.handleSubmit}
                             size="sm"
-                            disabled={loading}
+                            disabled={false}
                           >
                             {itemSelected ? "Update" : "Save"}
                           </Button>

@@ -25,6 +25,8 @@ import { RefundInvoiceItemsTable } from "components/Tables/RefundInvoiceItemsTab
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { v4 as uuid } from "uuid";
+import Loader from "components/Modals/Loader";
+import useCustomAxios from "hooks/useCustomAxios";
 
 const moneyInTxt = (value, standard, dec = 2) => {
   var nf = new Intl.NumberFormat(standard, {
@@ -43,7 +45,7 @@ function InvoicePreviewRefund({
   setRefundType,
   refundType,
   setRefundTypeForPost,
-  reset
+  reset,
 }) {
   const [invoiceQuery, setinvoiceQuery] = useState("");
   const [showInvoice, setShowInvoice] = useState(false);
@@ -65,16 +67,11 @@ function InvoicePreviewRefund({
   });
   const [confirmDisabled, setConfirmDisabled] = useState(false);
   const [invoicesPrePost, setInvoicesPrePost] = useState([]);
-  const [amountToRefund, setAmountToRefund] = useState(0)
-
-
-  let userDetails = JSON.parse(
-    sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  );
-
+  const [amountToRefund, setAmountToRefund] = useState(0);
+  let axios = useCustomAxios();
 
   const transformPayload = (data = []) => {
-    return data.map(item => ({
+    return data.map((item) => ({
       ...item,
       originalQty: item.quantity,
       quantity: item.quantity,
@@ -82,44 +79,52 @@ function InvoicePreviewRefund({
       itemCode: item.itemCode,
       availableQty: item.quantity - item.quantityRefunded,
       unitPrice: item.unitPrice,
-      price: item.payablePrice
-    }))
-  }
+      price: item.payablePrice,
+    }));
+  };
 
   const findInvoice = async (text) => {
-    const request = await axios.get(
-      `${process.env.REACT_APP_CLIENT_ROOT}/Invoices/GetByInvoiceNoTaxpayerId/${text}/${userDetails?.profile?.company}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userDetails.access_token}`,
-        },
-      }
-    );
+    const request = await axios.get(`/api/GetByInvoiceNoTaxpayerId/${text}`);
 
     return request?.data;
   };
 
-  const { refetch, data } = useQuery({
-    queryKey: ["invoice", invoiceQuery],
+  const { refetch, data, isLoading } = useQuery({
+    queryKey: ["invoice-preview-refund", invoiceQuery],
     queryFn: () => findInvoice(invoiceQuery),
     enabled: false,
     onSuccess: (data) => {
       if (data.body) {
         if (data?.body?.signatureStatus != "SUCCESS") {
-          toast.info("Invoice is without signature. Refund operation cannot be performed")
+          toast.info(
+            "Invoice is without signature. Refund operation cannot be performed"
+          );
           return;
         }
         setShowInvoice(true);
         setsearchResults(data.body);
         setInvoicesPrePost(transformPayload(data.body.invoiceItems));
         setIsRefunded(data.isRefunded);
-        setAmountToRefund(0)
+        setAmountToRefund(0);
       } else {
         toast.warning("Invoice does not exist");
       }
     },
-    cacheTime: 0
+    cacheTime: 0,
+    onError: (error) => {
+      if (error?.response?.status === 500) {
+        toast.error(
+          error?.response?.data?.Message || error?.response?.data?.message
+        );
+        return;
+      }
+      // console.log({ useMutationError: error });
+      toast.error(
+        error?.response?.data?.message ||
+          error?.response?.data?.Message ||
+          "Invoice could not be saved."
+      );
+    },
   });
 
   const handleSearchInvoice = (e) => {
@@ -171,53 +176,54 @@ function InvoicePreviewRefund({
     if (togglePartialRefund) {
       setPromptMessage("Do you want to proceed with the PARTIAL refund?");
       setRefundTypeForPost("Partial");
-      setRefundType("Partial")
+      setRefundType("Partial");
       // setConfirmDisabled(true);
     } else {
       setPromptMessage("Do you want to proceed with a FULL refund?");
       setRefundTypeForPost("Full");
-      setRefundType("Full")
+      setRefundType("Full");
       // setConfirmDisabled(false);
     }
   }, [togglePartialRefund]);
 
-
-
   //If refund type is full set invoiceprepost to data from the query call
   useEffect(() => {
     if (refundType == "Full") {
-      setInvoicesPrePost(transformPayload(data?.body?.invoiceItems))
-      setAmountToRefund(searchResults.totalAmount)
+      setInvoicesPrePost(transformPayload(data?.body?.invoiceItems));
+      setAmountToRefund(searchResults.totalAmount);
     }
 
     if (refundType == "Partial") {
-      setAmountToRefund(0)
+      setAmountToRefund(0);
     }
-
-
-  }, [refundType])
+  }, [refundType]);
 
   const handleOnConfirmClick = () => {
     //check if at least one item has been refunded if refund type is partial
-    const temp = invoicesPrePost.findIndex(item => item?.refundQuantity)
+    const temp = invoicesPrePost.findIndex((item) => item?.refundQuantity);
     if (refundType == "Partial" && temp == -1) {
-      toast.error("No item refunded yet")
-      return
+      toast.error("No item refunded yet");
+      return;
     }
 
     //if item has been refunded refund type is always partial
     if (searchResults?.refundType !== "NO REFUNDS") {
       // setRefundType("Partial");
       setRefundTypeForPost("Partial");
-      
+
       setPromptMessage("Do you want to proceed with the PARTIAL refund?");
-      setrefundInvoice({ ...searchResults, invoiceItemsToPost: invoicesPrePost });
+      setrefundInvoice({
+        ...searchResults,
+        invoiceItemsToPost: invoicesPrePost,
+      });
       setIsRefunded(false);
       setshowPrompt(true);
       return;
     }
-    
-    const isFullRefund = invoicesPrePost.every((item) => item.availableQty == 0);
+
+    const isFullRefund = invoicesPrePost.every(
+      (item) => item.availableQty == 0
+    );
     // console.log("got here", invoicesPrePost, isFullRefund)
     if (isFullRefund || refundType == "Full") {
       // setRefundType("Full");
@@ -243,7 +249,10 @@ function InvoicePreviewRefund({
     <>
       <ToastContainer />
 
-      <Modal className="modal-dialog-centered modal-lg refund-modal-wrapper" isOpen={show}>
+      <Modal
+        className="modal-dialog-centered modal-lg refund-modal-wrapper"
+        isOpen={show}
+      >
         <div
           style={{
             display: "flex",
@@ -382,7 +391,9 @@ function InvoicePreviewRefund({
             </div>
           </div>
           <div style={styles.title}>
-            <h4>Invoice for: &nbsp;<b>{searchResults.customerName}</b></h4>
+            <h4>
+              Invoice for: &nbsp;<b>{searchResults.customerName}</b>
+            </h4>
           </div>
 
           <div style={styles.body}>
@@ -449,7 +460,7 @@ function InvoicePreviewRefund({
                     setShowInvoice(false);
                     setIsFocus(false);
                     setShowToggle(false);
-                    reset(uuid())
+                    reset(uuid());
                   }}
                 >
                   <span className="btn-inner--text">Cancel</span>

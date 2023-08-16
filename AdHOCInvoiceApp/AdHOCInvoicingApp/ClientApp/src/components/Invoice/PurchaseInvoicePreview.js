@@ -6,6 +6,8 @@ import { FormContext } from "components/Modals/NewPurchaseInvoice";
 import { GrEdit } from "react-icons/gr";
 import { FaTrashAlt } from "react-icons/fa";
 import EditInvoiceItem from "components/Modals/EditInvoiceItem";
+import { useCustomQuery } from "hooks/useCustomQuery"
+
 
 export const moneyInTxt = (value, standard, dec = 2) => {
   var nf = new Intl.NumberFormat(standard, {
@@ -23,7 +25,10 @@ export default function PurchaseInvoicePreview() {
     quantity: 0,
     price: 0,
   });
-  const [showUpdate, setShowUpdate] = useState(false);
+    const [showUpdate, setShowUpdate] = useState(false);
+    const { data: companyname } = useCustomQuery("/api/GetCompanyName")
+
+    
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -57,7 +62,7 @@ export default function PurchaseInvoicePreview() {
 
           <div style={styles.rightHeader}>
             {/* <img src={companyLogo} style={{ height: 30, width: '40%' }} /> */}
-            <h3>{userDetails.profile.companyname}</h3>
+                      <h3>{companyname}</h3>
             <h4>INVOICE #: {formData.invoiceNumber}</h4>
             <h4>RECEIPT #: {formData.recNum}</h4>
             <h6>Issued on : {formData.issuedDate}</h6>

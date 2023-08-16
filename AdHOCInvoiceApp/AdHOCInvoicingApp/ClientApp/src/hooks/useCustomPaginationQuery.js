@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 // import axios from "axios"
 import useCustomAxios from "./useCustomAxios";
+import { toast } from "react-toastify";
 
 // let userDetails = JSON.parse(
 //     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -22,7 +23,7 @@ export const useCustomPaginationQuery = (
   const getFunction = async () => {
     let ul = text ? filterUrl : url;
     const request = await axios.get(ul);
-    return request.data;
+    return request?.data;
   };
 
   const reactQuery = useQuery({
@@ -32,8 +33,6 @@ export const useCustomPaginationQuery = (
     onError: (error) => onError(error),
     enabled: isEnabled,
     select: (data) => {
-      let stringData = JSON.parse(data);
-      data = JSON.parse(stringData.data);
       if (text && shouldTransform) {
         let obj = {},
           pageObj = {};

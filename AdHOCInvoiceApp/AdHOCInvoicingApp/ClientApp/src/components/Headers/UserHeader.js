@@ -15,7 +15,7 @@ const UserHeader = ({ message, pageName = "" }) => {
     //setUserData((userData) => userData + 1)
 
     if (!userOBJ) {
-      logout();
+      //logout();
       setTimeout(() => {
         // history("/auth/login");
       });

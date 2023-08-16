@@ -14,6 +14,7 @@
         }
 
         public string EvatAdHOCBaseUrl { get; set; }
+        public string REACT_APP_DASHBOARD_URL { get; set; }
 
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AdHOCInvoicingApp.Helpers;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace AdHOCInvoicingApp.Controllers.Base
 {
@@ -11,6 +12,7 @@ namespace AdHOCInvoicingApp.Controllers.Base
     public abstract class GlobalController : ControllerBase
     {
         public static string EvatAdHOCBaseUrl = APISettings.Current.EvatAdHOCBaseUrl;
+        public static string REACT_APP_DASHBOARD_URL = APISettings.Current.REACT_APP_DASHBOARD_URL;
         public GlobalController()
         {
 
@@ -26,14 +28,29 @@ namespace AdHOCInvoicingApp.Controllers.Base
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        protected async Task<string> UserInfo()
+        protected async Task<tokenData> UserInfo()
         {
             var token = await HttpContext.GetUserAccessTokenAsync();
             var handler = new JwtSecurityTokenHandler();
             var decodeToken = handler.ReadJwtToken(token.AccessToken);
-            //var tin = decodeToken.Claims.Where(x => x.Type == "TIN");
-            var userInfo = decodeToken.Claims.First(claim => claim.Type == "sub").Value;
-            return userInfo ?? string.Empty;
+            var claims = decodeToken.Claims.ToList();
+            var companyName = claims.FirstOrDefault(x => x.Type == "COMPANY_NAME").Value;
+            var sub = claims.FirstOrDefault(x => x.Type == "COMPANY_ID").Value;
+            var tin = claims.FirstOrDefault(x => x.Type == "TIN").Value;
+
+            return new tokenData 
+            { 
+                CompanyName=companyName,
+                Sub=sub,
+                TIN= tin
+            };
+            
+        }
+        protected class tokenData
+        {
+            public string TIN { get; set; }
+            public string CompanyName { get; set; }
+            public string Sub { get; set; }
         }
 
     }

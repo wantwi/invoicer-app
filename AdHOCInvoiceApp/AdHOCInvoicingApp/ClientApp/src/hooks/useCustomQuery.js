@@ -13,8 +13,7 @@ let userDetails = JSON.parse(
   
     const {isEnabled, queryTag} = options
     const getFunction = async ()=>{
-        let ul = text ? url +`${queryTag}${text}` : url
-        const request = await axios.get(ul)
+        const request = await axios.get(url)
         return request.data
     }
 

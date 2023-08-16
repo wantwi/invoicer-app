@@ -13,7 +13,7 @@ import IdleTimeOutHandler from "components/IdleTimeOutHandler";
 import { renewToken } from "services/AuthService";
 import { ErrorBoundary } from "react-error-boundary";
 import Fallback from "components/Fallback";
-import Loader from "components/Modals/Loader"
+import Loader from "components/Modals/Loader";
 
 import { IdleTimerProviderWrapper } from "context/IdleTimerContext";
 import useAuth from "hooks/useAuth";
@@ -27,15 +27,15 @@ const Admin = (props) => {
   const mainContent = React.useRef(null);
   const [role, setRole] = useState(null);
   let [routes, setRoutes] = useState(routesData || []);
-    const { getUser } = useAuth();
+  const { getUser } = useAuth();
 
   React.useLayoutEffect(() => {
     //const user = sessionStorage.getItem(process.env.REACT_APP_OIDC_USER);
     //const userOBJ = JSON.parse(user);
     //// console.log(userOBJ.profile)
     //setRole((prev) => userOBJ?.profile?.role);
-      //const data = await getUser()
-      //console.log({data})
+    //const data = await getUser()
+    //console.log({data})
   }, []);
 
   React.useLayoutEffect(() => {
@@ -43,7 +43,6 @@ const Admin = (props) => {
       setRoutes(routes.filter((route) => !adminLinks.includes(route.path)));
     }
   }, [role]);
-
 
   const getRoutes = () => {
     return routes.map((prop, key) => {
@@ -77,8 +76,6 @@ const Admin = (props) => {
     console.log("Logging", error, errorInfo);
   };
 
-
-
   return (
     <>
       {/* <IdleTimerProviderWrapper /> */}
@@ -92,13 +89,12 @@ const Admin = (props) => {
         }}
       />
       <Suspense fallback={<Loader />}>
-
         <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
           <div className="main-content" ref={mainContent}>
-            {/*<AdminNavbar*/}
-            {/*  {...props}*/}
-            {/*  brandText={getBrandText(props.location.pathname)}*/}
-            {/*/>*/}
+            <AdminNavbar
+              {...props}
+              brandText={getBrandText(props.location.pathname)}
+            />
             <Switch>
               {getRoutes()}
               <Redirect from="*" to="/admin/index" />

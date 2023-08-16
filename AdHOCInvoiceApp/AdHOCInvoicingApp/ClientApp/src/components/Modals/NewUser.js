@@ -25,7 +25,7 @@ function NewUser({
   handleAddUser,
   handleUpdateUser,
   handleInviteLinkResend,
-  setPhone, loading
+    setPhone, loading, formattedPhone
 }) {
   useEffect(() => {
 
@@ -142,7 +142,7 @@ function NewUser({
                         type='tel'
                         id='cellPhone'
                         name='cellPhone'
-                        value={formik.values.cellPhone}
+                                              value={formattedPhone}
                         onChange={(e) => {
                           setPhone(e.target.rawValue)
                           formik.handleChange(e)

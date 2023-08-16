@@ -23,6 +23,7 @@ import { useCustomQuery } from "hooks/useCustomQuery";
 import { useDebounce } from "use-debounce";
 import { useCustomPost } from "hooks/useCustomPost";
 import { useCustomPut } from "hooks/useCustomPut";
+import { useAuth } from "context/AuthContext";
 
 const init = {
   userID: "",
@@ -42,8 +43,14 @@ const Accounts = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [value] = useDebounce(searchText, 500);
-  const [phone, setPhone] = useState("")
+  const [phone, setPhone] = useState("");
+  const { getUser, user, logout } = useAuth();
 
+  useEffect(async () => {
+    await getUser();
+
+    return () => {};
+  }, []);
   const formik = useFormik({
     initialValues: init,
     validationSchema: Yup.object({
@@ -59,21 +66,6 @@ const Accounts = () => {
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
   );
 
-  const [url] = useState(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Account/GetUsersByCompanyTin/${userDetails?.profile?.bTin}`
-  );
-  const getUsers = useCallback(() => {
-    fetch(url)
-      .then((json) => json.json())
-      .then((res) => {
-        setUsers(res);
-        setIsLoading(false);
-      });
-  }, [url]);
-
-
-
-
   const onSuccess = (data) => {
     // console.log({ data });
     //setUsers(data)
@@ -84,24 +76,37 @@ const Accounts = () => {
     setIsLoading(false);
   };
 
-  const { refetch, data } = useCustomQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Account/GetUsersByCompanyTin/${userDetails?.profile?.bTin}`,
+  const { refetch, data = [] } = useCustomQuery(
+    //if search value is defined the url is different
+    !value ? `/api/GetUsers` : `/api/GetUsers/${value}`,
     "user",
     value,
     onSuccess,
     onError
-  );
+    );
+
+    console.log({ gha: data })
 
   const postSuccess = (data) => {
     toast.success("User successfully saved");
     setIsLoading(false);
     setshowAddUser(false);
     formik.resetForm();
+    refetch();
   };
   const postError = (err) => {
-    console.log({ err })
-    toast.error(err?.response?.data || "Error saving new user")
+    console.log({ err });
+    toast.error(err?.response?.data || "Error saving new user");
     setIsLoading(false);
+  };
+
+  const PostResendSuccess = () => {
+    setshowAddUser(false);
+
+    toast.success("Invite link sent successfully");
+  };
+  const PostResendError = () => {
+    toast.error("Could not send invite link");
   };
 
   const putSuccess = (data) => {
@@ -114,19 +119,27 @@ const Accounts = () => {
   };
 
   const { mutate, isLoading: isLoad } = useCustomPost(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Account/registrations`,
+    `/api/createUser`,
     "users",
     postSuccess,
     postError
   );
+
+  const { mutate: postResendInvite, isLoading: isLoadResend } = useCustomPost(
+    `/api/SendUserEmail`,
+    "users",
+    PostResendSuccess,
+    PostResendError
+  );
+
   const { mutate: putmutate, isLoading } = useCustomPut(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Account/UpdateUser/${formik.values.userID}`,
+    `/api/UpdateUserDto/${formik.values.userID}`,
     "users",
     putSuccess,
     postError
   );
 
-  // console.log({ postError })
+  console.log({ data });
 
   const handleAddUser = () => {
     let formData = formik.values;
@@ -140,15 +153,11 @@ const Accounts = () => {
         userName: formData.username,
         email: formData.email,
         phone: phone,
-        bTin: userDetails.profile.bTin,
         role: Number(formData.userType),
-        companyId: userDetails.profile.company,
-        businessname: userDetails.profile.companyname,
       };
 
       mutate(postData);
-      return
-
+      return;
     }
     let postData = {
       firstName: formData.fname,
@@ -169,9 +178,10 @@ const Accounts = () => {
 
   const handleEditUser = (user) => {
     setIsEditMode(true);
-    setshowAddUser(true);
+      setshowAddUser(true);
+      setPhone(user?.phoneNumber)
     // console.log(user)
-    let formikData = [user].map((item) => {
+    let formikData = [user]?.map((item) => {
       return {
         userID: item.id,
         fname: item.firstName,
@@ -189,38 +199,21 @@ const Accounts = () => {
 
   const handleInviteLinkResend = () => {
     setIsLoading(true);
-    fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Account/SendUserEmail`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userDetails.access_token}`,
-      },
-      body: JSON.stringify({ Id: formik.values.userID }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        setshowAddUser(false);
-
-        toast.success("Invite link sent successfully");
-      })
-      .catch((err) => {
-        toast.error("Could not send invite link");
-      })
-      .finally(() => {
-        setIsLoading(false)
-
-      });
+    postResendInvite({ Id: formik.values.userID });
   };
 
   const handleUpdateUser = () => {
     setIsLoading(true);
     let formData = formik.values;
+
     let postData = {
       Firstname: formData.fname,
       Lastname: formData.lname,
       Email: formData.email,
       PhoneNumber: formData.cellPhone,
-      UserStatus: userStatus,
+        PhoneNumber: formData.cellPhone,
+        UserName: formData.username,
+        UserStatus: userStatus,
       Role: Number(formData.userType),
     };
     putmutate(postData);
@@ -255,9 +248,7 @@ const Accounts = () => {
   };
 
   const handleSearch = debounce((e) => {
-    fetch(
-      `${process.env.REACT_APP_CLIENT_ROOT}/Account/GetUsersByCompanyTin/${userDetails.profile.bTin}/?filter=${e.target.value}`
-    )
+    fetch(`/api/GetUsers/${user?.jk}`)
       .then((res) => res.json())
       .then((data) => {
         setUsers(data);
@@ -269,7 +260,7 @@ const Accounts = () => {
       refetch();
     }
 
-    return () => { };
+    return () => {};
   }, [value]);
 
   // console.log({ isLoading })
@@ -338,35 +329,37 @@ const Accounts = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {data?.map((user, key) => (
-                      <tr key={key} onClick={() => handleEditUser(user)}>
-                        <td>{user.userName}</td>
+                    {data?.length > 0
+                      ? data?.map((user, key) => (
+                          <tr key={key} onClick={() => handleEditUser(user)}>
+                            <td>{user.userName}</td>
 
-                        <td>{user.role == 1 ? "Admin" : "Default"}</td>
-                        <td>{user.email}</td>
-                        <td>{user.phoneNumber}</td>
-                        <td>
-                          {" "}
-                          <FaCircle
-                            color={user.userStatus ? "green" : "red"}
-                            style={{ marginRight: 20 }}
-                          />
-                          {user.userStatus ? "Active" : "Inactive"}
-                        </td>
+                            <td>{user.role == 1 ? "Admin" : "Default"}</td>
+                            <td>{user.email}</td>
+                            <td>{user.phoneNumber}</td>
+                            <td>
+                              {" "}
+                              <FaCircle
+                                color={user.userStatus ? "green" : "red"}
+                                style={{ marginRight: 20 }}
+                              />
+                              {user.userStatus ? "Active" : "Inactive"}
+                            </td>
 
-                        <td
-                          style={{
-                            textAlign: "right",
-                            width: "10%",
-                            height: 20,
-                            cursor: "pointer",
-                          }}
-                          onClick={() => handleEditUser(user)}
-                        >
-                          <GrEdit />
-                        </td>
-                      </tr>
-                    ))}
+                            <td
+                              style={{
+                                textAlign: "right",
+                                width: "10%",
+                                height: 20,
+                                cursor: "pointer",
+                              }}
+                              onClick={() => handleEditUser(user)}
+                            >
+                              <GrEdit />
+                            </td>
+                          </tr>
+                        ))
+                      : null}
                   </tbody>
                 </Table>
               </CardBody>
@@ -385,7 +378,8 @@ const Accounts = () => {
             handleAddUser={handleAddUser}
             handleUpdateUser={handleUpdateUser}
             handleInviteLinkResend={handleInviteLinkResend}
-            setPhone={setPhone}
+                      setPhone={setPhone}
+                      formattedPhone={phone }
             loading={isLoad}
           />
         )}

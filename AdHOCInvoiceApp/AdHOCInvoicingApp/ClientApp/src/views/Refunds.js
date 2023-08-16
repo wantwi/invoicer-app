@@ -56,7 +56,7 @@ const Refunds = () => {
   const [pdfData, setPdfData] = useState("");
   const [selectedInvoiceNo, setSelectedInvoiceNo] = useState("");
   const [isRefundLoading, setRefundIsLoading] = useState(false);
-
+    const [, setIsReportDownloading] = useState(false);
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -150,10 +150,9 @@ const Refunds = () => {
     setRefundIsLoading(true);
     let base64 = "";
 
-
     try {
       const request = await axios.post(
-        `${process.env.REACT_APP_CLIENT_ROOT}/Reports/GenerateRefundReportAsync?Id=${invoiceNo}`
+          `/api/GenerateRefundReportAsync`, invoiceNo
       );
       if (request) {
         const { data } = request;
@@ -182,7 +181,6 @@ const Refunds = () => {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(base64toBlob(base64));
         link.download = "Invoice Report";
-
       }
     } catch (error) {
       setIsReportDownloading(false);
@@ -192,7 +190,7 @@ const Refunds = () => {
   };
 
   const { data, refetch, isFetching, isLoading } = useCustomPaginationQuery(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Refunds/GetRefundInvoicesByCompanyId/${period}?CompanyId=${userDetails.profile.company}&PageNumber=${pageNumber}&PageSize=${pageSize}`,
+      !value ? `/api/GetRefunds/${period}/${pageNumber}/${pageSize}` : `/api/GetRefundsSearch/${value}`,
     "refunds",
     pageNumber,
     Number(period),
@@ -204,11 +202,12 @@ const Refunds = () => {
       setSummary(data?.summaries || []);
 
       if (data?.invoices?.items?.length === 0) {
-        const msg = !value ?
-          "No Invoice Available For " +
-          dayOfWeekSelRef?.current?.options[
-            dayOfWeekSelRef?.current?.selectedIndex
-          ]?.innerText : "No invoice matched your search: " + value
+        const msg = !value
+          ? "No Invoice Available For " +
+            dayOfWeekSelRef?.current?.options[
+              dayOfWeekSelRef?.current?.selectedIndex
+            ]?.innerText
+          : "No invoice matched your search: " + value;
         toast.info(msg);
         setMessage(msg);
       } else {
@@ -216,13 +215,16 @@ const Refunds = () => {
       }
     },
     (err) => {
-      toast.error(err?.response?.data?.message || err?.response?.data?.Message || "Error loading Refunds")
+      toast.error(
+        err?.response?.data?.message ||
+          err?.response?.data?.Message ||
+          "Error loading Refunds"
+      );
     },
     {
-      filterUrl: `${process.env.REACT_APP_CLIENT_ROOT}/Refunds/GetRefundInvoicesByCompanyId/6?CompanyId=${userDetails.profile.company}&Filter=${value}`,
-      shouldTransform: false
-    },
-
+        filterUrl: `/api/GetRefundsSearch/${value}`,
+      shouldTransform: false,
+    }
   );
 
   const {
@@ -231,7 +233,7 @@ const Refunds = () => {
     isLoading: isInvoiceLoading,
     isFetching: isPageFetching,
   } = useCustomQueryById(
-    `${process.env.REACT_APP_CLIENT_ROOT}/Refunds/GetRefundsById/${selectedRow}`,
+    `/api/GetRefundsById/${selectedRow}`,
     "refund-detail",
     selectedRow,
     (data) => {
@@ -267,23 +269,22 @@ const Refunds = () => {
       setPageNumber(1);
     }
     refetch();
-    return () => { };
+    return () => {};
   }, [period, pageNumber]);
 
   useEffect(() => {
     if (value.length > 1) {
-      refetch()
+      refetch();
     }
-    return () => { }
-  }, [value])
+    return () => {};
+  }, [value]);
 
   useEffect(() => {
     if (selectedRow.length > 0) {
       refetchGetById();
     }
-    return () => { };
+    return () => {};
   }, [selectedRow]);
-
 
   return (
     <>
@@ -303,12 +304,9 @@ const Refunds = () => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-
                     <Form
                       className="navbar-search navbar-search-light form-inline "
-                      onSubmit={(e) => {
-
-                      }}
+                      onSubmit={(e) => {}}
                     >
                       <FormGroup className="mb-0">
                         {" "}
@@ -327,24 +325,23 @@ const Refunds = () => {
                             value={invoiceQuery}
                             onChange={(e) => {
                               if (invoiceQuery?.length > 25) {
-                                setinvoiceQuery(prev => prev.substring(0,16))
-                                setMessage("Your search query is too long")
-                                return
+                                setinvoiceQuery((prev) =>
+                                  prev.substring(0, 16)
+                                );
+                                setMessage("Your search query is too long");
+                                return;
                               }
-                              setinvoiceQuery(e.target.value)
+                              setinvoiceQuery(e.target.value);
                             }}
                             style={{ width: 400 }}
                           />
                           <InputGroupAddon addonType="append">
-                            <InputGroupText
-                            >
-                            </InputGroupText>
+                            <InputGroupText></InputGroupText>
                           </InputGroupAddon>
                         </InputGroup>
                       </FormGroup>
                     </Form>
                   </div>
-
                 </Row>
               </CardHeader>
               <div style={styles.body}>
@@ -357,79 +354,80 @@ const Refunds = () => {
                   pdfData={pdfData}
                 />
               </div>
-              {message && (
-                <p className="text-info text-center" >{message}</p>
-              )}
+              {message && <p className="text-info text-center">{message}</p>}
               <CardFooter className="py-1">
-                {!(isLoading || isInvoiceLoading || isRefundLoading) && pageInfo.totalItems > 0 && (
-                  <nav aria-label="...">
-                    {pageInfo?.pageNumber ? (
-                      <Pagination
-                        className="pagination justify-content-center mb-0"
-                        listClassName="justify-content-center mb-0"
-                      >
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              e.preventDefault();
-                              if (pageInfo.pageNumber > 1) {
-                                if (pageNumber < 1) {
-                                  return;
-                                }
+                {!(isLoading || isInvoiceLoading || isRefundLoading) &&
+                  pageInfo.totalItems > 0 && (
+                    <nav aria-label="...">
+                      {pageInfo?.pageNumber ? (
+                        <Pagination
+                          className="pagination justify-content-center mb-0"
+                          listClassName="justify-content-center mb-0"
+                        >
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (pageInfo.pageNumber > 1) {
+                                  if (pageNumber < 1) {
+                                    return;
+                                  }
 
-                                setPageNumber((prev) => Number(prev) - 1);
-                              } else {
-                                return;
-                              }
-                            }}
-                          >
-                            <i className="fas fa-angle-left" />
-                            <span className="sr-only">Previous</span>
-                          </PaginationLink>
-                        </PaginationItem>
-
-                        <PaginationItem>
-                          <PaginationLink onClick={(e) => setPageNumber(1)}>
-                            1
-                          </PaginationLink>
-                        </PaginationItem>
-
-                        <PaginationItem className="active">
-                          <PaginationLink onClick={(e) => e.preventDefault()}>
-                            {pageInfo.pageNumber}
-                          </PaginationLink>
-                        </PaginationItem>
-
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => setPageNumber(pageInfo.totalPages)}
-                          >
-                            {pageInfo.totalPages}
-                          </PaginationLink>
-                        </PaginationItem>
-
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              if (pageInfo.pageNumber < pageInfo.totalPages) {
-                                if (pageNumber === pageInfo.totalPages) {
-                                  return;
+                                  setPageNumber((prev) => Number(prev) - 1);
                                 } else {
-                                  setPageNumber((prev) => Number(prev) + 1);
+                                  return;
                                 }
-                              } else {
-                                return;
+                              }}
+                            >
+                              <i className="fas fa-angle-left" />
+                              <span className="sr-only">Previous</span>
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink onClick={(e) => setPageNumber(1)}>
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem className="active">
+                            <PaginationLink onClick={(e) => e.preventDefault()}>
+                              {pageInfo.pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) =>
+                                setPageNumber(pageInfo.totalPages)
                               }
-                            }}
-                          >
-                            <i className="fas fa-angle-right" />
-                            <span className="sr-only">Next</span>
-                          </PaginationLink>
-                        </PaginationItem>
-                      </Pagination>
-                    ) : null}
-                  </nav>
-                )}
+                            >
+                              {pageInfo.totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                if (pageInfo.pageNumber < pageInfo.totalPages) {
+                                  if (pageNumber === pageInfo.totalPages) {
+                                    return;
+                                  } else {
+                                    setPageNumber((prev) => Number(prev) + 1);
+                                  }
+                                } else {
+                                  return;
+                                }
+                              }}
+                            >
+                              <i className="fas fa-angle-right" />
+                              <span className="sr-only">Next</span>
+                            </PaginationLink>
+                          </PaginationItem>
+                        </Pagination>
+                      ) : null}
+                    </nav>
+                  )}
               </CardFooter>
             </Card>
           </Col>
