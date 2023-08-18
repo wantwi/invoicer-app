@@ -1,6 +1,6 @@
 {
   "name": "gra-invoicer",
-  "version": "0.0.5",
+  "version": "2.0.0",
   "private": true,
   "dependencies": {
     "@babel/compat-data": "7.19.4",

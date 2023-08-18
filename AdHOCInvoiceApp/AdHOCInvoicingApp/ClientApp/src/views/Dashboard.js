@@ -104,12 +104,11 @@ const Dashboard = () => {
 };
 
 const EmbededDashboard = ({ from, to, companyId }) => {
-    const dashboardUrl = "https://reports.cimsgh.com/bi/site/newsite2/dashboards/d3624c35-3aa3-45a1-bbfc-15efadd916be/Sales/Dashboard?isembed=true&hide_tool=dp&export=true%27&CompanyId=B129E013-19C5-485D-B2B8-6334B68E55E2"
     return (
     <>
       <CardBody>
         <iframe
-                    src={`${dashboardUrl}&CompanyId=${companyId}&FromDate=${from}&ToDate=${to}`}
+                    src={`${process.env.REACT_APP_DASHBOARD_URL}&CompanyId=${companyId}&FromDate=${from}&ToDate=${to}`}
           id="dashboard-frame"
           width="100%"
           height="900px"

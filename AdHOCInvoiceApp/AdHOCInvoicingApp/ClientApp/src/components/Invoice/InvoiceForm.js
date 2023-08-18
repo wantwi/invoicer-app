@@ -68,7 +68,9 @@ function InvoiceForm({ refetch }) {
   const queryClient = useQueryClient();
 
   const axios = useCustomAxios();
-  const { getUser, user, logout } = useAuth();
+    const { getUser, user, logout } = useAuth();
+
+    console.log({axios})
 
   useEffect(async () => {
     await getUser();
@@ -184,7 +186,8 @@ function InvoiceForm({ refetch }) {
   };
 
   const postInvoice = async (postData) => {
-    setLoading(true);
+      setLoading(true);
+      axios.defaults.headers.usr =  user?.preferred_username
     return await axios.post(`/api/PostInvoice`, postData);
   };
 

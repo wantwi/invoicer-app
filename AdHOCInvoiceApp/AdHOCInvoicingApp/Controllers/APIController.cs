@@ -14,6 +14,7 @@ using System.Text.Json.Nodes;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace AdHOCInvoicingApp.Controllers
 {
@@ -142,8 +143,16 @@ namespace AdHOCInvoicingApp.Controllers
             data.companyId =  user.Sub;
             data.usr =  user.CompanyName;
             var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("usr", user.CompanyName);
+            client.DefaultRequestHeaders.Add("usr", $"{user.CompanyName}");
+            
+           
             client.SetBearerToken(await AccessToken());
             string url = $"{EvatAdHOCBaseUrl}v3/Invoices/Sales";
+            var json = JsonConvert.SerializeObject( data);
+
+            //    httpContent.Headers.Add("usr", user.CompanyName);
+
             var response = await client.PostAsJsonAsync(url, data);
             if (response.StatusCode.ToString() == "BadRequest")
             {

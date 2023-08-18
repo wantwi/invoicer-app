@@ -27,6 +27,13 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const queryClient = new QueryClient();
 
+if (process.env.NODE_ENV === 'development') {
+    console.log = () => { }
+    console.error = () => { }
+    console.debug = () => { }
+}
+
+
 ReactDOM.render(
   <BrowserRouter basename={process.env.REACT_APP_BASENAME}>
     <QueryClientProvider client={queryClient}>
