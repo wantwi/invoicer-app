@@ -17,6 +17,7 @@ namespace AdHOCInvoicingApp.model
     public class CreateInvoiceDto
     {
         public string? companyId { get; set; }
+        public string? usr { get; set; }
         public DateTime? date { get; set; }
         public DateTime? dueDate { get; set; }
         public string? remarks { get; set; }
@@ -36,6 +37,7 @@ namespace AdHOCInvoicingApp.model
         public string id { get; set; }
         public string invoiceNumber { get; set; }
         public string? companyId { get; set; }
+        public string? usr { get; set; }
         public string customerTinghcard { get; set; }
         public List<RefundItems>? invoiceItems { get; set; }
     }

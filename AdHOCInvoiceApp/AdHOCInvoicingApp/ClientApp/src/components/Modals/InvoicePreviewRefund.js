@@ -114,14 +114,13 @@ function InvoicePreviewRefund({
     onError: (error) => {
       if (error?.response?.status === 500) {
         toast.error(
-          error?.response?.data?.Message || error?.response?.data?.message
+          error?.response?.data || "Technical error!"
         );
         return;
       }
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data?.message ||
-          error?.response?.data?.Message ||
+        error?.response?.data ||
           "Invoice could not be saved."
       );
     },

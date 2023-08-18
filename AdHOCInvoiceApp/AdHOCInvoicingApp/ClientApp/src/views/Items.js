@@ -81,7 +81,8 @@ const Items = () => {
     "items",
     value,
     (data) => {
-      setIsViewed(true);
+        setIsViewed(true);
+        setitemSelected(false)
       if (data.length > 0) {
         let results = data.map((item) => {
           return {
@@ -131,8 +132,9 @@ const Items = () => {
     setIstaxable(false);
     setIsTaxInclusive(false);
   };
-  const postError = (err) => {
-    setLoading(false);
+    const postError = (err) => {
+        toast.error(err?.response?.Message || "Technical error! Please contact support")
+        setLoading(false);
   };
 
   const putSuccess = (data) => {
@@ -283,7 +285,7 @@ const Items = () => {
       setSearchText("");
     },
     (err) => {
-      toast.error("Could not submit list. Please try again.");
+        toast.error(err?.response?.Message || "Technical error! Please contact support")
       setLoading(false);
     }
   );
@@ -317,7 +319,7 @@ const Items = () => {
     "currency",
     "",
     (data) => {
-      if (data.length > 0) {
+      if (data?.length > 0) {
         setLoading(false);
         let res = data?.map((item) => {
           return {
@@ -510,7 +512,7 @@ const Items = () => {
                             title={item.name}
                             onClick={() => handleEditItem(item)}
                           >
-                            {item.name.substr(0, 20)}
+                            {item?.name?.substr(0, 20)}
                           </td>
                           <td>{item.currencyCode}</td>
 
@@ -639,7 +641,6 @@ const Items = () => {
                           marginLeft: 0,
                           textAlign: "center",
                         }}
-                        disabled={(isViewMode || showBulkListButt) ? true : false}
                       >
                         View Existing Items List
                       </Button>

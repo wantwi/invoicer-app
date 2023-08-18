@@ -194,7 +194,8 @@ const Accounts = () => {
       };
     });
 
-    formik.setValues(formikData[0]);
+      formik.setValues(formikData[0]);
+
   };
 
   const handleInviteLinkResend = () => {

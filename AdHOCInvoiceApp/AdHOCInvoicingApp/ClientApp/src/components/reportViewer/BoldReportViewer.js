@@ -92,9 +92,9 @@ const BoldReportViewer = ({
     <BoldReportViewerComponent
       id="reportviewer-container"
           //reportServerUrl={"/api/GetReportMeta" + reportPath}
-       reportServerUrl={"http://192.168.0.71/Reports_SSRS/"}
+       reportServerUrl={process.env.REACT_APP_REPORTSERVERURL}
       // reportServiceUrl={"http://192.168.0.26/BReport/api/ReportViewer"}
-          reportServiceUrl={"https://psl-app-vm3/EvatApi/api/v1/ReportViewer"}
+          reportServiceUrl={process.env.REACT_APP_REPORTSERVICEURL}
       reportPath={`${REACT_APP_REPORTSERVERPath}${reportPath}`}
       onShowError={onShowError}
       //ajaxBeforeLoad={onAjaxRequest}

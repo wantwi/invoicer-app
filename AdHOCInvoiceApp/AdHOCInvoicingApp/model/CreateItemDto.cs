@@ -42,34 +42,35 @@ namespace AdHOCInvoicingApp.model
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
     public class InvoiceItemPurchase
     {
-        public int unitPrice { get; set; }
-        public int itemDiscount { get; set; }
-        public int quantity { get; set; }
-        public string vatItemId { get; set; }
-        public bool isTaxable { get; set; }
-        public bool isTaxInclusive { get; set; }
-        public string trsmCst { get; set; }
+        public decimal? unitPrice { get; set; }
+        public decimal itemDiscount { get; set; }
+        public int? quantity { get; set; }
+        public string? vatItemId { get; set; }
+        public bool? isTaxable { get; set; }
+        public bool? isTaxInclusive { get; set; }
+        public string? trsmCst { get; set; }
     }
 
     public class PurchaseInvoiceDto
     {
-        public string companyId { get; set; }
-        public DateTime date { get; set; }
-        public string supplierName { get; set; }
-        public string transactionType { get; set; }
-        public string currency { get; set; }
-        public int forexRate { get; set; }
-        public string supplierTinghcard { get; set; }
+        public string? companyId { get; set; }
+        public string? usr { get; set; }
+        public DateTime? date { get; set; }
+        public string? supplierName { get; set; }
+        public string? transactionType { get; set; }
+        public string? currency { get; set; }
+        public decimal forexRate { get; set; }
+        public string? supplierTinghcard { get; set; }
         public string invoiceNo { get; set; }
-        public int amount { get; set; }
-        public string ysdcid { get; set; }
-        public string ysdcrecnum { get; set; }
-        public string ysdcintdata { get; set; }
-        public string ysdcregsig { get; set; }
-        public int ysdcitems { get; set; }
-        public string ysdcmrc { get; set; }
-        public string ysdcmrctim { get; set; }
-        public string ysdctime { get; set; }
+        public decimal amount { get; set; }
+        public string? ysdcid { get; set; }
+        public string? ysdcrecnum { get; set; }
+        public string? ysdcintdata { get; set; }
+        public string? ysdcregsig { get; set; }
+        public int? ysdcitems { get; set; }
+        public string? ysdcmrc { get; set; }
+        public string? ysdcmrctim { get; set; }
+        public string? ysdctime { get; set; }
         public List<InvoiceItemPurchase> invoiceItems { get; set; }
     }
 

@@ -269,7 +269,7 @@ function PurchaseInvoiceForm() {
     (error) => {
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data?.message ||
+        error?.response?.data ||
         "Invoice could not be saved. Please try again"
       );
       setLoading(false);
@@ -283,7 +283,6 @@ function PurchaseInvoiceForm() {
       return
     }
     let postData = {
-      companyId: userDetails.profile.company,
       date: new Date(formData?.date).toISOString(),
       supplierName: formData.customer,
       transactionType: "PURCHASE",
@@ -324,7 +323,7 @@ function PurchaseInvoiceForm() {
   const checkIfRatesExist = async (currency) => {
     let issuedDate = formData.issuedDate;
     const request = await axios.get(
-      `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${userDetails.profile.company}/${issuedDate}?currencyCode=${currency}`
+      `/api/checkIfRatesExist/${currency}/${issuedDate}`
     );
 
     if (request) {

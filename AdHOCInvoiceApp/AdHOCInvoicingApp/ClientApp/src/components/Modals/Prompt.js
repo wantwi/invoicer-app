@@ -46,8 +46,7 @@ export default function Prompt({
     onError: (error) => {
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data?.Message ||
-          error?.response?.data?.message ||
+        error?.response?.data ||
           "Could not refund invoice. Please try again"
       );
       setLoading(false);

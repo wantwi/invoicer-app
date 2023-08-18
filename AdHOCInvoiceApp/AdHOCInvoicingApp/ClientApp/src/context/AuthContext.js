@@ -14,17 +14,17 @@ export const AuthProvider = ({
 
     const fetchUser = async () => {
         const response = await axios.get(`/bff/user`)
+        console.log({ response })
         return response?.data
     }
     const login = () => {
         //window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
-        console.log("green", process.env.REACT_APP_CLIENT_ROOT)
+        console.log("green", process.env.REACT_APP_BASENAME)
         window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
         console.log("Location", process.env.REACT_APP_BASENAME, window.location.href)
     }
 
     const logout = () => {
-        console.log("logout called")
         const logoutUrl = user["bff:logout_url"]
         window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_BASENAME}/auth/login`
        
@@ -38,7 +38,8 @@ export const AuthProvider = ({
         setIsAuthenticated(true)
         setUser(obj)
     }
-    const onErrorResponse = () => {
+    const onErrorResponse = (err) => {
+        console.log({err})
         setIsAuthenticated(false)
         window.location = `${process.env.REACT_APP_BASENAME}/login`
     }

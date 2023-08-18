@@ -23,10 +23,14 @@ import {
 
 const AdminNavbar = (props) => {
   const [profile, setProfile] = React.useState("");
-  const { getUser, user, logout } = useAuth();
+    const { getUser, user, logout } = useAuth();
 
   useEffect(async () => {
-    await getUser();
+      await getUser();
+
+      if (!user) {
+          //login()
+      }
 
     return () => {};
   }, []);

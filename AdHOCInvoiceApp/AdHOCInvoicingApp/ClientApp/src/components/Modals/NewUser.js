@@ -32,7 +32,9 @@ function NewUser({
 
     return () => {
       setIsEditMode(false)
-      formik?.resetForm()
+        formik?.resetForm()
+        setPhone("")
+        setUserStatus(true)
     }
   }, [])
   return (

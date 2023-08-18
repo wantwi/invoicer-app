@@ -216,8 +216,7 @@ const Refunds = () => {
     },
     (err) => {
       toast.error(
-        err?.response?.data?.message ||
-          err?.response?.data?.Message ||
+        err?.response?.data ||
           "Error loading Refunds"
       );
     },

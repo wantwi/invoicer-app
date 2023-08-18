@@ -11,128 +11,28 @@ export default function DeletePromptCustomer({
   setLoading,
   setCustomerList,
   getCustomerList,
-  getSupplierList
+    getSupplierList,
+    resetFormBtn
 }) {
-  let userDetails = JSON.parse(
-    sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  )
-
-  // const getCustomerList = async () => {
-  //   try {
-  //     let results = await fetch(
-  //       `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}`,
-  //       {
-  //         method: 'GET', // or 'PUT'
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Authorization: `Bearer ${userDetails.access_token}`,
-  //         },
-  //       }
-  //     )
-
-  //     if (results.ok) {
-  //       let apiResponse = await results.json()
-  //       // console.log(apiResponse)
-  //       let allCustomers = apiResponse.map((customer) => {
-  //         return {
-  //           customerID: customer.id,
-  //           customerName: customer.name,
-  //           customerTin: customer.tin,
-  //           customerEmail: customer.email,
-  //           customerPhone: customer.telephone,
-  //           customerAddress: customer.address,
-  //           customerCity: customer.city,
-  //           customerDigitalAddress: customer.digitalAddress,
-  //           type: customer.type,
-  //           status: customer.status || 'A',
-  //           hasTrans: customer.hasTrans || false,
-  //         }
-  //       })
-  //       // console.log(allCustomers)
-  //       if (allCustomers.length < 1) {
-  //         setLoading(false)
-  //         toast.warning('You dont have any customers on your list yet')
-  //       } else {
-  //         setLoading(false)
-
-  //         setCustomerList(allCustomers)
-  //       }
-  //     } else {
-  //       if (results.status === 401) {
-  //         toast.error('Unauthorized. Logging you out')
-  //         setTimeout(() => {
-  //           window.location = '/'
-  //         }, 3000)
-  //       }
-  //     }
-  //   } catch (error) {
-  //     setLoading(false)
-  //     console.error(error.message)
-  //   }
-  // }
-
-  // const getSupplierList = async () => {
-  //   try {
-  //     let apiResponse = await (
-  //       await fetch(
-  //         `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetSuppliersByCompanyId/${userDetails.profile.company}`,
-  //         {
-  //           method: 'GET', // or 'PUT'
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             Authorization: `Bearer ${userDetails.access_token}`,
-  //           },
-  //         }
-  //       )
-  //     ).json()
-  //     // console.log(apiResponse)
-  //     let allCustomers = apiResponse.map((customer) => {
-  //       return {
-  //         customerID: customer.id,
-  //         customerName: customer.name,
-  //         customerTin: customer.tin,
-  //         customerEmail: customer.email,
-  //         customerPhone: customer.telephone,
-  //         customerAddress: customer.address,
-  //         customerCity: customer.city,
-  //         customerDigitalAddress: customer.digitalAddress,
-  //         type: customer.type,
-  //         status: customer.status || 'A',
-  //         hasTrans: customer.hasTrans || false,
-  //       }
-  //     })
-  //     // console.log(allCustomers)
-  //     if (allCustomers.length < 1) {
-  //       setLoading(false)
-  //       toast.warning('You dont have any suppliers on your list yet')
-  //       setCustomerList([])
-  //     } else {
-  //       setLoading(false)
-
-  //       setCustomerList(allCustomers)
-  //     }
-  //   } catch (error) {
-  //     setLoading(false)
-  //     console.error(error.message)
-  //   }
-  // }
 
     const { mutate } = useCustomDelete(`/api/DeleteCustomer/${customerToDelete?.customerID}`,"customer",customerToDelete?.customerID,
   (data)=>{
     if (customerToDelete.type === 'CUS') {
-      toast.success('Customer successfully deleted from system')
+        toast.success('Customer successfully deleted from system')
+        resetFormBtn?.current?.onClick()
       getCustomerList()
     } else {
       toast.success('Supplier successfully deleted from system')
       getSupplierList()
     }
-    setShowPrompt(false)
+      setShowPrompt(false)
+      setLoading(false)
   },
   (error)=>{
    
     setShowPrompt(false)
     // console.log({useMutationError: error});
-    toast.error(error?.response?.data?.message ||"Invoice could not be saved. Please try again")
+    toast.error(error?.response?.data ||"Invoice could not be saved. Please try again")
     setLoading(false)
   }
   )
@@ -146,6 +46,7 @@ export default function DeletePromptCustomer({
       )
       setShowPrompt(false)
     } else {
+        setLoading(true)
       mutate()
     //   fetch(
     //     `${process.env.REACT_APP_CLIENT_ROOT}/Customers/${customer.customerID}`,

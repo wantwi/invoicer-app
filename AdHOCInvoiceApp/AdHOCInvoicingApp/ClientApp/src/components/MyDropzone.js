@@ -187,7 +187,6 @@ function MyDropzone({
     );
 
     const renderData = results.map((value) => ({
-      companyId: userDetails.profile.company,
       customerTin: value.GhanaCardTIN,
       customerName: value.Name,
       type: value.TypeOfBusinessPartner.substr(0, 3).toUpperCase() || "CUS",

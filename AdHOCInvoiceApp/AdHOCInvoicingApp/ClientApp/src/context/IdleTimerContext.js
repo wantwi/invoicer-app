@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-//import {
-//    IdleTimerProvider,
-//    PresenceType,
-//    useIdleTimerContext,
-//} from "react-idle-timer";
+import {
+    IdleTimerProvider,
+    PresenceType,
+    useIdleTimerContext,
+} from "react-idle-timer";
 import { toast } from "react-toastify";
-import { logout } from "services/AuthService";
+import { useAuth } from "context/AuthContext";
 import {Modal, Button} from "reactstrap"
 
 
@@ -16,7 +16,8 @@ const promptBeforeIdle = 15000;
 function Prompt(props) {
     const [remaining, setRemaining] = useState(0);
 
-    //const { activate, getRemainingTime } = useIdleTimerContext();
+
+    const { activate, getRemainingTime } = useIdleTimerContext();
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -67,6 +68,7 @@ export const IdleTimerProviderWrapper = () => {
     const [state, setState] = useState("Active");
     const [count, setCount] = useState(0);
     const [open, setOpen] = useState(false);
+    const { logout } = useAuth()
 
 
     const onPrompt = () => {

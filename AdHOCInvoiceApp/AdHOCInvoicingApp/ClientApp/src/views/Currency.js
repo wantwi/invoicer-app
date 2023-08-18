@@ -63,8 +63,9 @@ const CurrencySetupWithReset = ({ reset }) => {
   const { data: currencyList2, refetch: refetchCurrency } = useQuery({
     queryKey: ["currency"],
     queryFn: getCurrency,
-    onSuccess: (data) => {
-      let res = data.map((item) => {
+      onSuccess: (data) => {
+          console.log({data})
+      let res = data?.map((item) => {
         return {
           name: item.name,
           iso: item.code,
@@ -95,8 +96,8 @@ const CurrencySetupWithReset = ({ reset }) => {
     onError: (error) => {
       console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data?.message ||
-          "Invoice could not be saved. Please try again"
+        error?.response?.data ||
+          "Error saving exchange rate"
       );
       setLoading(false);
     },

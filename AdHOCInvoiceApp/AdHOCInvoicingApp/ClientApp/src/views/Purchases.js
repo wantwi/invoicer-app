@@ -165,7 +165,7 @@ const Purchases = () => {
   const getInvoiceById = async (id) => {
     setIsReportDownloading(true);
     const res = await axios.post(
-      `/api/GetPurchaseById/${id}`
+        `/api/GenerateVAPurchaseInvoiceReportAsync`,id
     );
     return res?.data;
 
@@ -190,7 +190,7 @@ const Purchases = () => {
     },
     onError: (res) => {
       setIsReportDownloading(false);
-      toast.error(res?.data?.Message || "Error. Unable to load preview. Please try again");
+      toast.error(res?.data || "Error. Unable to load preview. Please try again");
     },
   });
 

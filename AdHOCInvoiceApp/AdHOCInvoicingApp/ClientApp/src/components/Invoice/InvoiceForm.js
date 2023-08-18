@@ -238,15 +238,14 @@ function InvoiceForm({ refetch }) {
           if (error?.response?.status === 500) {
           console.log("500 error")
         toast.error(
-            error?.response?.data?.Message || error?.response?.data?.message ||  "Serever Error"
+            error?.response?.data ||  "Serever Error"
         );
         setLoading(false);
         return;
       }
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data?.message ||
-          error?.response?.data?.Message ||
+        error?.response?.data ||
           "Invoice could not be saved."
       );
       setLoading(false);

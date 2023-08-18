@@ -13,6 +13,7 @@ using AdHOCInvoicingApp.model;
 using System.Text.Json.Nodes;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace AdHOCInvoicingApp.Controllers
 {
@@ -32,7 +33,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetTransactionSummary(int period, int pageNumber, int pageSize)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetTransactionsSummaryByCompanyId/{period}?CompanyId={user.Sub}&PageNumber{pageNumber}1&PageSize={pageSize}";
+            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetTransactionsSummaryByCompanyId/{period}?CompanyId={user.Sub}&PageNumber={pageNumber}&PageSize={pageSize}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -97,6 +98,19 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
+         [HttpGet("checkIfRatesExist/{currency}/{issuedDate}")]
+        public async Task<IActionResult> checkIfRatesExist(string currency, string issuedDate)
+        {
+            var user = await UserInfo();
+
+            string url = $"{EvatAdHOCBaseUrl}v1/TransactionCurrency/{user.Sub}/{issuedDate}?currencyCode={currency}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
+
          [HttpGet("GetCustomers")]
         public async Task<IActionResult> GetCustomers()
         {
@@ -126,6 +140,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var user = await UserInfo();
             data.companyId =  user.Sub;
+            data.usr =  user.CompanyName;
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
             string url = $"{EvatAdHOCBaseUrl}v3/Invoices/Sales";
@@ -143,7 +158,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -169,7 +185,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -224,7 +241,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError,  error.Message );
             }
         }
 
@@ -255,8 +273,8 @@ namespace AdHOCInvoicingApp.Controllers
             else
             {
                 var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -283,7 +301,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
         
@@ -309,7 +328,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -344,7 +364,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -384,7 +405,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -413,7 +435,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
          [HttpPut("UpdateUserDto/{userId}")]
@@ -439,7 +462,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -505,7 +529,7 @@ namespace AdHOCInvoicingApp.Controllers
 
         [HttpGet("GetCompanySuppliers/{search}")]
         public async Task<IActionResult> GetCompanySuppliersSearch(string search)
-        {
+       {
             var user = await UserInfo();
             string url = $"{EvatAdHOCBaseUrl}v1/Customers/GetSuppliersByCompanyId/{user.Sub}?search={search}";
 
@@ -546,9 +570,12 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
+
+
 
         [HttpPut("UpdateCreateCustomer/{customerId}")]
         public async Task<IActionResult> UpdateCreateCustomer([FromBody] UpdatePartnerDto data, string customerId)
@@ -578,7 +605,8 @@ namespace AdHOCInvoicingApp.Controllers
                 {
                     var result = await response.Content.ReadAsStringAsync();
                     //return new JsonResult(new { result });
-                    throw new Exception(result);
+                    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
                 }
 
             }
@@ -611,7 +639,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -671,7 +700,7 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
         }
 
@@ -682,6 +711,7 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
             data.companyId = user.Sub;
+            data.usr = user.CompanyName;
 
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
@@ -702,7 +732,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -721,7 +752,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetPurchaseSearch(int filter, int pgNumber, int pgSz, string search)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetPurchaseInvoicesByCompanyId/{filter}?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}/?filter={search}";
+            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetPurchaseInvoicesByCompnyId/{user.Sub}/?filter={search}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
 
@@ -736,6 +767,32 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
+        [HttpPost("GenerateVAPurchaseInvoiceReportAsync")]
+        public async Task<IActionResult> GenerateVAPurchaseInvoiceReportAsync([FromBody] string invoiceNo)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v1/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={invoiceNo}";
+            var response = await client.PostAsJsonAsync(url, invoiceNo);
+
+            if (response.StatusCode.ToString() == "BadRequest")
+            {
+                throw new Exception("Error Occurred");
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                var secResult = JsonConvert.DeserializeObject<string>(result);
+                return Ok(secResult);
+            }
+            else
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                //return new JsonResult(new { result });
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
         [HttpPost("CreatePurchaseInvoice")]
         public async Task<IActionResult> CreatePurchaseInvoice([FromBody] PurchaseInvoiceDto data)
         {
@@ -743,10 +800,11 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
             data.companyId = user.Sub;
+            data.usr = user.CompanyName;
 
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers";
+            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/Purchase";
 
             var response = await client.PostAsync(url, content);
 
@@ -763,7 +821,8 @@ namespace AdHOCInvoicingApp.Controllers
             {
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
-                throw new Exception(result);
+                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -785,6 +844,16 @@ namespace AdHOCInvoicingApp.Controllers
             return Ok(user.CompanyName);
 
         }
+
+        [HttpGet("GetMenus")]
+        public async Task<IActionResult> GetMenus()
+        {
+            string url = $"{REACT_APP_USERS_MGT_URL}/Users/menus/00000000-0000-0000-0000-400000000000";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+        
     }
 
 }

@@ -6,6 +6,8 @@
 // import { logout } from "services/AuthService"
 
 import axios from "axios";
+import React from "react";
+import { login } from "services/AuthService";
 
 const CustomAxios = axios.create({
   baseURL: process.env.REACT_APP_BASENAME,
@@ -25,11 +27,17 @@ function useCustomAxios() {
   
     CustomAxios.interceptors.response.use(
         (response) => {
+            console.log("dem call")
             try {
+                console.log({ response })
+                console.log("we are here.....")
                 let temp = JSON.parse(response?.data);
                 response.data = JSON.parse(temp?.data);
+                console.log(response)
                 return response;
             } catch (error) {
+                
+
                 return response;
             }
         }, (error) => {
@@ -42,10 +50,14 @@ function useCustomAxios() {
 
                 if (code === 401 && !originalRequest._retry) {
                     originalRequest._retry = true
-                    const logoutUrl = user["bff:logout_url"]
-                    window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_BASENAME}/auth/login`
+                    login()
+
                 }
 
+            //if (!Boolean(error?.data)) {
+            //console.log("mr error ", error, Boolean(error?.data))
+            //    login()
+            //}
                 return Promise.reject(error)
             }
         }
