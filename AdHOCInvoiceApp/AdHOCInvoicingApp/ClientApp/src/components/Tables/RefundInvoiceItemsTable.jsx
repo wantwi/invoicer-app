@@ -52,7 +52,7 @@ export const RefundInvoiceItemsTable = ({
               {item?.originalQty}
             </td>
             <td style={{ fontSize: "10px", textAlign: "right" }}>
-              {item?.availableQty}
+              {Number(item?.availableQty).toFixed(4)}
             </td>
             {/* <td style={{ fontSize: "10px", textAlign: "right" }}>
               {moneyInTxt(item.unitPrice)}

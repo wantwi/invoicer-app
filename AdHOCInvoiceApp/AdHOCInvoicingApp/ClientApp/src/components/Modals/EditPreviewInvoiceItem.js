@@ -41,7 +41,7 @@ const calcuLateRefundAmount = (params) => {
   // console.log({params})
   let temp = (params.payablePrice / params.quantity) * params.qtyToRefund
   // let temp = (params.quantity / params.qtyToRefund) * params.price;
-  return parseFloat(temp).toFixed(2) || 0;
+  return Number(temp).toFixed(4) || 0;
 };
 
 function EditPreviewInvoiceItem({

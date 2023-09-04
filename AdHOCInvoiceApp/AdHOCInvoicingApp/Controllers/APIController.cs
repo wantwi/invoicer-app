@@ -30,11 +30,11 @@ namespace AdHOCInvoicingApp.Controllers
             _httpClientFactory = httpClientFactory;
         }
         // sales
-        [HttpGet("GetTransactionSummary/{period}/{pageNumber}/{pageSize}")]
-        public async Task<IActionResult> GetTransactionSummary(int period, int pageNumber, int pageSize)
+        [HttpGet("GetTransactionSummary/{period}/{pageNumber}/{pageSize}/{branchId}")]
+        public async Task<IActionResult> GetTransactionSummary(int period, int pageNumber, int pageSize, string branchId)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetTransactionsSummaryByCompanyId/{period}?CompanyId={user.Sub}&PageNumber={pageNumber}&PageSize={pageSize}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetTransactionsSummaryByCompanyId/{period}?CompanyId={user.Sub}&PageNumber={pageNumber}&PageSize={pageSize}&BranchId={branchId}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -43,10 +43,10 @@ namespace AdHOCInvoicingApp.Controllers
 
 
         [HttpGet("GetSalesInvoicesByCompanyId")]
-        public async Task<IActionResult> GetSalesInvoicesByCompanyId(string value)
+        public async Task<IActionResult> GetSalesInvoicesByCompanyId()
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetSalesInvoicesByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetSalesInvoicesByCompanyId/{user.Sub}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -58,7 +58,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetSalesInvoicesByCompanyIdSearch(string search)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetSalesInvoicesByCompanyId/{user.Sub}/?filter={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetSalesInvoicesByCompanyId/{user.Sub}/?filter={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -69,7 +69,7 @@ namespace AdHOCInvoicingApp.Controllers
         [HttpGet("GetSalesInvoicesDetail/{invoiceNo}")]
         public async Task<IActionResult> GetSalesInvoicesDetail(string invoiceNo)
         {
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/{invoiceNo}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/{invoiceNo}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -80,7 +80,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetByInvoiceNoTaxpayerId(string value)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetByInvoiceNoTaxpayerId/{value}/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetByInvoiceNoTaxpayerId/{value}/{user.Sub.ToUpper()}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -91,7 +91,7 @@ namespace AdHOCInvoicingApp.Controllers
          [HttpGet("GetCurrency")]
         public async Task<IActionResult> GetCurrency()
         {
-            string url = $"{EvatAdHOCBaseUrl}v1/Currency";
+            string url = $"{EvatAdHOCBaseUrl}v4/Currency";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -104,7 +104,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var user = await UserInfo();
 
-            string url = $"{EvatAdHOCBaseUrl}v1/TransactionCurrency/{user.Sub}/{issuedDate}?currencyCode={currency}";
+            string url = $"{EvatAdHOCBaseUrl}v4/TransactionCurrency/{user.Sub}/{issuedDate}?currencyCode={currency}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -116,7 +116,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetCustomers()
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers/GetCustomerByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -128,7 +128,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var user = await UserInfo();
 
-            string url = $"{EvatAdHOCBaseUrl}v1/VatItems/GetByCompanyId/{user.Sub}/{currency}";
+            string url = $"{EvatAdHOCBaseUrl}v4/VatItems/GetByCompanyId/{user.Sub}/{currency}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -136,19 +136,19 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-        [HttpPost("PostInvoice")]
-        public async Task<IActionResult> PostInvoice([FromBody] CreateInvoiceDto data)
+        [HttpPost("PostInvoice/{branchId}")]
+        public async Task<IActionResult> PostInvoice([FromBody] CreateInvoiceDto data, string branchId)
         {
             var user = await UserInfo();
             data.companyId =  user.Sub;
-            data.usr =  user.CompanyName;
+            data.branchId = branchId;
             var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Add("usr", user.CompanyName);
-            client.DefaultRequestHeaders.Add("usr", $"{user.CompanyName}");
+            //client.DefaultRequestHeaders.Add("usr", user.CompanyName);
+            //client.DefaultRequestHeaders.Add("usr", $"{user.CompanyName}");
             
            
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v3/Invoices/Sales";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/Sales";
             var json = JsonConvert.SerializeObject( data);
 
             //    httpContent.Headers.Add("usr", user.CompanyName);
@@ -177,7 +177,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Reports/GenerateVATInvoiceReportAsync?Id={invoiceNo}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateVATInvoiceReportAsync?Id={invoiceNo}";
             var response = await client.PostAsJsonAsync(url, invoiceNo);
 
             if (response.StatusCode.ToString() == "BadRequest")
@@ -205,7 +205,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetItemsList()
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/VatItems/GetByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/VatItems/GetByCompanyId/{user.Sub}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -215,7 +215,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> SearchItem(string search)
        {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/VatItems/GetByCompanyId/{user.Sub}?filter={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/VatItems/GetByCompanyId/{user.Sub}?filter={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -234,7 +234,7 @@ namespace AdHOCInvoicingApp.Controllers
             }
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/VatItems";
+            string url = $"{EvatAdHOCBaseUrl}v4/VatItems";
 
             var response = await client.PostAsync(url, content);
             if (response.StatusCode.ToString() == "BadRequest")
@@ -266,7 +266,7 @@ namespace AdHOCInvoicingApp.Controllers
             }
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/TransactionCurrency";
+            string url = $"{EvatAdHOCBaseUrl}v4/TransactionCurrency";
 
             var response = await client.PostAsync(url, content);
 
@@ -293,7 +293,7 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/VatItems/{id}";
+            string url = $"{EvatAdHOCBaseUrl}v4/VatItems/{id}";
 
             var response = await client.PutAsync(url, content);
 
@@ -320,7 +320,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/VatItems/{id}";
+            string url = $"{EvatAdHOCBaseUrl}v4/VatItems/{id}";
 
             var response = await client.DeleteAsync(url);
 
@@ -356,7 +356,7 @@ namespace AdHOCInvoicingApp.Controllers
 
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Account/registrations";
+            string url = $"{EvatAdHOCBaseUrl}v4/Account/registrations";
 
             var response = await client.PostAsync(url, content);
 
@@ -383,7 +383,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var res = await UserInfo();
             
-            string url = $"{EvatAdHOCBaseUrl}v1/Account/GetUsersByCompanyTin/{res.TIN}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Account/GetUsersByCompanyTin/{res.TIN}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -397,7 +397,7 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(JsonConvert.SerializeObject(Id), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Account/SendUserEmail";
+            string url = $"{EvatAdHOCBaseUrl}v4/Account/SendUserEmail";
 
             var response = await client.PostAsync(url, content);
 
@@ -427,7 +427,7 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/ReportViewer/PostReportAction";
+            string url = $"{EvatAdHOCBaseUrl}v4/ReportViewer/PostReportAction";
 
             var response = await client.PostAsync(url, content);
 
@@ -455,7 +455,7 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Account/UpdateUser/{userId}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Account/UpdateUser/{userId}";
 
             var response = await client.PutAsync(url, content);
             if (response.StatusCode.ToString() == "BadRequest")
@@ -481,7 +481,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var res = await UserInfo();
             
-            string url = $"{EvatAdHOCBaseUrl}v1/Account/GetUsersByCompanyTin/{res.TIN}?filter={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Account/GetUsersByCompanyTin/{res.TIN}?filter={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -491,7 +491,7 @@ namespace AdHOCInvoicingApp.Controllers
         [HttpGet("GetReportMeta/{reportType}")]
         public async Task<IActionResult> GetReportMeta( string reportType)
         {
-            string url = $"{EvatAdHOCBaseUrl}v1/ReportMetadata/{reportType}";
+            string url = $"{EvatAdHOCBaseUrl}v4/ReportMetadata/{reportType}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -503,7 +503,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetCompanyCustomers()
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers/GetCustomerByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -515,7 +515,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetCompanyCustomersSearch(string search)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers/GetCustomerByCompanyId/{user.Sub}?search={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}?search={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -527,7 +527,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetCompanySuppliers()
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers/GetSuppliersByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetSuppliersByCompanyId/{user.Sub}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -540,7 +540,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetCompanySuppliersSearch(string search)
        {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers/GetSuppliersByCompanyId/{user.Sub}?search={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetSuppliersByCompanyId/{user.Sub}?search={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -562,7 +562,7 @@ namespace AdHOCInvoicingApp.Controllers
 
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers";
 
             var response = await client.PostAsync(url, content);
 
@@ -595,7 +595,7 @@ namespace AdHOCInvoicingApp.Controllers
 
                 var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
                 client.SetBearerToken(await AccessToken());
-                string url = $"{EvatAdHOCBaseUrl}v1/Customers/{customerId}";
+                string url = $"{EvatAdHOCBaseUrl}v4/Customers/{customerId}";
 
                 var response = await client.PutAsync(url, content);
                 //var result = await response.Content.ReadAsStringAsync();
@@ -631,7 +631,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Customers/{id}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/{id}";
 
             var response = await client.DeleteAsync(url);
 
@@ -655,11 +655,11 @@ namespace AdHOCInvoicingApp.Controllers
 
 
         // refunds
-         [HttpGet("GetRefunds/{filter}/{pgNumber}/{pgSz}")]
-        public async Task<IActionResult> GetRefunds(int filter,  int pgSz ,int pgNumber)
+         [HttpGet("GetRefunds/{filter}/{pgNumber}/{pgSz}/{branchId}")]
+        public async Task<IActionResult> GetRefunds(int filter,  int pgSz ,int pgNumber, string branchId)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Refunds/GetRefundInvoicesByCompanyId/{filter}?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/GetRefundInvoicesByCompanyId/{filter}?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}&BranchId={branchId}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -671,7 +671,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetRefundsSearch(string search)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Refunds/GetRefundInvoicesByCompanyId/6?CompanyId={user.Sub}&Filter={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/GetRefundInvoicesByCompanyId/6?CompanyId={user.Sub}&Filter={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -680,7 +680,7 @@ namespace AdHOCInvoicingApp.Controllers
         [HttpGet("GetRefundsById/{refundId}")]
         public async Task<IActionResult> GetRefundsById(string refundId)
         {
-            string url = $"{EvatAdHOCBaseUrl}v1/Refunds/GetRefundsById/{refundId}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/GetRefundsById/{refundId}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
 
@@ -692,7 +692,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Reports/GenerateRefundReportAsync?Id={id}"; 
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateRefundReportAsync?Id={id}"; 
             var response = await client.PostAsJsonAsync(url, id);
 
             if (response.StatusCode.ToString() == "BadRequest")
@@ -713,18 +713,18 @@ namespace AdHOCInvoicingApp.Controllers
             }
         }
 
-        [HttpPost("PostRefund/{refundType}")]
-        public async Task<IActionResult> PostRefund([FromBody] PartialRefundDto data, string refundType)
+        [HttpPost("PostRefund/{refundType}/{branchId}")]
+        public async Task<IActionResult> PostRefund([FromBody] PartialRefundDto data, string refundType, string branchId)
         {
 
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
             data.companyId = user.Sub;
-            data.usr = user.CompanyName;
+            data.branchId = branchId;
 
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v3/Refunds/{refundType}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/{refundType}";
 
             var response = await client.PostAsync(url, content);
 
@@ -748,11 +748,11 @@ namespace AdHOCInvoicingApp.Controllers
 
 
         // purchase
-         [HttpGet("GetPurchase/{filter}/{pgNumber}/{pgSz}")]
-        public async Task<IActionResult> GetPurchase(int filter, int pgNumber, int pgSz)
+         [HttpGet("GetPurchase/{filter}/{pgNumber}/{pgSz}/{branchId}")]
+        public async Task<IActionResult> GetPurchase(int filter, int pgNumber, int pgSz, string branchId)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetPurchaseInvoicesByCompanyId/{filter}?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetPurchaseInvoicesByCompanyId/{filter}?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}&BranchId={branchId}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
 
@@ -761,7 +761,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetPurchaseSearch(int filter, int pgNumber, int pgSz, string search)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/GetPurchaseInvoicesByCompnyId/{user.Sub}/?filter={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetPurchaseInvoicesByCompnyId/{user.Sub}/?filter={search}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
 
@@ -770,7 +770,7 @@ namespace AdHOCInvoicingApp.Controllers
          [HttpGet("GetPurchaseById/{id}")]
         public async Task<IActionResult> GetPurchaseById(string id)
         {
-            string url = $"{EvatAdHOCBaseUrl}v1/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={id}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={id}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
 
@@ -781,7 +781,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={invoiceNo}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={invoiceNo}";
             var response = await client.PostAsJsonAsync(url, invoiceNo);
 
             if (response.StatusCode.ToString() == "BadRequest")
@@ -802,18 +802,18 @@ namespace AdHOCInvoicingApp.Controllers
             }
         }
 
-        [HttpPost("CreatePurchaseInvoice")]
-        public async Task<IActionResult> CreatePurchaseInvoice([FromBody] PurchaseInvoiceDto data)
+        [HttpPost("CreatePurchaseInvoice/{branchId}")]
+        public async Task<IActionResult> CreatePurchaseInvoice([FromBody] PurchaseInvoiceDto data, string branchId)
         {
 
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
             data.companyId = user.Sub;
-            data.usr = user.CompanyName;
+            data.branchId = branchId;
 
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v1/Invoices/Purchase";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/Purchase";
 
             var response = await client.PostAsync(url, content);
 
@@ -858,6 +858,23 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetMenus()
         {
             string url = $"{REACT_APP_USERS_MGT_URL}/Users/menus/00000000-0000-0000-0000-400000000000";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
+        [HttpGet("GetBranches")]
+        public async Task<IActionResult> GetBranches()
+        {
+            string url = $"{REACT_APP_USERS_MGT_URL}/Users/branch-access";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+        [HttpGet("GetApps")]
+        public async Task<IActionResult> GetApps()
+        {
+            string url = $"{REACT_APP_USERS_MGT_URL}/Users/application";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
 

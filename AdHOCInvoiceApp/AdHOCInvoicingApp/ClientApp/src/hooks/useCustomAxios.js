@@ -8,6 +8,7 @@
 import axios from "axios";
 import React from "react";
 import { login } from "services/AuthService";
+import useAuth from "hooks/useAuth";
 
 const CustomAxios = axios.create({
   baseURL: process.env.REACT_APP_BASENAME,
@@ -24,16 +25,13 @@ const CustomAxios = axios.create({
 });
 
 function useCustomAxios() {
-  
+    const selectedBranch = useAuth()
+
     CustomAxios.interceptors.response.use(
         (response) => {
-            console.log("dem call")
             try {
-                console.log({ response })
-                console.log("we are here.....")
                 let temp = JSON.parse(response?.data);
                 response.data = JSON.parse(temp?.data);
-                console.log(response)
                 return response;
             } catch (error) {
                 
@@ -41,6 +39,7 @@ function useCustomAxios() {
                 return response;
             }
         }, (error) => {
+            console.log({error})
             if (!error.response) {
                 alert('NETWORK ERROR')
             } else {

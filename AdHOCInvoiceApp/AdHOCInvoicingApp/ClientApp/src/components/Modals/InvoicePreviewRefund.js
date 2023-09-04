@@ -68,6 +68,7 @@ function InvoicePreviewRefund({
   const [confirmDisabled, setConfirmDisabled] = useState(false);
   const [invoicesPrePost, setInvoicesPrePost] = useState([]);
   const [amountToRefund, setAmountToRefund] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   let axios = useCustomAxios();
 
   const transformPayload = (data = []) => {
@@ -84,12 +85,18 @@ function InvoicePreviewRefund({
   };
 
   const findInvoice = async (text) => {
-    const request = await axios.get(`/api/GetByInvoiceNoTaxpayerId/${text}`);
+    try {
+      setIsLoading(true);
+      const request = await axios.get(`/api/GetByInvoiceNoTaxpayerId/${text}`);
 
-    return request?.data;
+      return request?.data;
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const { refetch, data, isLoading } = useQuery({
+  const { refetch, data } = useQuery({
     queryKey: ["invoice-preview-refund", invoiceQuery],
     queryFn: () => findInvoice(invoiceQuery),
     enabled: false,
@@ -113,16 +120,11 @@ function InvoicePreviewRefund({
     cacheTime: 0,
     onError: (error) => {
       if (error?.response?.status === 500) {
-        toast.error(
-          error?.response?.data || "Technical error!"
-        );
+        toast.error(error?.response?.data || "Technical error!");
         return;
       }
       // console.log({ useMutationError: error });
-      toast.error(
-        error?.response?.data ||
-          "Invoice could not be saved."
-      );
+      toast.error(error?.response?.data || "Invoice could not be saved.");
     },
   });
 
@@ -247,7 +249,7 @@ function InvoicePreviewRefund({
   return (
     <>
       <ToastContainer />
-
+      {isLoading && <Loader />}
       <Modal
         className="modal-dialog-centered modal-lg refund-modal-wrapper"
         isOpen={show}

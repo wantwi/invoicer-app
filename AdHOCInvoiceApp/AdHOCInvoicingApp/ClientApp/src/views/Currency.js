@@ -11,6 +11,10 @@ import {
   CardFooter,
   Button,
   Table,
+  Pagination,
+  PaginationItem,
+  PaginationLink,
+  Modal,
 } from "reactstrap";
 import UserHeader from "components/Headers/UserHeader";
 import { ToastContainer, toast } from "react-toastify";
@@ -23,6 +27,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { v4 as uuid } from "uuid";
 import useCustomAxios from "hooks/useCustomAxios";
+import { EvatTable } from "components/Tables/EvatTable";
+import { NewRateForm } from "components/NewRate";
+import { FaEdit } from "react-icons/fa";
 
 const init = {
   currencyName: "",
@@ -35,14 +42,25 @@ let userDetails = JSON.parse(
   sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
 );
 const CurrencySetupWithReset = ({ reset }) => {
-  const [currencies, setCurrencies] = useState([]);
   const [exchangeFormData, setExchangeFormData] = useState(init);
-  const [showForm, setShowForm] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showList, setShowList] = useState(false);
   const [currencyList, setCurrencyList] = useState([]);
-    const axios = useCustomAxios();
+  const axios = useCustomAxios();
+  const [pageInfo, setPageInfo] = useState({
+    totalItems: 10,
+    pageNumber: 1,
+    pageSize: 10,
+    totalPages: 5,
+  });
 
+  const [filter, setfilter] = useState({
+    currency: "GHS",
+    period: "CURRENT",
+  });
+
+  const [pageNumber, setPageNumber] = useState(1);
 
   const handleClick = (currency) => {
     setShowList(false);
@@ -54,433 +72,349 @@ const CurrencySetupWithReset = ({ reset }) => {
     }));
   };
 
+  const prepData = [
+    {
+      invoiceNo: "9201921",
+      date: new Date().toLocaleDateString(),
+      rate: 11.3,
+    },
+    {
+      invoiceNo: "9201921",
+      date: new Date().toLocaleDateString(),
+      rate: 8.95,
+    },
+  ];
+
+  const columns = React.useMemo(
+    () =>
+      filter.period == "PAST"
+        ? [
+            {
+              Header: "#",
+              accessor: "invoiceNo",
+              className: " text-left ",
+
+              width: "auto",
+            },
+
+            {
+              Header: "Date Added",
+              accessor: "date",
+              className: " text-left ",
+
+              width: "auto",
+              Cell: ({ cell: { value } }) => (
+                <>{new Date(value).toLocaleDateString("en-GB")}</>
+              ),
+            },
+
+            {
+              Header: () => (
+                <span
+                  align="right"
+                  style={{
+                    float: "right",
+                    display: "inline-block",
+                    width: "100%",
+                    paddingRight: "20px",
+                  }}
+                >
+                  Rate
+                </span>
+              ),
+              accessor: "rate",
+              className: " text-right ",
+              width: "auto",
+            },
+            ,
+          ]
+        : [
+            {
+              Header: "#",
+              accessor: "invoiceNo",
+              className: " text-left ",
+
+              width: 90,
+            },
+
+            {
+              Header: "Date Added",
+              accessor: "date",
+              className: " text-left ",
+
+              width: 140,
+              Cell: ({ cell: { value } }) => (
+                <>{new Date(value).toLocaleDateString("en-GB")}</>
+              ),
+            },
+
+            {
+              Header: () => (
+                <span
+                  align="right"
+                  style={{
+                    float: "right",
+                    display: "inline-block",
+                    width: "100%",
+                    paddingRight: "20px",
+                  }}
+                >
+                  Rate
+                </span>
+              ),
+              accessor: "rate",
+              className: " text-right ",
+              // Cell: ({ cell: { value } }) => <>{moneyInTxt(value)}</>,
+              width: 200,
+            },
+            {
+              Header: () => <div align="center">Action</div>,
+              disableSortBy: true,
+              className: " text-center table-action",
+              Cell: ({ cell }) => {
+                return (
+                  <Button
+                    style={{ padding: "2px 8px" }}
+                    className="badge-success"
+                    onClick={(e) => {
+                      setExchangeFormData(() => ({
+                        newRate: cell?.row?.original?.rate,
+                        date: new Date(cell?.row?.original?.date).toLocaleDateString("en-gb"),
+                        currencyName: "Ghana Cedis",
+                        iso: "GHS",
+                      }));
+                      setShowForm(true);
+                    }}
+                    title="Preview"
+                  >
+                    <FaEdit />
+                  </Button>
+                );
+              },
+              accessor: "something",
+              width: 100,
+            },
+          ],
+    [filter.period]
+  );
+
   const getCurrency = async () => {
+    const request = await axios.get(
+      `/api/GetCurrency/${filter.currency}/${filter.period}`
+    );
+
+    return request.data;
+  };
+
+  const getCurrencies = async () => {
     const request = await axios.get("/api/GetCurrency");
 
     return request.data;
   };
 
-  const { data: currencyList2, refetch: refetchCurrency } = useQuery({
-    queryKey: ["currency"],
+  const { data: currenciesLList = [], isLoading } = useQuery({
+    queryFn: getCurrencies,
+    queryKey: "currencies",
+  });
+
+  const { data: currencies } = useQuery({
+    queryKey: ["currencies", filter.currency, filter.period],
     queryFn: getCurrency,
-      onSuccess: (data) => {
-          console.log({data})
-      let res = data?.map((item) => {
-        return {
-          name: item.name,
-          iso: item.code,
-          homeCurrency: item.homeCurrency,
-          rate: 0,
-        };
-      });
-      setCurrencies(res.filter((item) => item.homeCurrency === false));
+    onSuccess: (data) => {
+      // console.log({ data });
+      // let res = data?.map((item) => {
+      //   return {
+      //     name: item.name,
+      //     iso: item.code,
+      //     homeCurrency: item.homeCurrency,
+      //     rate: 0,
+      //   };
+      // });
+      // setCurrencies(res.filter((item) => item.homeCurrency === false));
     },
+    enabled: Boolean(filter.currency || filter.period),
   });
 
-  const postExRate = async (postData) => {
-    setLoading(true);
-    return await axios.post(
-        `/api/AddExcahngeRate`,
-      postData,
-      
-    );
-  };
-
-  const { mutate } = useMutation({
-    mutationFn: postExRate,
-    onSuccess: () => {
-      toast.success("Exchange Rates Successfully Saved");
-      setLoading(false);
-      setCurrencyList([]);
-    },
-    onError: (error) => {
-      console.log({ useMutationError: error });
-      toast.error(
-        error?.response?.data ||
-          "Error saving exchange rate"
-      );
-      setLoading(false);
-    },
-  });
-
-  const handleAdd = () => {
-    // setShowForm(false)
-    // console.log(exchangeFormData)
-    if (
-      exchangeFormData.newRate == "" ||
-      exchangeFormData.currencyName == "" ||
-      exchangeFormData.date == ""
-    ) {
-      toast.warning(
-        "Please make sure all required information has been filled"
-      );
-    } else {
-      setCurrencyList((prev) => [...prev, exchangeFormData]);
-      setExchangeFormData(init);
-      setShowList(false);
-    }
-  };
-
-    const handleSaveList = () => {
-    let postData = currencyList.map((item) => {
-      return {
-        currencyCode: item.iso,
-        transactionDate: item.date,
-        exchangeRate: item.newRate,
-      };
-    });
-
-    mutate(postData);
-
-    setLoading(true);
-    // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency`, {
-    //   method: 'POST', // or 'PUT'
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer ${userDetails.access_token}`,
-    //   },
-    //   body: JSON.stringify(postData),
-    // })
-    //   .then((response) => {
-    //     if (response.status === 401) {
-    //       toast.warning('Token expired. Logging you out')
-    //     }
-    //     return response.json()
-    //   })
-    //   .then((data) => {
-    //     // console.log(data)
-    //     if (data.failed.length == 0) {
-    //       toast.success('Exchange Rates Successfully Saved')
-    //     } else {
-    //       toast.warning(
-    //         'Exchange rates could not be saved. They may already be in the system'
-    //       )
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     setLoading(false)
-    //     toast.error('Error occured. Please try again.')
-    //   })
-    //   .finally(() => {
-    //     setCurrencyList([])
-    //     setLoading(false)
-    //   })
-  };
-
-  // useEffect(() => {
-  //   getCurrencies()
-
-  //   return () => {}
-  // }, [])
+  console.log({ exchangeFormData });
 
   return (
     <>
       <UserHeader
-        message={"Exchange Rate Setup page. Setup of your currencies here"}
+        message={"Exchange Rate Setup page. Setup your currencies here"}
         pageName="Exchange Rate Setup"
       />
       <ToastContainer />
 
-      {loading ? (
-        <Loader />
-      ) : (
-        <Container className="mt--7" fluid>
-          <Row className="mt-5">
-            <Col className="order-xl-2 mb-5 mb-xl-0" xl="5">
-              <Card className="shadow">
-                <CardHeader className="bg-transparent">
-                  <h3 className="mb-0">Add Exchange Rates</h3>
-                </CardHeader>
-                <CardBody style={{ marginTop: -30 }}>
-                  <Row className="icon-examples"></Row>
-                  <Row>
-                    <Col lg="6">
-                      <FormGroup>
-                        <label
-                          className="form-control-label"
-                          htmlFor="input-username"
-                          onClick={() => setShowList(!showList)}
-                        >
-                          Select Currency{" "}
-                          <code style={{ color: "darkred" }}>*</code>
-                          <i
-                            className={
-                              !showList
-                                ? "fas fa-angle-up"
-                                : "fas fa-angle-down"
-                            }
-                          />
-                        </label>{" "}
-                        {!showList ? (
-                          <Input
-                            className="form-control font-sm"
-                            placeholder="Currency"
-                            type="text"
-                            value={exchangeFormData.currencyName}
-                            onClick={() => setShowList(true)}
-                            onChange={() => console.log("")}
-                          />
-                        ) : (
-                          <Card
-                            style={{
-                              position: "absolute",
-                              width: "96%",
-                              zIndex: "1000",
-                              margin: 0,
-                              maxHeight: "200px",
-                              overflow: "auto",
-                              boxShadow:
-                                "5px 10px 5px 0px rgba(189,189,189,0.75)",
-                            }}
-                          >
-                            {currencies?.map((country, i) => {
-                              return (
-                                <Col
-                                  lg="12"
-                                  md="3"
-                                  key={i}
-                                  onClick={() => handleClick(country)}
-                                >
-                                  <div
-                                    key={i}
-                                    style={{
-                                      padding: "10px",
-                                      borderBottom: "1px solid #e3e3e3",
-                                      alignContent: "center",
-                                      marginTop: 2,
-                                      marginBottom: 3,
-                                      cursor: "pointer",
-                                      height: 29,
-                                      fontSize: 12,
-                                    }}
-                                  >
-                                    <div>
-                                      <img
-                                        alt={country.name}
-                                        src={`http://purecatamphetamine.github.io/country-flag-icons/3x2/${country.iso.substr(
-                                          0,
-                                          2
-                                        )}.svg`}
-                                        style={{ height: 14, marginRight: 5 }}
-                                      />
-
-                                      {country.iso}
-                                    </div>
-                                  </div>
-                                </Col>
-                              );
-                            })}
-                          </Card>
-                        )}
-                      </FormGroup>
-                    </Col>
-                    <Col lg="6">
-                      <FormGroup>
-                        <label
-                          className="form-control-label"
-                          htmlFor="input-username"
-                        >
-                          Currency Code
-                        </label>{" "}
-                        <Input
-                          className="form-control font-sm"
-                          placeholder="Current Rate"
-                          type="text"
-                          defaultValue={exchangeFormData.iso}
-                          disabled
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-
-                  <Row>
-                    <Col lg="6">
-                      <FormGroup>
-                        <label
-                          className="form-control-label"
-                          htmlFor="input-username"
-                        >
-                          Exchange Rate Date
-                        </label>{" "}
-                        <code style={{ color: "darkred" }}>*</code>
-                        <Input
-                          className="form-control font-sm"
-                          placeholder=""
-                          type="date"
-                          value={exchangeFormData.date}
-                          onChange={(e) =>
-                            setExchangeFormData({
-                              ...exchangeFormData,
-                              date: e.target.value,
-                            })
-                          }
-                        />
-                      </FormGroup>
-                    </Col>
-                    <Col lg="6">
-                      <FormGroup>
-                        <label
-                          className="form-control-label"
-                          htmlFor="input-username"
-                        >
-                          Exchange Rate
-                        </label>{" "}
-                        <code style={{ color: "darkred" }}>*</code>
-                        <Input
-                          className="form-control font-sm"
-                          placeholder="Rate"
-                          type="number"
-                          value={exchangeFormData.newRate}
-                          onChange={(e) =>
-                            setExchangeFormData({
-                              ...exchangeFormData,
-                              newRate: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                </CardBody>
-                <CardFooter>
-                  <Row>
-                    <Col
-                      lg="12"
-                      style={{
-                        display: "flex",
-                        flexDirection: "row-reverse",
-                      }}
-                    >
-                      {/* <Button
-                        // hidden
-                        onClick={() => reset(uuid())}
-                        style={{ marginRight: 10 }}
-                        color="danger"
-                        size="sm"
-                      >
-                        Cancel
-                      </Button> */}
-                      <Button size="sm" color="success" onClick={handleAdd}>
-                        Add
-                      </Button>
-                      <Button
-                        style={{ marginRight: 10 }}
-                        onClick={() => {
-                          setExchangeFormData(init);
-                        }}
-                        size="sm"
-                      >
-                        Clear
-                      </Button>
-                    </Col>
-                    <Col lg="6"></Col>
-                  </Row>
-                </CardFooter>
-              </Card>
-            </Col>
-
-            {currencyList.length > 0 ? (
-              <Col className="order-xl-2 mb-5 mb-xl-0" xl="7">
-                <Card className="shadow">
-                  <CardHeader className="bg-transparent">
-                    <h3 className="mb-0"> Exchange Rates</h3>
-                  </CardHeader>
-                  <CardBody style={styles.body}>
-                    <Row className="icon-examples"></Row>
-                    <Row>
-                      <Table
-                        className="align-items-center  table-flush"
-                        responsive
-                      >
-                        <thead className="thead-light">
-                          <tr>
-                            <th
-                              style={{
-                                width: "35%",
-                              }}
-                              scope="col"
-                            >
-                              Curency
-                            </th>
-                            <th scope="col">Code</th>
-                            <th scope="col">Date</th>
-                            <th
-                              style={{
-                                textAlign: "right",
-                                width: "25%",
-                              }}
-                              scope="col"
-                            >
-                              Exchange Rate
-                            </th>
-                            <th
-                              scope="col"
-                              style={{
-                                textAlign: "right",
-                                width: "10%",
-                              }}
-                            >
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {currencyList?.map((item, key) => (
-                            <tr key={key} style={{ cursor: "pointer" }}>
-                              <td>{item.currencyName}</td>
-
-                              <td>{item.iso}</td>
-
-                              <td>{new Date(item.date).toDateString()}</td>
-                              <td style={{ textAlign: "right" }}>
-                                {moneyInTxt(item.newRate)}
-                              </td>
-                              <td
-                                style={{
-                                  textAlign: "right",
-                                  width: "10%",
-                                }}
-                              >
-                                <FcCancel />
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
-                    </Row>
-                  </CardBody>
-                  <CardFooter>
-                    <Row>
-                      <Col
-                        lg="12"
+      <Container className="mt--7" fluid>
+        <Row className="mt-5">
+          <Col className="">
+            <Card className="shadow">
+              <CardHeader className="bg-transparent">
+                <div
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div>
+                      <label htmlFor="currency" className="form-control-label ">
+                        Currency
+                      </label>
+                      <select
+                        className="form-control font-sm"
+                        id="currency"
+                        value={filter.currency}
+                        onChange={(e) =>
+                          setfilter((prev) => ({
+                            ...prev,
+                            currency: e.target.value,
+                          }))
+                        }
                         style={{
-                          display: "flex",
-                          flexDirection: "row-reverse",
+                          height: 29,
+                          padding: "0px 5px",
+                          width: "300px",
                         }}
                       >
-                        <Button color="success" onClick={handleSaveList}>
-                          Save
-                        </Button>
-                        <Button
-                          color="warning"
-                          style={{ marginRight: 10 }}
-                          onClick={() => {
-                            setCurrencyList([]);
-                            setShowForm(false);
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </Col>
-                      <Col lg="6"></Col>
-                    </Row>
-                  </CardFooter>
-                </Card>
-              </Col>
-            ) : null}
-          </Row>
-        </Container>
-      )}
+                        <option value="GHS">GHS</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="YEN">YEN</option>
+                      </select>{" "}
+                    </div>
+                    <div className="ml-2">
+                      <label htmlFor="currency" className="form-control-label ">
+                        Filter by
+                      </label>
+                      <select
+                        className="form-control font-sm"
+                        id="currency"
+                        value={filter.period}
+                        onChange={(e) =>
+                          setfilter((prev) => ({
+                            ...prev,
+                            period: e.target.value,
+                          }))
+                        }
+                        style={{
+                          height: 29,
+                          padding: "0px 5px",
+                          width: "300px",
+                        }}
+                      >
+                        <option value="CURRENT">Current</option>
+                        <option value="PAST">Past</option>
+                      </select>{" "}
+                    </div>
+                  </div>
+                  <Button
+                    color="primary"
+                    onClick={() => setShowForm(true)}
+                    type="button"
+                    // style={{ width: "100%" }}
+                    size="sm"
+                  >
+                    Add Rate
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardBody style={{ marginTop: -30 }}>
+                <EvatTable
+                  isLoading={false}
+                  columns={columns}
+                  data={new Array(15).fill({
+                    invoiceNo: "9201921",
+                    date: new Date().toLocaleDateString(),
+                    rate: 11.3,
+                  })}
+                  // data2={invoices}
+                  // setSelectedRow={setSelectedRow}
+                  // getPrintPDF={getPrintPDF}
+                  // pdfData={pdfData}
+                />
+                {currencies?.length > 0 && (
+                  <Pagination
+                    className="pagination justify-content-center mb-0"
+                    listClassName="justify-content-center mb-0"
+                  >
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (pageInfo.pageNumber > 1) {
+                            if (pageNumber < 1) {
+                              return;
+                            }
+
+                            setPageNumber((prev) => Number(prev) - 1);
+                          } else {
+                            return;
+                          }
+                        }}
+                      >
+                        <i className="fas fa-angle-left" />
+                        <span className="sr-only">Previous</span>
+                      </PaginationLink>
+                    </PaginationItem>
+
+                    <PaginationItem>
+                      <PaginationLink onClick={(e) => setPageNumber(1)}>
+                        1
+                      </PaginationLink>
+                    </PaginationItem>
+
+                    <PaginationItem className="active">
+                      <PaginationLink onClick={(e) => e.preventDefault()}>
+                        {pageInfo.pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={(e) => setPageNumber(pageInfo.totalPages)}
+                      >
+                        {pageInfo.totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+
+                    <PaginationItem>
+                      <PaginationLink
+                        onClick={(e) => {
+                          if (pageInfo.pageNumber < pageInfo.totalPages) {
+                            if (pageNumber === pageInfo.totalPages) {
+                              return;
+                            } else {
+                              setPageNumber((prev) => Number(prev) + 1);
+                            }
+                          } else {
+                            return;
+                          }
+                        }}
+                      >
+                        <i className="fas fa-angle-right" />
+                        <span className="sr-only">Next</span>
+                      </PaginationLink>
+                    </PaginationItem>
+                  </Pagination>
+                )}
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+        {showForm && (
+          <NewRateForm
+            rate={exchangeFormData}
+            currencies={currenciesLList}
+            close={() => {
+              setShowForm(false);
+              setExchangeFormData(init);
+            }}
+          />
+        )}
+      </Container>
     </>
   );
 };

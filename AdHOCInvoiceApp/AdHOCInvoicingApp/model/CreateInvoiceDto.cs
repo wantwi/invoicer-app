@@ -10,14 +10,15 @@ namespace AdHOCInvoicingApp.model
         public decimal? unitPrice { get; set; }
         public decimal? itemDiscount { get; set; }
         public string? taxCode { get; set; }
-        public int? quantity { get; set; }
+        public decimal? quantity { get; set; }
         public string? vatItemId { get; set; }
     }
 
     public class CreateInvoiceDto
     {
         public string? companyId { get; set; }
-        public string? usr { get; set; }
+        public string? nameOfUser { get; set; }
+        public string? branchId { get; set; }
         public DateTime? date { get; set; }
         public DateTime? dueDate { get; set; }
         public string? remarks { get; set; }
@@ -37,14 +38,15 @@ namespace AdHOCInvoicingApp.model
         public string id { get; set; }
         public string invoiceNumber { get; set; }
         public string? companyId { get; set; }
-        public string? usr { get; set; }
+        public string? nameOfUser { get; set; }
+        public string? branchId { get; set; }
         public string customerTinghcard { get; set; }
         public List<RefundItems>? invoiceItems { get; set; }
     }
 
     public class RefundItems
     {
-        public Guid vatItemId { get; set; }
+        public string vatItemId { get; set; }
         public decimal refundAmount { get; set; }  
         public int refundQuantity { get; set; }  
     }

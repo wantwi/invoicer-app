@@ -20,6 +20,7 @@ import { useLayoutEffect, useState } from "react";
 import { NavLink as NavLinkRRD, Link } from "react-router-dom";
 // nodejs library to set properties for components
 import { PropTypes } from "prop-types";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 // reactstrap components
 import {
@@ -50,8 +51,10 @@ import {
   Container,
   Row,
   Col,
+  NavbarToggler,
 } from "reactstrap";
 import { AppVersion } from "components/Footers/Footer";
+import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
 
 var ps;
 
@@ -75,6 +78,8 @@ const Sidebar = (props) => {
   //   sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
   // )
 
+  console.log(props.routes);
+
   useLayoutEffect(() => {
     const user = sessionStorage.getItem(process.env.REACT_APP_OIDC_USER);
     const userOBJ = JSON.parse(user);
@@ -82,42 +87,274 @@ const Sidebar = (props) => {
     // setRole((prev) => userOBJ.profile.role)
   }, []);
   // creates the links that appear in the left menu / Sidebar
-  const createLinks = (routes) => {
-    //remove user management menu item if not admin
-    if (role == "0") {
-      routes.splice(6, 1);
-      return routes.map((prop, key) => {
-        return (
-          <NavItem key={key}>
-            <NavLink
-              to={prop.layout + prop.path}
-              tag={NavLinkRRD}
-              onClick={closeCollapse}
-              activeClassName="active"
-            >
-              <i className={prop.icon} />
-              {prop.name}
-            </NavLink>
-          </NavItem>
-        );
-      });
-    } else {
-      return routes.map((prop, key) => {
-        return (
-          <NavItem key={key}>
-            <NavLink
-              to={prop.layout + prop.path}
-              tag={NavLinkRRD}
-              onClick={closeCollapse}
-              activeClassName="active"
-            >
-              <i className={prop.icon} />
-              {prop.name}
-            </NavLink>
-          </NavItem>
-        );
-      });
+
+  const layout = "/admin";
+
+  const MenuItem = ({
+    name = "Menu",
+    items = [],
+    children,
+    path = "",
+    sub = "",
+    open = false,
+    iconPath=""
+  }) => {
+    const [isOpen, setIsOpen] = useState(open);
+    const [isActive, setIsActive] = useState(false);
+    const location = useLocation();
+
+    useLayoutEffect(() => {
+      let temp = location.pathname;
+      if (temp == "/admin" + path) {
+        setIsActive(true)
+        setIsOpen(true)
+      } else {
+        setIsActive(false)
+        // setIsOpen(false)
+
+      }
+      
+
+      return () => {};
+    }, [location]);
+
+    const toggle = () => setIsOpen(!isOpen);
+
+    console.log({ items });
+
+    if (children === undefined) {
+      return (
+        <>
+          <div className="py-2 ">
+            <Link to={layout + sub + path}>
+              <span
+                className={isActive ? "isActive "+iconPath : "isPending "+iconPath}
+                onClick={toggle}
+                style={{ marginBottom: "1rem" }}
+              >
+                <span className="pl-1" style={{display:"inline-block"}}>
+
+                {name}
+                </span>
+              </span>
+            </Link>
+          </div>
+        </>
+      );
     }
+    return (
+      <div className="py-2 ">
+        <span
+          // color="primary"
+          onClick={toggle}
+          style={{ marginBottom: "1rem" }}
+        >
+          {name}
+          {isOpen ? <FaChevronDown /> : <FaChevronUp />}
+        </span>
+        <Collapse isOpen={isOpen}>
+          {items?.map((prop, key) => (
+            <NavItem key={key}>
+              <NavLink
+                to={layout + sub + items[key]?.navicationPath}
+                tag={NavLinkRRD}
+                onClick={closeCollapse}
+                activeStyle={{ color: "red" }}
+                // activeClassName="active"
+              >
+                <i className={items[key]?.icon} />
+                {prop.name}
+              </NavLink>
+            </NavItem>
+          ))}
+          <div
+            className="d-flex"
+            style={{ flexDirection: "column", marginLeft: "10px" }}
+          >
+            {children}
+          </div>
+        </Collapse>
+      </div>
+    );
+  };
+
+  const MenuLayout = ({ routes = [] }) => {
+    console.log({ routes });
+    const transactionsIdx = routes.findIndex(
+      (item) => item.name == "Transactions"
+    );
+    const setupIdx = routes.findIndex((item) => item.name == "Setup");
+    const DashboardIdx = routes.findIndex((item) => item.name == "Dashboard");
+    const ReportsIdx = routes.findIndex((item) => item.name == "Reports");
+    let cancelIdx = -1;
+
+    if (transactionsIdx != -1) {
+      if (routes[transactionsIdx].menus[0] != undefined) cancelIdx = 0;
+    }
+
+    console.log({
+      setupIdx,
+      DashboardIdx,
+      ReportsIdx,
+      cancelIdx,
+      transactionsIdx,
+    });
+
+    const handleComponentFetchAndFilter = (routes, allroutes) => {
+      const menus = routes.map((resl) => resl?.navicationPath);
+
+      // .charAt(0).toUpperCase()
+
+      console.log({ po: menus });
+
+      const usemenus = allroutes.filter((route) => menus.includes(route.path));
+
+      console.log({ usemenus });
+
+      return usemenus;
+    };
+
+    console.log(
+      "test",
+      routes[transactionsIdx]?.menus[cancelIdx],
+      routes[transactionsIdx]
+    );
+
+    return (
+      <div style={{ paddingLeft: "30px" }} className="pdl-3 mt-4">
+        {DashboardIdx !== -1 && (
+          <MenuItem
+            path={routes[DashboardIdx]?.navicationPath}
+            iconPath={routes[DashboardIdx]?.iconPath}
+            items={[]}
+            name="Dashboard"
+          />
+        )}
+        {transactionsIdx !== -1 && (
+          <MenuItem items={[]} open={true} name="Transactions">
+            <MenuItem
+              path={routes[transactionsIdx].menus[4]?.navicationPath}
+              iconPath={routes[transactionsIdx].menus[4]?.iconPath}
+              name="Sales"
+            />
+            <MenuItem
+              path={routes[transactionsIdx].menus[1]?.navicationPath}
+              iconPath={routes[transactionsIdx].menus[1]?.iconPath}
+              name="Purchase"
+            />
+            <MenuItem
+              path={routes[transactionsIdx].menus[2]?.navicationPath}
+              iconPath={routes[transactionsIdx].menus[2]?.iconPath}
+              name="Refund"
+            />
+            <MenuItem
+              path={routes[transactionsIdx].menus[3]?.navicationPath}
+              iconPath={routes[transactionsIdx].menus[3]?.iconPath}
+              name="Purchase Return"
+            />
+
+            {cancelIdx != -1 && (
+              <MenuItem items={[]} name="Cancelation">
+                <MenuItem
+                  items={[routes[transactionsIdx][3]?.menus]}
+                  name="Purchase Return"
+                  path={
+                    routes[transactionsIdx]?.menus[cancelIdx]?.menus[0]
+                      ?.navicationPath
+                  }
+                  iconPath={
+                    routes[transactionsIdx]?.menus[cancelIdx]?.menus[0]
+                      ?.iconPath
+                  }
+                />
+                <MenuItem
+                  path={
+                    routes[transactionsIdx].menus[cancelIdx]?.menus[1]
+                      ?.navicationPath
+                  }
+                  iconPath={
+                    routes[transactionsIdx].menus[cancelIdx]?.menus[1]
+                      ?.iconPath
+                  }
+                  items={[]}
+                  name="Refund"
+                />
+              </MenuItem>
+            )}
+          </MenuItem>
+        )}
+
+        {setupIdx !== -1 && (
+          <MenuItem open={true} items={[]} name="Setups">
+            <MenuItem
+              items={[]}
+              name="Item"
+              path={routes[setupIdx]?.menus[1]?.navicationPath}
+              iconPath={routes[setupIdx]?.menus[1]?.iconPath}
+            />
+            <MenuItem
+              items={[]}
+              name="Business Partner"
+              path={routes[setupIdx]?.menus[2]?.navicationPath}
+              iconPath={routes[setupIdx]?.menus[2]?.iconPath}
+            />
+            <MenuItem
+              items={[]}
+              name="Exchange Rate"
+              path={routes[setupIdx]?.menus[0]?.navicationPath}
+              iconPath={routes[setupIdx]?.menus[0]?.iconPath}
+            />
+          </MenuItem>
+        )}
+        {ReportsIdx !== -1 && (
+          <MenuItem
+            items={[routes[ReportsIdx]]}
+            name="Reports"
+            path={routes[ReportsIdx]?.navicationPath}
+            iconPath={routes[ReportsIdx]?.iconPath}
+          />
+        )}
+      </div>
+    );
+  };
+  const createLinks = (routes) => {
+    console.log({ toti: routes });
+    // transactions: [],
+    // setups: [],
+    // report: [],
+    //   dashboard: [],
+
+    return routes.map((prop, key) => {
+      if (prop.menus?.length) {
+        return prop.menus.map((prop, key) => (
+          <NavItem key={key}>
+            <NavLink
+              to={layout + prop.navicationPath}
+              tag={NavLinkRRD}
+              onClick={closeCollapse}
+              activeClassName="active"
+            >
+              <i className={prop.icon} />
+              {prop.name}
+            </NavLink>
+          </NavItem>
+        ));
+      } else {
+        return (
+          <NavItem key={key}>
+            <NavLink
+              to={layout + prop.navicationPath}
+              tag={NavLinkRRD}
+              onClick={closeCollapse}
+              activeClassName="active"
+            >
+              <i className={prop.icon} />
+              {prop.name + "Hello"}
+            </NavLink>
+          </NavItem>
+        );
+      }
+    });
   };
 
   const { bgColor, routes, logo } = props;
@@ -271,8 +508,9 @@ const Sidebar = (props) => {
             </InputGroup>
           </Form>
           {/* Navigation */}
-          <Nav navbar style={{ marginTop: -30 }}>
-            {createLinks(routes)}
+          <Nav navbar style={{ marginTop: -30 }} className="sideBar">
+            {/* {createLinks(routes)} */}
+            <MenuLayout routes={routes} />
           </Nav>
 
           {/* Divider */}

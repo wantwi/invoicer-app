@@ -27,6 +27,7 @@ import { useCustomQueryById } from "hooks/useCustomQueryById";
 import useCustomAxios from "hooks/useCustomAxios";
 import { EvatTable } from "components/Tables/EvatTable";
 import PrintPreview from "components/Modals/PrintPreview";
+import useAuth from "hooks/useAuth";
 
 const Refunds = () => {
   const [pageNumber, setPageNumber] = useState(1);
@@ -56,11 +57,8 @@ const Refunds = () => {
   const [pdfData, setPdfData] = useState("");
   const [selectedInvoiceNo, setSelectedInvoiceNo] = useState("");
   const [isRefundLoading, setRefundIsLoading] = useState(false);
-    const [, setIsReportDownloading] = useState(false);
-
-  let userDetails = JSON.parse(
-    sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-  );
+  const [, setIsReportDownloading] = useState(false);
+  const { selectedBranch } = useAuth();
 
   const columns = React.useMemo(
     () => [
@@ -69,14 +67,14 @@ const Refunds = () => {
         accessor: "invoiceNo",
         className: " text-left ",
 
-        width: 180,
+        width: 190,
       },
       {
         Header: "Refund #",
         accessor: "refundNo",
         className: " text-left ",
 
-        width: 180,
+        width: 190,
       },
       {
         Header: "Refund Date",
@@ -152,7 +150,8 @@ const Refunds = () => {
 
     try {
       const request = await axios.post(
-          `/api/GenerateRefundReportAsync`, invoiceNo
+        `/api/GenerateRefundReportAsync`,
+        invoiceNo
       );
       if (request) {
         const { data } = request;
@@ -190,7 +189,9 @@ const Refunds = () => {
   };
 
   const { data, refetch, isFetching, isLoading } = useCustomPaginationQuery(
-      !value ? `/api/GetRefunds/${period}/${pageNumber}/${pageSize}` : `/api/GetRefundsSearch/${value}`,
+    !value
+      ? `/api/GetRefunds/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`
+      : `/api/GetRefundsSearch/${value}`,
     "refunds",
     pageNumber,
     Number(period),
@@ -215,13 +216,10 @@ const Refunds = () => {
       }
     },
     (err) => {
-      toast.error(
-        err?.response?.data ||
-          "Error loading Refunds"
-      );
+      toast.error(err?.response?.data || "Error loading Refunds");
     },
     {
-        filterUrl: `/api/GetRefundsSearch/${value}`,
+      filterUrl: `/api/GetRefundsSearch/${value}`,
       shouldTransform: false,
     }
   );
@@ -348,15 +346,16 @@ const Refunds = () => {
                   isLoading={isLoading || isInvoiceLoading || isRefundLoading}
                   columns={columns}
                   data={refunds}
+                  sortKey={"date"}
                   setSelectedRow={() => null}
                   getPrintPDF={() => null}
                   pdfData={pdfData}
+                  message={message}
                 />
               </div>
-              {message && <p className="text-info text-center">{message}</p>}
               <CardFooter className="py-1">
                 {!(isLoading || isInvoiceLoading || isRefundLoading) &&
-                  pageInfo.totalItems > 0 && (
+                  refunds?.length > 0 && (
                     <nav aria-label="...">
                       {pageInfo?.pageNumber ? (
                         <Pagination
@@ -450,8 +449,8 @@ export default Refunds;
 const styles = {
   body: {
     marginTop: -10,
-    height: 420,
-    maxHeight: 420,
+    // height: 420,
+    // maxHeight: 420,
     overflow: "auto",
     cursor: "pointer",
   },

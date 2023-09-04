@@ -22,7 +22,7 @@ import UserHeader from "components/Headers/UserHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "components/Modals/Loader";
-import excelFile from "../assets/GRA_INVOICER_ITEMS_TEMPLATE.xlsx"
+import excelFile from "../assets/GRA_INVOICER_ITEMS_TEMPLATE.xlsx";
 import ItemsUploadExcel from "components/Modals/ItemsUploadExcel";
 import { moneyInTxt } from "components/Invoice/InvoicePreview";
 import { GrEdit, GrClose } from "react-icons/gr";
@@ -35,10 +35,11 @@ import { useCustomPost } from "hooks/useCustomPost";
 import { useDebounce } from "use-debounce";
 import { useCustomPut } from "hooks/useCustomPut";
 import useAuth from "hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Items = () => {
   const { getUser, user, logout } = useAuth();
-
+  const queryClient = useQueryClient();
   useEffect(async () => {
     await getUser();
 
@@ -75,14 +76,18 @@ const Items = () => {
   const [value] = useDebounce(searchText, 500);
   const [isViewed, setIsViewed] = useState(false);
 
-    const { refetch: getItemsList, isLoading, isFetching } = useCustomQuery(
-      //if search value is defined the url is different
-      !value ?`/api/GetItemsList`:`/api/GetItemsList/${value}`,
+  const {
+    refetch: getItemsList,
+    isLoading,
+    isFetching,
+  } = useCustomQuery(
+    //if search value is defined the url is different
+    !value ? `/api/GetItemsList` : `/api/GetItemsList/${value}`,
     "items",
     value,
     (data) => {
-        setIsViewed(true);
-        setitemSelected(false)
+      setIsViewed(true);
+      setitemSelected(false);
       if (data.length > 0) {
         let results = data.map((item) => {
           return {
@@ -132,16 +137,18 @@ const Items = () => {
     setIstaxable(false);
     setIsTaxInclusive(false);
   };
-    const postError = (err) => {
-        toast.error(err?.response?.Message || "Technical error! Please contact support")
-        setLoading(false);
+  const postError = (err) => {
+    toast.error(
+      err?.response?.Message || "Technical error! Please contact support"
+    );
+    setLoading(false);
   };
 
   const putSuccess = (data) => {
     toast.success("Successfully Updated");
     setLoading(false);
-      setSearchText(formData?.productName);
-      getItemsList()
+    setSearchText(formData?.productName);
+    getItemsList();
     setFormData({
       id: "",
       productName: "",
@@ -157,7 +164,7 @@ const Items = () => {
     setIsTaxInclusive(false);
   };
 
-    const { mutate, isLoading:isPostLoading } = useCustomPost(
+  const { mutate, isLoading: isPostLoading } = useCustomPost(
     `/api/CreateItem`,
     "items",
     postSuccess,
@@ -202,29 +209,28 @@ const Items = () => {
           // hasTourismLevy: item.hasTourismLevy,
         };
       });
-      
 
-        setLoading(true);
+      setLoading(true);
       mutate(postData);
     }
   };
 
-    const updateItem = (item) => {
-        let postData = {
-            id: item.id,
-            name: item.productName,
-            status: status ? "A" : "I",
-            description: item.description,
-            taxable: istaxable,
-            code: item.code,
-            taxRate: item.taxRate,
-            price: item.price,
-            currencyCode: item.currencyCode,
-            isTaxInclusive: isTaxInclusive,
-            // hasTourismLevy: hasTourismLevy,
-            otherLevies: otherLevies,
-        };
-        console.log({postData}, otherLevies, item);
+  const updateItem = (item) => {
+    let postData = {
+      id: item.id,
+      name: item.productName,
+      status: status ? "A" : "I",
+      description: item.description,
+      taxable: istaxable,
+      code: item.code,
+      taxRate: item.taxRate,
+      price: item.price,
+      currencyCode: item.currencyCode,
+      isTaxInclusive: isTaxInclusive,
+      // hasTourismLevy: hasTourismLevy,
+      otherLevies: otherLevies,
+    };
+    console.log({ postData }, otherLevies, item);
     // return
     putmutate(postData);
   };
@@ -233,7 +239,7 @@ const Items = () => {
     itemSelected ? updateItem(formData) : saveItem(formData);
   };
 
-    const handleEditItem = (item) => {
+  const handleEditItem = (item) => {
     setIstaxable(item.istaxable);
     setHasTourismLevy(item.hasTourismLevy);
     setIsTaxInclusive(item.isTaxInclusive);
@@ -273,19 +279,21 @@ const Items = () => {
     }
   };
 
-    const { mutate: bultData, isLoading:isPutLoading } = useCustomPost(
-      `/api/CreateItem`,
-      "items",
+  const { mutate: bultData, isLoading: isPutLoading } = useCustomPost(
+    `/api/CreateItem`,
+    "items",
     () => {
       setLoading(false);
-        toast.success("Items List successfully Added");
-        setItemsList([]);
-        setshowBulkListButt(false)
-        getItemsList()
+      toast.success("Items List successfully Added");
+      setItemsList([]);
+      setshowBulkListButt(false);
+      getItemsList();
       setSearchText("");
     },
     (err) => {
-        toast.error(err?.response?.Message || "Technical error! Please contact support")
+      toast.error(
+        err?.response?.Message || "Technical error! Please contact support"
+      );
       setLoading(false);
     }
   );
@@ -307,7 +315,6 @@ const Items = () => {
         isTaxInclusive: item.isTaxInclusive,
         currencyCode: item.currencyCode,
         otherLevies: item.otherLevies,
-
       };
     });
 
@@ -357,8 +364,8 @@ const Items = () => {
       <UserHeader
         message={"This is your products setup page. Manage your products here"}
         pageName="Item Setup"
-          />
-          {( isPostLoading || isPutLoading) && <Loader />}
+      />
+      {(isPostLoading || isPutLoading) && <Loader />}
 
       <ToastContainer />
       <Container className="mt--7" fluid>
@@ -732,6 +739,12 @@ const Items = () => {
                                 price: e.target.value,
                               })
                             }
+                            onBlur={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                price: Number(formData?.price).toFixed(4),
+                              }))
+                            }
                           />
                         </FormGroup>
                       </Col>
@@ -764,6 +777,11 @@ const Items = () => {
                             className="form-control-label"
                             htmlFor="input-username"
                             onClick={() => setShowList(!showList)}
+                            onHover={() => {
+                              if (!currencies?.length) {
+                                queryClient.invalidateQueries("currency");
+                              }
+                            }}
                           >
                             Select Currency{" "}
                             <i
@@ -1027,15 +1045,15 @@ const Items = () => {
       />
 
       <DeletePrompt
-              message={`Are you sure you want to proceed with deleting the item "${itemToDelete?.name}"?`}
-              showPrompt={showPrompt}
-              setShowPrompt={setShowPrompt}
-              itemToDelete={itemToDelete}
-              setItemsList={setItemsList}
-              setLoading={setLoading}
-              setSearchText={setSearchText}
-              value={value}
-              refetch={getItemsList}
+        message={`Are you sure you want to proceed with deleting the item "${itemToDelete?.name}"?`}
+        showPrompt={showPrompt}
+        setShowPrompt={setShowPrompt}
+        itemToDelete={itemToDelete}
+        setItemsList={setItemsList}
+        setLoading={setLoading}
+        setSearchText={setSearchText}
+        value={value}
+        refetch={getItemsList}
       />
     </>
   );

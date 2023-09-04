@@ -25,11 +25,14 @@ import { useCustomQuery } from "hooks/useCustomQuery";
 import { useCustomPost } from "hooks/useCustomPost";
 import { useQueryClient } from "@tanstack/react-query";
 import useCustomAxios from "hooks/useCustomAxios";
+import useMultiFetchAllSettled from "hooks/useMultiFetchAllSettled";
+import useAuth from "hooks/useAuth";
 import DatePicker from "react-datepicker"
 
 function PurchaseInvoiceForm() {
   const queryClient = useQueryClient();
   const axios = useCustomAxios();
+    const { selectedBranch, user } = useAuth();
 
   const { invoices, setInvoices } = useContext(PurchaseContext);
   const {
@@ -256,7 +259,7 @@ function PurchaseInvoiceForm() {
   };
 
   const { mutate } = useCustomPost(
-    `/api/CreatePurchaseInvoice`,
+      `/api/CreatePurchaseInvoice/${selectedBranch?.code}`,
     "purchase-invoices",
     () => {
       toast.success("Invoice successfully saved");
@@ -285,12 +288,14 @@ function PurchaseInvoiceForm() {
     let postData = {
       date: new Date(formData?.date).toISOString(),
       supplierName: formData.customer,
+      nameOfUser: user?.name,
+
       transactionType: "PURCHASE",
       currency: formData.currency,
       forexRate: forex,
       supplierTinghcard: formData.identity,
       invoiceNo: formData.invoiceNumber,
-
+        nameOfUser: user?.name,
       amount: gridData.reduce((total, item) => total + item.totalPayable, 0),
       ysdcid: "",
       ysdcrecnum: formData.recNum,
@@ -351,24 +356,71 @@ function PurchaseInvoiceForm() {
     } else {
       setExchangeRate("");
     }
-  };
+    };
 
-  // useEffect(() => {
-  //   handleCustomerList()
-  //   // getCurrencies()
+    const requstCallback = (response) => {
+        const productResponse = response[2];
+        const currencyResponse = response[1];
+        const suppliersResponse = response[0];
 
-  //   return () => {
-  //     //cleanup
-  //   }
-  // }, [invoices])
+        if (productResponse?.status === "fulfilled") {
+            console.log({ requstCallback1: productResponse?.value.data });
+            setProductsList(productResponse?.value.data);
+        }
+        if (currencyResponse?.status === "fulfilled") {
+            console.log({ requstCallback2: currencyResponse?.value.data });
+
+            if (currencyResponse?.value.data.length > 0) {
+                setCurrencies(currencyResponse?.value.data);
+            } else {
+                setCurrencies(currenciesInit);
+            }
+        }
+        if (suppliersResponse?.status === "fulfilled") {
+            console.log({ requstCallback3: customerResponse?.value.data });
+            let filteredCustomers = customerResponse?.value.data.filter(
+                (customer) => customer.status === "A"
+            );
+            setCustomers(filteredCustomers);
+            setCashCustomerTin(
+                customerResponse?.value.data.find(
+                    (cust) => cust.name == "cash customer"
+                )?.tin
+            );
+        }
+    };
+
+    const {
+        data,
+        error,
+        isLoading: multifLoading,
+        setUrls,
+    } = useMultiFetchAllSettled(
+        [
+            `/api/GetCompanySuppliers`,
+            "/api/GetCurrency",
+            `/api/GetProductList/${currency}`,
+        ],
+        requstCallback
+    );
 
   useEffect(() => {
     // console.log('Currency', currency)
-    setFormData((prev) => ({ ...prev, currency: currency }));
+      setFormData((prev) => ({ ...prev, currency: currency }));
+      setUrls([
+          `/api/GetCompanySuppliers`,
+          "/api/GetCurrency",
+          `/api/GetProductList/${currency}`,
+      ])
     if (currency !== "") {
       // getProducts()
     }
   }, [currency]);
+
+
+
+
+  
 
   return (
     <>
@@ -592,7 +644,7 @@ function PurchaseInvoiceForm() {
                           quantity: e.target.value,
                         })
                       }
-                      onKeyDown={validateInput(formData?.quantity)}
+                      onBlur={()=>setFormData(prev=>({...prev, quantity: Number(formData.quantity).toFixed(4)}))}
                       bsSize="sm"
                     />
                   </Col>
@@ -617,10 +669,11 @@ function PurchaseInvoiceForm() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          price: e.target.value,
+                            price: e.target.value,
                         })
                       }
-                      onKeyDown={validateInput(formData?.price)}
+                      onBlur={()=>setFormData(prev=>({...prev, price: Number(formData.price).toFixed(4)}))}
+
                     />
                   </Col>
                 </Row>

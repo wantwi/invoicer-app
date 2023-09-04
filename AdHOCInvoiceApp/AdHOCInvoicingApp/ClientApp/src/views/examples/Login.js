@@ -1,9 +1,13 @@
 import { useAuth } from "context/AuthContext";
 import Loader from "components/Modals/Loader";
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
 const Login = () => {
   const [show, setshow] = useState(false);
-    const { login } = useAuth();
+  const { login } = useAuth();
+  const loginRef = useRef();
+  useEffect(() => {
+    //loginRef?.current.click()
+  }, []);
 
   return (
     <>
@@ -11,18 +15,35 @@ const Login = () => {
         <h1 style={{ color: "#f1f1f1", marginBottom: 20 }}>
           Welcome to GRA's Invoicing App
         </h1>
-
-        <button
-          className="login-button"
-          style={styles.buttonWrap}
-          disabled={show}
-          onClick={() => {
-            setshow(true);
-            login();
-          }}
-        >
-          {!show ? "Click to Login" : "Loading..."}
-        </button>
+        {!show ? (
+          <button
+            autoFocus
+            className="login-button"
+            style={styles.buttonWrap}
+            ref={loginRef}
+            disabled={show}
+            onClick={() => {
+              setshow(true);
+              login();
+            }}
+          >
+            Click&nbsp;to&nbsp;Login{" "}
+          </button>
+        ) : (
+          <button
+            autoFocus
+            className="login-button"
+            style={styles.buttonWrap}
+            ref={loginRef}
+            disabled={show}
+            onClick={() => {
+              setshow(true);
+              login();
+            }}
+          >
+            Loading...
+          </button>
+        )}
       </div>
     </>
   );

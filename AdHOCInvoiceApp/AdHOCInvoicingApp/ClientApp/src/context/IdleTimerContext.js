@@ -6,7 +6,9 @@ import {
 } from "react-idle-timer";
 import { toast } from "react-toastify";
 import { useAuth } from "context/AuthContext";
-import {Modal, Button} from "reactstrap"
+import { Modal, Button } from "reactstrap"
+import { useQueryClient } from "@tanstack/react-query"
+import { useCallback } from "react";
 
 
 const timeout = 300_000;
@@ -15,6 +17,7 @@ const promptBeforeIdle = 15000;
 
 function Prompt(props) {
     const [remaining, setRemaining] = useState(0);
+    const queryClient = useQueryClient()
 
 
     const { activate, getRemainingTime } = useIdleTimerContext();
@@ -28,6 +31,11 @@ function Prompt(props) {
             clearInterval(interval);
         };
     });
+
+    const handleOnclick = useCallback(() => {
+        queryClient.invalidateQueries("salesinvoices")
+        activate()
+    })
 
     return (
         <div>
@@ -53,7 +61,7 @@ function Prompt(props) {
                         className='btn-white'
                         color='default'
                         type='button'
-                        onClick={activate}
+                        onClick={handleOnclick}
                     >
                         I'm still here
                     </Button>

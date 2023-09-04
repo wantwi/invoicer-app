@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import useCustomAxios from "hooks/useCustomAxios";
 import { v4 as uuid } from "uuid";
+import useAuth from "hooks/useAuth";
 
 export default function Prompt({
   message,
@@ -20,12 +21,12 @@ export default function Prompt({
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const axios = useCustomAxios();
+  const { selectedBranch, user } = useAuth();
 
   const submitRefund = async ({ postData, refundType }) => {
-
     setLoading(true);
     const request = await axios.post(
-      `/api/PostRefund/${refundType}`,
+      `/api/PostRefund/${refundType}/${selectedBranch?.code}`,
       postData
     );
 
@@ -40,14 +41,16 @@ export default function Prompt({
       setLoading(false);
       setshowPrompt(false);
       setOpen(false);
-      queryClient.invalidateQueries("invoices");
+      queryClient.invalidateQueries(
+        "invoice-preview-refund",
+        refundInvoice?.invoiceNumber
+      );
       reset(uuid());
     },
     onError: (error) => {
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data ||
-          "Could not refund invoice. Please try again"
+        error?.response?.data || "Could not refund invoice. Please try again"
       );
       setLoading(false);
       setshowPrompt(false);
@@ -67,6 +70,7 @@ export default function Prompt({
           id: invoice.id,
           invoiceNumber: invoice.invoiceNo,
           customerTinghcard: invoice.customerTinghcard,
+          nameOfUser: user?.name,
         };
         refundTypeVal = "Full";
       } else {
@@ -78,6 +82,7 @@ export default function Prompt({
           id: invoice.id,
           invoiceNumber: invoice.invoiceNo,
           customerTinghcard: invoice.customerTinghcard,
+          nameOfUser: user?.name,
           invoiceItems: temp.map((item, idx) => {
             return {
               refundQuantity: item.refundQuantity,
@@ -99,6 +104,7 @@ export default function Prompt({
         id: invoice.id,
         invoiceNumber: invoice.invoiceNo,
         customerTinghcard: invoice.customerTinghcard,
+        nameOfUser: user?.name,
         invoiceItems: temp.map((item, idx) => {
           return {
             refundQuantity: item.refundQuantity,

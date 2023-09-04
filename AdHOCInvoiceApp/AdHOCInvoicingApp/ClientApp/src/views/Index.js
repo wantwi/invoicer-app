@@ -48,7 +48,7 @@ export const AppContext = createContext(null);
 
 const Index = () => {
   const axios = useCustomAxios();
-  const { auth } = useAuth();
+  const { selectedBranch } = useAuth();
   const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [showLoader, setShowLoader] = useState(false);
@@ -83,6 +83,7 @@ const Index = () => {
   const [value] = useDebounce(invoiceQuery, 500);
   const [selectedRow, setSelectedRow] = useState("");
   const [refundTypeForPost, setRefundTypeForPost] = useState("");
+  const [isReportLoading, setReportIsLoading] = useState(false);
   const [
     resetInvoicePreviewRefundComponent,
     setResetInvoicePreviewRefundComponent,
@@ -98,7 +99,7 @@ const Index = () => {
         accessor: "invoiceNo",
         className: " text-left ",
 
-        width: 180,
+        width: 190,
       },
       {
         Header: "Date",
@@ -220,18 +221,19 @@ const Index = () => {
     //https://api.cimsgh.com/api/v1/Reports/GenerateVATInvoiceReportAsync?InvoiceNo=2305229002
 
     try {
+      setReportIsLoading(true);
+      setMessage("Fetching invoice detail...")
       const request = await axios.post(
         `/api/GenerateVATInvoiceReportAsync`,
         invoiceNo
       );
-        if (request) {
+      if (request) {
         const { data } = request;
         base64 = `data:application/pdf;base64,` + data;
         const pdfContentType = "application/pdf";
 
         setPdfData(base64);
         setShowReport(true);
-
         const base64toBlob = (data) => {
           // Cut the prefix `data:application/pdf;base64` from the raw base 64
           const base64WithoutPrefix = data.substr(
@@ -259,20 +261,22 @@ const Index = () => {
     } catch (error) {
       console.log({ error });
       setIsReportDownloading(false);
-      toast.error(
-        error?.response?.data ||
-          "System failed to download invoice"
-      );
+      toast.error(error?.response?.data || "System failed to download invoice");
+    } finally {
+      setReportIsLoading(false);
+      setMessage(null)
     }
   };
 
-    const handleSearchInvoice = (e) => { };
+  const handleSearchInvoice = (e) => {};
 
-    console.log({ pageNumber, pageInfo })
+  console.log({ pageNumber, pageInfo });
 
   useEffect(() => {
     setCurrencyFilter("GHS");
   }, []);
+
+  console.log({pageInfo})
 
   const {
     refetch: refetchGetById,
@@ -304,24 +308,16 @@ const Index = () => {
     }
   );
 
-  useEffect(() => {
-    if (selectedRow.length > 0) {
-      refetchGetById();
-    }
-    return () => {};
-  }, [selectedRow]);
-
   const { data, refetch, isFetching, isLoading } = useCustomPaginationQuery(
-    `/api/GetTransactionSummary/${period}/${pageNumber}/${pageSize}`,
-    "invoicesfd",
+    `/api/GetTransactionSummary/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`,
+    "salesinvoices",
     pageNumber,
     Number(period),
     value,
     (data) => {
-       
       // data = JSON.parse(data);
       // const res = JSON.parse(data.data);
-      // console.log({ res });
+      console.log({ data });
       setInvoices(data?.invoices?.items || []);
       setPageInfo(data.invoices?.paging);
       setSummary(data?.summaries || []);
@@ -344,19 +340,19 @@ const Index = () => {
       filterUrl: `/api/GetSalesInvoicesByCompanyId/${value}`,
     }
   );
-    useEffect(() => {
-        if (pageNumber === 0) {
-            setPageInfo({
-                totalItems: 10,
-                pageNumber: 1,
-                pageSize: 10,
-                totalPages: 5,
-            });
-            setPageNumber(1);
-        }
-        refetch();
-        return () => { };
-    }, [period, pageNumber]);
+  useEffect(() => {
+    if (pageNumber === 0) {
+      setPageInfo({
+        totalItems: 10,
+        pageNumber: 1,
+        pageSize: 10,
+        totalPages: 5,
+      });
+      setPageNumber(1);
+    }
+    refetch();
+    return () => {};
+  }, [period, pageNumber]);
 
   useEffect(() => {
     if (value.length > 1) {
@@ -365,7 +361,7 @@ const Index = () => {
     return () => {};
   }, [value]);
 
-  // console.log({ use: pageInfo?.pageNumber })
+  console.log({ use: data})
 
   return (
     <>
@@ -384,7 +380,6 @@ const Index = () => {
           {/* Page content */}
           <Container className="mt--7" fluid>
             <ToastContainer />
-
             <Row className="my-5">
               <Col className="mb-5 mb-xl-0" xl="12">
                 <Card className="shadow">
@@ -483,90 +478,94 @@ const Index = () => {
                   </CardHeader>
                   <div style={styles.body}>
                     <EvatTable
-                      isLoading={isLoading}
+                      isLoading={isLoading || isReportLoading}
                       columns={columns}
                       data={data?.invoices?.items || []}
                       data2={invoices}
                       setSelectedRow={setSelectedRow}
                       getPrintPDF={getPrintPDF}
                       pdfData={pdfData}
+                      message={message}
+                      sortKey="date"
                     />
                   </div>
-                                  {message && (<p className="text-info text-center">{message}</p>)}
-                                  <CardFooter className="py-1">
-                                      {!(isLoading) &&
-                                          pageInfo?.totalItems > 0 && (
-                                              <nav aria-label="...">
-                                                  {pageInfo?.pageNumber ? (
-                                                      <Pagination
-                                                          className="pagination justify-content-center mb-0"
-                                                          listClassName="justify-content-center mb-0"
-                                                      >
-                                                          <PaginationItem>
-                                                              <PaginationLink
-                                                                  onClick={(e) => {
-                                                                      e.preventDefault();
-                                                                      if (pageInfo.pageNumber > 1) {
-                                                                          if (pageNumber < 1) {
-                                                                              return;
-                                                                          }
+                  <CardFooter className="py-1">
+                    {!isLoading && data?.invoices?.items.length > 0 && (
+                      <nav aria-label="...">
+                        {pageInfo?.pageNumber ? (
+                          <Pagination
+                            className="pagination justify-content-center mb-0"
+                            listClassName="justify-content-center mb-0"
+                          >
+                            <PaginationItem>
+                              <PaginationLink
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (pageInfo.pageNumber > 1) {
+                                    if (pageNumber < 1) {
+                                      return;
+                                    }
 
-                                                                          setPageNumber((prev) => Number(prev) - 1);
-                                                                      } else {
-                                                                          return;
-                                                                      }
-                                                                  }}
-                                                              >
-                                                                  <i className="fas fa-angle-left" />
-                                                                  <span className="sr-only">Previous</span>
-                                                              </PaginationLink>
-                                                          </PaginationItem>
+                                    setPageNumber((prev) => Number(prev) - 1);
+                                  } else {
+                                    return;
+                                  }
+                                }}
+                              >
+                                <i className="fas fa-angle-left" />
+                                <span className="sr-only">Previous</span>
+                              </PaginationLink>
+                            </PaginationItem>
 
-                                                          <PaginationItem>
-                                                              <PaginationLink onClick={(e) => setPageNumber(1)}>
-                                                                  1
-                                                              </PaginationLink>
-                                                          </PaginationItem>
+                            <PaginationItem>
+                              <PaginationLink onClick={(e) => setPageNumber(1)}>
+                                1
+                              </PaginationLink>
+                            </PaginationItem>
 
-                                                          <PaginationItem className="active">
-                                                              <PaginationLink onClick={(e) => e.preventDefault()}>
-                                                                  {pageInfo.pageNumber}
-                                                              </PaginationLink>
-                                                          </PaginationItem>
+                            <PaginationItem className="active">
+                              <PaginationLink
+                                onClick={(e) => e.preventDefault()}
+                              >
+                                {pageInfo.pageNumber}
+                              </PaginationLink>
+                            </PaginationItem>
 
-                                                          <PaginationItem>
-                                                              <PaginationLink
-                                                                  onClick={(e) =>
-                                                                      setPageNumber(pageInfo.totalPages)
-                                                                  }
-                                                              >
-                                                                  {pageInfo.totalPages}
-                                                              </PaginationLink>
-                                                          </PaginationItem>
+                            <PaginationItem>
+                              <PaginationLink
+                                onClick={(e) =>
+                                  setPageNumber(pageInfo.totalPages)
+                                }
+                              >
+                                {pageInfo.totalPages}
+                              </PaginationLink>
+                            </PaginationItem>
 
-                                                          <PaginationItem>
-                                                              <PaginationLink
-                                                                  onClick={(e) => {
-                                                                      if (pageInfo.pageNumber < pageInfo.totalPages) {
-                                                                          if (pageNumber === pageInfo.totalPages) {
-                                                                              return;
-                                                                          } else {
-                                                                              setPageNumber((prev) => Number(prev) + 1);
-                                                                          }
-                                                                      } else {
-                                                                          return;
-                                                                      }
-                                                                  }}
-                                                              >
-                                                                  <i className="fas fa-angle-right" />
-                                                                  <span className="sr-only">Next</span>
-                                                              </PaginationLink>
-                                                          </PaginationItem>
-                                                      </Pagination>
-                                                  ) : null}
-                                              </nav>
-                                          )}
-                                  </CardFooter>
+                            <PaginationItem>
+                              <PaginationLink
+                                onClick={(e) => {
+                                  if (
+                                    pageInfo.pageNumber < pageInfo.totalPages
+                                  ) {
+                                    if (pageNumber === pageInfo.totalPages) {
+                                      return;
+                                    } else {
+                                      setPageNumber((prev) => Number(prev) + 1);
+                                    }
+                                  } else {
+                                    return;
+                                  }
+                                }}
+                              >
+                                <i className="fas fa-angle-right" />
+                                <span className="sr-only">Next</span>
+                              </PaginationLink>
+                            </PaginationItem>
+                          </Pagination>
+                        ) : null}
+                      </nav>
+                    )}
+                  </CardFooter>
                 </Card>
               </Col>
             </Row>
@@ -627,8 +626,8 @@ export default Index;
 const styles = {
   body: {
     marginTop: 0,
-    height: 420,
-    maxHeight: "450px",
+    height: 520,
+    // maxHeight: "450px",
     overflow: "auto",
     // maxHeight: '450px',
     // overflowX: 'scroll',

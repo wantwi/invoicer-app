@@ -18,7 +18,7 @@ import { AppContext } from "views/Index";
 import { FormContext } from "components/Modals/NewInvoice";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "components/Modals/Loader";
-// import { useNavigate } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import subDays from "date-fns/subDays";
 import addDays from "date-fns/addDays";
@@ -31,7 +31,9 @@ import {
 // import axios from 'axios'
 import useCustomAxios from "../../hooks/useCustomAxios";
 import { getPayableAmount } from "utils/util";
-import { useAuth } from "context/AuthContext";
+import useMultiFetchAllSettled from "hooks/useMultiFetchAllSettled";
+import useAuth from "hooks/useAuth";
+
 // import 'react-tooltip/dist/react-tooltip.css'
 
 // import SelectSearch from 'react-select-search'
@@ -64,21 +66,10 @@ const currenciesInit = [
 ];
 
 function InvoiceForm({ refetch }) {
-  // const history = useNavigate();
+  const history = useHistory();
   const queryClient = useQueryClient();
 
   const axios = useCustomAxios();
-    const { getUser, user, logout } = useAuth();
-
-    console.log({axios})
-
-  useEffect(async () => {
-    await getUser();
-
-    return () => {};
-  }, []);
-
-  console.log({ user });
 
   // const searchInput = useRef()
   const { invoices } = useContext(AppContext);
@@ -106,6 +97,7 @@ function InvoiceForm({ refetch }) {
   const [isCurrencyDisabled, setIsCurrencyDisbled] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(1);
   const [forex, setForex] = useState(1);
+  const [productsList, setProductsList] = useState([]);
   // const [discount, setDiscount] = useState({
   //   type: "",
   //   amount: 0.0,
@@ -117,6 +109,9 @@ function InvoiceForm({ refetch }) {
   });
 
   const [cashCustomerTin, setCashCustomerTin] = useState("");
+
+  const { selectedBranch, user } = useAuth();
+  console.log({ user });
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -150,82 +145,165 @@ function InvoiceForm({ refetch }) {
     return () => {};
   }, [formData?.discountType, formData?.totalDiscount]);
 
-  // *****   NEW IMPLEMENTATION *********//
-  const getCustomers = async () => {
-    const request = await axios.get(`/api/GetCustomers`);
-    console.log({ request });
-    return request?.data;
-  };
-  const getCurrency = async () => {
-    const request = await axios.get(`/api/GetCurrency`);
+  const handleOnchangeOfDiscountAmt = () => {};
 
-    return request.data;
-  };
-  const getProductList = async () => {
-    const request = await axios.get(`/api/GetProductList/${currency}`);
-    return request.data;
-  };
-  const renderProducts = (data) => {
-    let options = data?.map((item, index) => {
-      return {
-        name: item.name,
-        key: index,
-        value: item.id,
-        code: item.code,
-        description: item.description,
-        price: item.price,
-        taxRate: item.taxRate,
-        taxable: item.taxable,
-        otherLevies: item.otherLevies,
-        isTaxInclusive: item.isTaxInclusive,
-        id: item.id,
-        status: item.status,
-      };
-    });
-    return options.filter((item) => item.status === "A");
-  };
+  // const handleCustomerList = async () => {
+  //   try {
+  //     let allCustomers = await (
+  //       await fetch(
+  //         `${process.env.REACT_APP_CLIENT_ROOT}/Customers/GetCustomerByCompanyId/${userDetails.profile.company}`,
+  //         {
+  //           method: 'GET', // or 'PUT'
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             Authorization: `Bearer ${userDetails.access_token}`,
+  //           },
+  //         }
+  //       )
+  //     ).json()
 
-  const postInvoice = async (postData) => {
-      setLoading(true);
-      axios.defaults.headers.usr =  user?.preferred_username
-    return await axios.post(`/api/PostInvoice`, postData);
-  };
+  //     let filteredCustomers = allCustomers.filter(
+  //       (customer) => customer.status === 'A'
+  //     )
+  //     setCustomers(filteredCustomers)
 
-  const { data: customerList } = useQuery({
-     queryKey: ["customers"],
-   queryFn: getCustomers,
-     onSuccess: (data = []) => {
-       let filteredCustomers = data?.filter(
-         (customer) => customer.status === "A"
-       );
-       setCustomers(filteredCustomers);
-       setCashCustomerTin(
-         data.find((cust) => cust.name == "cash customer")?.tin
-       );
-     },
-   });
+  //     setCashCustomerTin((allCustomers.find(cust => cust.name == "cash customer")?.tin))
+  //   } catch (error) {
+  //     console.error(error.message)
+  //   }
+  // }
 
-  const { data: currencyList, refetch: refetchCurrency } = useQuery({
-    queryKey: ["currency"],
-    queryFn: getCurrency,
-    onSuccess: (data) => {
-      if (data.length > 0) {
-        setCurrencies(data);
+  // const getCurrencies = () => {
+  //   // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/VatItems`)
+  //   fetch(`${process.env.REACT_APP_CLIENT_ROOT}/Currency`, {
+  //     method: 'GET', // or 'PUT'
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization: `Bearer ${userDetails.access_token}`,
+  //     },
+  //   })
+  //     .then((res) => {
+  //       // console.log(res)
+  //       if (res.status === 401) {
+  //         toast.error('Token timed out. Logging you out')
+  //         setTimeout(() => {
+  //           window.location = '/'
+  //         }, 3000)
+  //       } else {
+  //         return res.json()
+  //       }
+  //     })
+  //     .then((data) => {
+  //       if (data.length > 0) {
+  //         setCurrencies(data)
+  //       } else {
+  //         setCurrencies(currenciesInit)
+  //       }
+  //     })
+  //     .catch((err) => console.log(err))
+  // }
+
+  // const getProducts = () => {
+  //   // fetch(`${process.env.REACT_APP_CLIENT_ROOT}/VatItems`)
+  //   fetch(
+  //     `${process.env.REACT_APP_CLIENT_ROOT}/VatItems/GetByCompanyId/${userDetails.profile.company}/${currency}`,
+  //     {
+  //       method: 'GET', // or 'PUT'
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${userDetails.access_token}`,
+  //       },
+  //     }
+  //   )
+  //     .then((res) => {
+  //       // console.log(res)
+  //       if (res.status === 401) {
+  //         toast.error('Token timed out. Logging you out')
+  //         setTimeout(() => {
+  //           window.location = '/'
+  //         }, 3000)
+  //       } else {
+  //         return res.json()
+  //       }
+  //     })
+  //     .then((data) => {
+  //       let options = data.map((item, index) => {
+  //         return {
+  //           name: item.name,
+  //           key: index,
+  //           value: item.id,
+  //           code: item.code,
+  //           description: item.description,
+  //           price: item.price,
+  //           taxRate: item.taxRate,
+  //           taxable: item.taxable,
+  //           otherLevies: item.otherLevies,
+  //           isTaxInclusive: item.isTaxInclusive,
+  //           id: item.id,
+  //           status: item.status,
+  //         }
+  //       })
+  //       // console.log(options)
+  //       let activeItems = options.filter((item) => item.status === 'A')
+  //       // console.log(activeItems)
+  //       setProducts(activeItems)
+  //     })
+  //     .catch((err) => console.log(err))
+  // }
+
+  const requstCallback = (response) => {
+    const productResponse = response[2];
+    const currencyResponse = response[1];
+    const customerResponse = response[0];
+
+    if (productResponse?.status === "fulfilled") {
+      console.log({ requstCallback1: productResponse?.value.data });
+      setProductsList(productResponse?.value.data);
+    }
+    if (currencyResponse?.status === "fulfilled") {
+      console.log({ requstCallback2: currencyResponse?.value.data });
+
+      if (currencyResponse?.value.data.length > 0) {
+        setCurrencies(currencyResponse?.value.data);
       } else {
         setCurrencies(currenciesInit);
       }
-    },
-  });
+    }
+    if (customerResponse?.status === "fulfilled") {
+      console.log({ requstCallback3: customerResponse?.value.data });
+      let filteredCustomers = customerResponse?.value.data.filter(
+        (customer) => customer.status === "A"
+      );
+      setCustomers(filteredCustomers);
+      setCashCustomerTin(
+        customerResponse?.value.data.find(
+          (cust) => cust.name == "cash customer"
+        )?.tin
+      );
+    }
+  };
 
   const {
-    data: productsList = [],
-    refetch: refetchProducts,
-    isLoading,
-  } = useQuery({
-    queryKey: ["products"],
-    queryFn: getProductList,
-    select: (data) => renderProducts(data),
-  });
+    data,
+    error,
+    isLoading: multifLoading,
+    setUrls,
+  } = useMultiFetchAllSettled(
+    [
+      `/api/GetCustomers`,
+      "/api/GetCurrency",
+      `/api/GetProductList/${currency}`,
+    ],
+    requstCallback
+  );
+
+  const postInvoice = async (postData) => {
+    setLoading(true);
+    return await axios.post(
+      `/api/PostInvoice/${selectedBranch?.code}`,
+      postData
+    );
+  };
 
   const { mutate } = useMutation({
     mutationFn: postInvoice,
@@ -236,19 +314,20 @@ function InvoiceForm({ refetch }) {
       setShowNewInvoiceModal(false);
       setLoading(false);
     },
-      onError: (error) => {
-          console.log({error})
-          if (error?.response?.status === 500) {
-          console.log("500 error")
+    onError: (error) => {
+      if (error?.response?.status === 500) {
         toast.error(
-            error?.response?.data ||  "Serever Error"
+          error?.response?.data ||
+            error?.response?.data ||
+            "Error creating invoice"
         );
         setLoading(false);
         return;
       }
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data ||
+        error?.response?.data?.message ||
+          error?.message ||
           "Invoice could not be saved."
       );
       setLoading(false);
@@ -287,6 +366,7 @@ function InvoiceForm({ refetch }) {
       toast.warning("Please provide a value for price");
     } else {
       const gridItem = getPayableAmount({ ...item, isTaxable }, discount);
+
       setGridData((gridData) => [
         ...gridData,
         { ...gridItem, otherLeviesType: item.otherLevies },
@@ -309,26 +389,27 @@ function InvoiceForm({ refetch }) {
         ? new Date(formData.dueDate).toISOString()
         : new Date().toISOString(),
       remarks: comments,
+      nameOfUser: user?.name,
       customerName: formData.customer,
       customerTinghcard: formData.identity,
       transactionType: "SALES",
       currency: formData.currency,
       forexRate: forex,
       amount: gridData.reduce((total, item) => total + item.totalPayable, 0),
-     
+
       invoiceItems: gridData.map((item) => {
-         return {
-           price: item.taxableAmount,
-         itemCode: item.itemCode,
-           itemDescription: item.itemName,
-           unitPrice: item.price,
-           itemDiscount: item.discount,
-           taxCode: "",
-           quantity: item.quantity,
-           vatItemId: item.vatItemId,
-           //isTaxable,
-         };
-       }),
+        return {
+          price: item.taxableAmount,
+          itemCode: item.itemCode,
+          itemDescription: item.itemName,
+          unitPrice: item.price,
+          itemDiscount: item.discount,
+          taxCode: "",
+          quantity: item.quantity,
+          vatItemId: item.vatItemId,
+          //isTaxable,
+        };
+      }),
     };
     //if discount is applied add it to data to post
     if (formData?.discountType) {
@@ -347,7 +428,7 @@ function InvoiceForm({ refetch }) {
         toast.error("Discount amount is invalid");
         return;
       }
-        postData["totalDiscount"] = formData.totalDiscount ? parseFloat(formData.totalDiscount).toFixed(2) : 0;
+      postData["totalDiscount"] = Number(formData.totalDiscount).toFixed(4);
       postData["discountType"] = String(formData.discountType).toUpperCase();
     }
 
@@ -355,8 +436,10 @@ function InvoiceForm({ refetch }) {
       postData["customerTinghcard"] = cashCustomerTin;
       postData["customerName"] = `${formData.customer}(cash customer)`;
     }
-      if (isItemAdded) {
-          console.log({ postData })
+    // console.log({cashCustomerTin, postData })
+    // return
+
+    if (isItemAdded) {
       mutate(postData);
     } else {
       toast.warning("Please add an item first");
@@ -366,11 +449,12 @@ function InvoiceForm({ refetch }) {
   const checkIfRatesExist = async (currency) => {
     let today = new Date().toISOString();
     const request = await axios.get(
-      `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${user?.sub}/${today}?currencyCode=${currency}`
+      `/api/checkIfRatesExist/${currency}/${today}`
     );
     // "(GHS" + data[0].exchangeRate + " / " + data[0].currencyCode
     if (request) {
       const { data } = request;
+      console.log({data})
       if (data.length > 0) {
         setForex(data[0].exchangeRate);
         setExchangeRate(
@@ -381,10 +465,48 @@ function InvoiceForm({ refetch }) {
           "There are no exchange rates set for today. Redirecting you to currency set up to add exchange rates"
         );
         setTimeout(() => {
-          // history("/admin/currency");
+          history.push("/admin/currency");
         }, 3000);
       }
     }
+
+    // fetch(
+    //   `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${userDetails.profile.company}/${today}?currencyCode=${currency}`,
+    //   {
+    //     method: 'GET', // or 'PUT'
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: `Bearer ${userDetails.access_token}`,
+    //     },
+    //   }
+    // )
+    //   .then((res) => {
+    //     if (res.status === 401) {
+    //       toast.error('Token timed out. Logging you out')
+    //       setTimeout(() => {
+    //         window.location = '/'
+    //       }, 3000)
+    //     } else {
+    //       return res.json()
+    //     }
+    //   })
+    //   .then((data) => {
+    //     if (data.length > 0) {
+    //       setForex(data[0].exchangeRate)
+    //       setExchangeRate(
+    //         'at GHS' + data[0].exchangeRate + ' per ' + data[0].currencyCode
+    //       )
+    //     } else {
+    //       toast.warning(
+    //         'There are no exchange rates set for today. Redirecting you to currency set up to add exchange rates'
+    //       )
+    //       setTimeout(() => {
+    //         window.location = '/admin/currency'
+    //         history.push('/admin/currency')
+    //       }, 3000)
+    //     }
+    //   })
+    //   .catch((err) => console.log(err))
   };
 
   const handleCurrencySelect = (e) => {
@@ -435,7 +557,11 @@ function InvoiceForm({ refetch }) {
 
   useEffect(() => {
     //console.log('Currency', currency)
-    refetchProducts();
+    setUrls([
+      `/api/GetCustomers`,
+      "/api/GetCurrency",
+      `/api/GetProductList/${currency}`,
+    ]);
     setFormData((prev) => ({ ...prev, currency: currency }));
   }, [currency]);
 
@@ -574,7 +700,7 @@ function InvoiceForm({ refetch }) {
                   disabled={Boolean(gridData.length)}
                   style={{ height: 29, padding: "0px 5px" }}
                 >
-                  {currencies?.map((currency, index) => (
+                  {currencies.map((currency, index) => (
                     <option
                       key={index}
                       name={currency.name}
@@ -754,7 +880,7 @@ function InvoiceForm({ refetch }) {
                     >
                       Item
                     </label>
-                    {isLoading ? (
+                    {multifLoading ? (
                       <p>Please wait, loading items ...</p>
                     ) : (
                       <AutocompleteItems
@@ -821,16 +947,22 @@ function InvoiceForm({ refetch }) {
                       id="qty"
                       // step={0.01}
                       placeholder="Quantity"
-                      type="text"
+                      type="number"
                       value={formData?.quantity}
                       onChange={(e) => {
-                        let valNum = new RegExp(/^\d*(\.\d{0,2})?$/);
-                        if (valNum.test(e.target.value)) {
-                          setFormData({
-                            ...formData,
-                            quantity: e.target.value,
-                          });
-                        }
+                        setFormData({
+                          ...formData,
+                          quantity: e.target.value,
+                        });
+                        // let valNum = new RegExp(/^\d*(\.\d{0,2})?$/);
+                        // if (valNum.test(e.target.value)) {
+                        // }
+                      }}
+                      onBlur={() => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          quantity: Number(formData?.quantity).toFixed(4),
+                        }));
                       }}
                       // onKeyUp={validateInput(formData.quantity)}
                     />
@@ -858,6 +990,12 @@ function InvoiceForm({ refetch }) {
                           price: e.target.value,
                         })
                       }
+                      onBlur={() => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          price: Number(formData?.price).toFixed(4),
+                        }));
+                      }}
                       // onKeyDown={validateInput(formData.price)}
                     />
                   </Col>

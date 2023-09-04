@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 //import { logout } from "../../hooks/useAuth"
 import { useAuth } from "context/AuthContext";
-import React, { useEffect } from "react";
+import React, { useLayoutEffect, useState } from "react";
 // reactstrap components
 import {
   DropdownMenu,
@@ -19,45 +19,92 @@ import {
   Container,
   Media,
 } from "reactstrap";
-//import useAuth from "hooks/useAuth";
+import { toast } from "react-toastify";
+import useCustomAxios from "hooks/useCustomAxios"
+import { BsFillGridFill } from "react-icons/bs";
 
 const AdminNavbar = (props) => {
-  const [profile, setProfile] = React.useState("");
-    const { getUser, user, logout } = useAuth();
-
-  useEffect(async () => {
-      await getUser();
-
-      if (!user) {
-          //login()
-      }
-
+    const { getUser, user, logout, setSelectedBranch, selectedBranch } = useAuth();
+    const axios = useCustomAxios()
+    useLayoutEffect(() => {
+        
+    const checkIsALoggedIn = async () => {
+        try {
+            const res = await getUser()
+            if (!res) {
+               throw new Error()
+            }
+        } catch (e) {
+            toast.error("Login to access this page")
+            login()
+        }
+        }
+        checkIsALoggedIn()
     return () => {};
-  }, []);
+    }, []);
 
-  console.log({user})
+    const [userApps, setUserApps] = useState([]);
+
+
+    useLayoutEffect(() => {
+
+        const apps = async () => {
+
+            try {
+
+                const res = await axios.get(`/api/GetApps`);
+
+                setUserApps(res?.data.filter(itm => itm?.id !== "00000000-0000-0000-0000-400000000000"));
+
+                // .charAt(0).toUpperCase()
+
+            } catch (error) {
+
+                //toast.error("Could not fetch menus. Please try again");
+
+            }
+
+        };
+
+        apps();
+
+
+
+        return () => { };
+
+    }, []);
 
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
-        <Container fluid>
-          <h1 className="h1 mb-0 text-white text-uppercase d-none d-lg-inline-block">
-            {/* {data?.profile?.companyname}*/}
+              <Container fluid>
+                  <h1 className="h1 mb-0 text-white text-uppercase d-none d-lg-inline-block">
+                      {user?.companyName ?  user?.companyName + " " + selectedBranch?.name : selectedBranch?.name}
           </h1>
+                  <Nav className="align-items-center d-none d-md-flex" navbar>
+                      <UncontrolledDropdown nav>
+                          <DropdownToggle className="pr-0" nav>
+                              <Media className="align-items-center">
 
-          {/* <Form className='navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto'>
-            <FormGroup className='mb-0'>
-              <InputGroup className='input-group-alternative'>
-                <InputGroupAddon addonType='prepend'>
-                  <InputGroupText>
-                    <i className='fas fa-search' />
-                  </InputGroupText>
-                </InputGroupAddon>
-                <Input placeholder='Search Invoice' type='text' />
-              </InputGroup>
-            </FormGroup>
-          </Form> */}
-          <Nav className="align-items-center d-none d-md-flex" navbar>
+                                  <Media className="ml-2 d-none d-lg-block">
+                                      <span className="mb-0 text-sm font-weight-bold">
+                                          <BsFillGridFill size="2em" />
+                                      </span>
+                                  </Media>
+                              </Media>
+                          </DropdownToggle>
+                          <DropdownMenu className="dropdown-menu-arrow" right>
+                              {userApps?.map(app => {
+                                  return (
+                                      <>
+                                          <DropdownItem className="noti-title" header tag="div">
+                                              <a href={app?.appPath} target="_blank" className="text-overflow m-0" style={{color: "#8898aa !important"}}>{app?.name}</a>
+                                          </DropdownItem>
+                                      </>
+                                  )
+                              }) }
+                          </DropdownMenu>
+                      </UncontrolledDropdown>
             <UncontrolledDropdown nav>
               <DropdownToggle className="pr-0" nav>
                 <Media className="align-items-center">
@@ -69,7 +116,7 @@ const AdminNavbar = (props) => {
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                      {user?.name}
+                                          {user?.given_name}
                     </span>
                   </Media>
                 </Media>
@@ -77,7 +124,15 @@ const AdminNavbar = (props) => {
               <DropdownMenu className="dropdown-menu-arrow" right>
                 <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Welcome!</h6>
-                </DropdownItem>
+                              </DropdownItem>
+                              <DropdownItem
+                                  onClick={() => {
+                                      setSelectedBranch(null)
+                                  }}
+                              >
+                                  <i className="ni ni-user-run" />
+                                  <span>Change Branch</span>
+                              </DropdownItem>
                 <DropdownItem
                   href={
                     process.env.REACT_APP_AUTHORITY + "/identity/account/manage"
@@ -87,19 +142,7 @@ const AdminNavbar = (props) => {
                   <i className="ni ni-single-02" />
                   <span>Profile Settings</span>
                 </DropdownItem>
-                {/* <DropdownItem to="/admin/user-profile" tag={Link}>
-                  <i className="ni ni-settings-gear-65" />
-                  <span>Settings</span>
-                </DropdownItem> */}
-                {/* <DropdownItem to="/admin/user-profile" tag={Link}>
-                  <i className="ni ni-calendar-grid-58" />
-                  <span>Activity</span>
-                </DropdownItem>
-                <DropdownItem to="/admin/user-profile" tag={Link}>
-                  <i className="ni ni-support-16" />
-                  <span>Support</span>
-                </DropdownItem>
-                <DropdownItem divider /> */}
+                    
                 <DropdownItem
                   onClick={() => {
                     logout();

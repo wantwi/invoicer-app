@@ -44,7 +44,7 @@ namespace AdHOCInvoicingApp.model
     {
         public decimal? unitPrice { get; set; }
         public decimal itemDiscount { get; set; }
-        public int? quantity { get; set; }
+        public decimal? quantity { get; set; }
         public string? vatItemId { get; set; }
         public bool? isTaxable { get; set; }
         public bool? isTaxInclusive { get; set; }
@@ -54,7 +54,8 @@ namespace AdHOCInvoicingApp.model
     public class PurchaseInvoiceDto
     {
         public string? companyId { get; set; }
-        public string? usr { get; set; }
+        public string? nameOfUser { get; set; }
+        public string? branchId { get; set; }
         public DateTime? date { get; set; }
         public string? supplierName { get; set; }
         public string? transactionType { get; set; }

@@ -3,6 +3,9 @@ import Loader from "components/Modals/Loader";
 import NewUser from "components/Modals/NewUser";
 import React, { useState, useEffect, useCallback } from "react";
 import { GrEdit } from "react-icons/gr";
+import { ErrorBoundary } from "react-error-boundary"
+import Fallback from "components/Fallback"
+
 import {
   Button,
   Table,
@@ -105,8 +108,8 @@ const Accounts = () => {
 
     toast.success("Invite link sent successfully");
   };
-  const PostResendError = () => {
-    toast.error("Could not send invite link");
+  const PostResendError = (err) => {
+      toast.error(err?.response?.data || "Could not send invite link");
   };
 
   const putSuccess = (data) => {
@@ -264,7 +267,11 @@ const Accounts = () => {
     return () => {};
   }, [value]);
 
-  // console.log({ isLoading })
+
+    const errorHandler = (error, errorInfo) => {
+        console.log("Logging", error, errorInfo)
+    }
+
 
   return (
     <>
@@ -272,7 +279,8 @@ const Accounts = () => {
         message={"This is your user management page"}
         pageName="User Account Management"
       />
-      <ToastContainer />
+          <ToastContainer />
+          <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
       <Container className="mt--7" fluid>
         <Row className="mt-5">
           <Col className="order-xl-2 mb-5 mb-xl-0" xl="12">
@@ -282,7 +290,7 @@ const Accounts = () => {
                   <Col xs="6">
                     <Input
                       className="form-control"
-                      placeholder="Search"
+                      placeholder="Search username"
                       type="text"
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
@@ -301,8 +309,8 @@ const Accounts = () => {
               </CardHeader>
               <CardBody
                 style={{ height: 500, maxHeight: 500, overflow: "auto" }}
-              >
-                {(isLoading || loading) && <Loader />}
+                          >
+                              {(isLoading || isLoad || isLoadResend) && <Loader />}
                 <Table className="align-items-center  table-flush" responsive>
                   <thead className="thead-light">
                     <tr>
@@ -384,7 +392,9 @@ const Accounts = () => {
             loading={isLoad}
           />
         )}
-      </Container>
+              </Container>
+          </ErrorBoundary>
+
     </>
   );
 };

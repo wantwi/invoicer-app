@@ -1,16 +1,27 @@
 import React, { useState, useContext } from "react"
 import useCustomAxios from "../hooks/useCustomAxios"
 import { useQuery } from "@tanstack/react-query"
+
+
+
 export const AuthContext = React.createContext()
 export const useAuth = () => useContext(AuthContext)
+
+
+let branchName = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_NAME")
+let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE")
+
 export const AuthProvider = ({
     children
 }) => {
 
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [selectedBranch, setSelectedBranch] = useState({ branchName, branchId })
+
+    console.log({selectedBranch})
 
     const [user, setUser] = useState()
-   const axios =  useCustomAxios()
+    const axios = useCustomAxios()
 
     const fetchUser = async () => {
         const response = await axios.get(`/bff/user`)
@@ -26,26 +37,53 @@ export const AuthProvider = ({
 
     const logout = () => {
         const logoutUrl = user["bff:logout_url"]
-        window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_BASENAME}/auth/login`
-       
+       window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_BASENAME}/auth/login`
+        //window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_POST_LOGOUT_REDIRECT}`
+
+        
+
     }
 
-    const onSuccessResponse = (data) => {
+    const onSuccessResponse = async (res) => {
         const obj = {}
-        data.forEach(x => {
+        res.forEach(x => {
             obj[x?.type] = x?.value
         })
         setIsAuthenticated(true)
         setUser(obj)
+        const { data } = await axios.get("/api/GetCompanyName")
+        setUser(prev => ({...prev, companyName: data+", " }))
     }
     const onErrorResponse = (err) => {
-        console.log({err})
+        console.log({ err })
         setIsAuthenticated(false)
         window.location = `${process.env.REACT_APP_BASENAME}/login`
     }
 
-    const { refetch: getUser, isLoading } = useQuery({ queryKey: ['user'], queryFn:  fetchUser, enabled: false, onSuccess: onSuccessResponse, onError: onErrorResponse })
+    const fakeBrances = [
+        {
+            branchId: "2107000d-8b72-44e9-91b8-bf7fd42243a6",
+            branchName: "Ksi Branch",
+        },
+        {
+            branchId: "2107000d-8b72-44e9-91b8-bf71d47943a6",
+            branchName: "Accra Branch",
+        },
+        {
+            branchId: "2107000d-8b72-44e9-91b8-bf7fd33943a6",
+            branchName: "Tema Branch",
+        }
+    ]
 
+    const fecthBranches = async () => {
+        const res = await axios.get("/api/GetBranches")
+        return res?.data
+    }
+
+    const { refetch: getUser, isLoading } = useQuery({ queryKey: ['user'], queryFn: fetchUser, enabled: false, onSuccess: onSuccessResponse, onError: onErrorResponse })
+    const { refetch: getBranches, data: branches, isLoading: isLoadingBraches, isError: isErrorLoadingBranches } = useQuery({ enabled: false, queryKey: ["branches"], queryFn: fecthBranches })
+
+    console.log({branches})
 
     return (
         <AuthContext.Provider
@@ -57,7 +95,13 @@ export const AuthProvider = ({
                 login,
                 logout,
                 getUser,
-                isLoading
+                isLoading,
+                getBranches,
+                isLoadingBraches,
+                branches,
+                setSelectedBranch,
+                selectedBranch,
+                isErrorLoadingBranches
             }}
         >
             {children}

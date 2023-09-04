@@ -34,6 +34,10 @@ import { useDebounce } from "use-debounce";
 import useCustomAxios from "hooks/useCustomAxios";
 import { EvatTable } from "components/Tables/EvatTable";
 import ReactTooltip from "react-tooltip";
+import useAuth from "hooks/useAuth";
+
+
+
 export const PurchaseContext = createContext();
 const Purchases = () => {
   const axios = useCustomAxios();
@@ -63,6 +67,7 @@ const Purchases = () => {
   const dayOfWeekSelRef = useRef();
   const [value] = useDebounce(invoiceQuery, 100);
   const [selectedRow, setSelectedRow] = useState(null);
+    const { selectedBranch, user } = useAuth();
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -74,7 +79,7 @@ const Purchases = () => {
         accessor: "invoiceNo",
         className: " text-left ",
 
-        width: 140,
+        width: 180,
       },
       {
         Header: "Date",
@@ -87,7 +92,7 @@ const Purchases = () => {
         ),
       },
       {
-        Header: "Customer",
+        Header: "Supplier",
         accessor: "customerName",
         className: " text-left ",
 
@@ -207,7 +212,7 @@ const Purchases = () => {
     if (searchText.length > 1) {
       url = `/api/GetPurchaseSearch/${period}/${pageNumber}/${pageSize}/${searchText}`;
     } else {
-      url = `/api/GetPurchase/${period}/${pageNumber}/${pageSize}`;
+        url = `/api/GetPurchase/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`;
     }
 
     const request = await axios.get(url);
@@ -253,7 +258,10 @@ const Purchases = () => {
         totalNoSalesInvoices: data.totalNoSalesInvoices,
       });
       setMessage(null);
-    },
+      },
+      onError: (err) => {
+          console.log({"treat":err})
+      }
 
     //  placeholderData: true
   });
@@ -351,11 +359,12 @@ const Purchases = () => {
                     isLoading={(showLoader || isReportDownloading)}
                     columns={columns}
                     data={invoices || []}
-                    getPrintPDF={()=>null}
+                    getPrintPDF={() => null}
+                    message={message}
+                    sortKey="date"
                   />
 
                 </div>
-                {message && <p className="text-info text-center">{message}</p>}
 
                 {pageInfo?.totalItems > 0 && (
                   <CardFooter className="py-4">
@@ -447,8 +456,8 @@ export default Purchases;
 const styles = {
   body: {
     marginTop: 0,
-    height: 420,
-    maxHeight: "450px",
+    // height: 420,
+    // maxHeight: "450px",
     overflow: "auto",
   },
 };
