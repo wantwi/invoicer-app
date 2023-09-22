@@ -30,6 +30,7 @@ import useCustomAxios from "hooks/useCustomAxios";
 import { EvatTable } from "components/Tables/EvatTable";
 import { NewRateForm } from "components/NewRate";
 import { FaEdit } from "react-icons/fa";
+import useAuth from "hooks/useAuth";
 
 const init = {
   currencyName: "",
@@ -44,7 +45,7 @@ let userDetails = JSON.parse(
 const CurrencySetupWithReset = ({ reset }) => {
   const [exchangeFormData, setExchangeFormData] = useState(init);
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { selectedBranch } = useAuth();
   const [showList, setShowList] = useState(false);
   const [currencyList, setCurrencyList] = useState([]);
   const axios = useCustomAxios();
@@ -56,8 +57,8 @@ const CurrencySetupWithReset = ({ reset }) => {
   });
 
   const [filter, setfilter] = useState({
-    currency: "GHS",
-    period: "CURRENT",
+    currency: "all",
+    period: 0,
   });
 
   const [pageNumber, setPageNumber] = useState(1);
@@ -71,145 +72,83 @@ const CurrencySetupWithReset = ({ reset }) => {
       iso: currency.iso,
     }));
   };
-
-  const prepData = [
-    {
-      invoiceNo: "9201921",
-      date: new Date().toLocaleDateString(),
-      rate: 11.3,
-    },
-    {
-      invoiceNo: "9201921",
-      date: new Date().toLocaleDateString(),
-      rate: 8.95,
-    },
-  ];
-
+  console.log({pageNumber});
   const columns = React.useMemo(
-    () =>
-      filter.period == "PAST"
-        ? [
-            {
-              Header: "#",
-              accessor: "invoiceNo",
-              className: " text-left ",
+    () => [
+      {
+        Header: "Currency",
+        accessor: "currencyCode",
+        className: " text-left ",
 
-              width: "auto",
-            },
+        width: "auto",
+      },
 
-            {
-              Header: "Date Added",
-              accessor: "date",
-              className: " text-left ",
+      {
+        Header: "Date Added",
+        accessor: "transactionDate",
+        className: " text-left ",
 
-              width: "auto",
-              Cell: ({ cell: { value } }) => (
-                <>{new Date(value).toLocaleDateString("en-GB")}</>
-              ),
-            },
+        width: "auto",
+        Cell: ({ cell: { value } }) => (
+          <>{new Date(value).toLocaleDateString("en-GB")}</>
+        ),
+      },
 
-            {
-              Header: () => (
-                <span
-                  align="right"
-                  style={{
-                    float: "right",
-                    display: "inline-block",
-                    width: "100%",
-                    paddingRight: "20px",
-                  }}
-                >
-                  Rate
-                </span>
-              ),
-              accessor: "rate",
-              className: " text-right ",
-              width: "auto",
-            },
-            ,
-          ]
-        : [
-            {
-              Header: "#",
-              accessor: "invoiceNo",
-              className: " text-left ",
-
-              width: 90,
-            },
-
-            {
-              Header: "Date Added",
-              accessor: "date",
-              className: " text-left ",
-
-              width: 140,
-              Cell: ({ cell: { value } }) => (
-                <>{new Date(value).toLocaleDateString("en-GB")}</>
-              ),
-            },
-
-            {
-              Header: () => (
-                <span
-                  align="right"
-                  style={{
-                    float: "right",
-                    display: "inline-block",
-                    width: "100%",
-                    paddingRight: "20px",
-                  }}
-                >
-                  Rate
-                </span>
-              ),
-              accessor: "rate",
-              className: " text-right ",
-              // Cell: ({ cell: { value } }) => <>{moneyInTxt(value)}</>,
-              width: 200,
-            },
-            {
-              Header: () => <div align="center">Action</div>,
-              disableSortBy: true,
-              className: " text-center table-action",
-              Cell: ({ cell }) => {
-                return (
-                  <Button
-                    style={{ padding: "2px 8px" }}
-                    className="badge-success"
-                    onClick={(e) => {
-                      setExchangeFormData(() => ({
-                        newRate: cell?.row?.original?.rate,
-                        date: new Date(cell?.row?.original?.date).toLocaleDateString("en-gb"),
-                        currencyName: "Ghana Cedis",
-                        iso: "GHS",
-                      }));
-                      setShowForm(true);
-                    }}
-                    title="Preview"
-                  >
-                    <FaEdit />
-                  </Button>
-                );
-              },
-              accessor: "something",
-              width: 100,
-            },
-          ],
-    [filter.period]
+      {
+        Header: () => (
+          <span
+            align="right"
+            style={{
+              float: "right",
+              display: "inline-block",
+              width: "100%",
+            }}
+          >
+            Rate
+          </span>
+        ),
+        accessor: "exchangeRate",
+        className: " text-right ",
+        width: "auto",
+      },
+      {
+        Header: () => <div align="center">Status</div>,
+        accessor: "status",
+        className: " text-center ",
+        align: "center",
+        width: "auto",
+        Cell: (props) => {
+          return (
+            <span style={{ color: props.value === "A" ? "green" : "red" }}>
+              {props.value == "A" ? "Active" : "Inactive"}
+            </span>
+          );
+        },
+      },
+    ],
+    []
   );
+
+  const handleClose = () => {
+    setShowForm(false);
+    setExchangeFormData(init);
+  };
 
   const getCurrency = async () => {
     const request = await axios.get(
-      `/api/GetCurrency/${filter.currency}/${filter.period}`
+      `/api/GetRates/${selectedBranch?.code}/${filter.currency}/${Number(
+        filter.period
+      )}/${pageInfo.pageNumber}/${pageInfo.pageSize}`
     );
 
-    return request.data;
+    console.log({ hey: request });
+
+    return request.data.data;
   };
 
   const getCurrencies = async () => {
     const request = await axios.get("/api/GetCurrency");
-
-    return request.data;
+    return request.data.filter((item) => item.homeCurrency === false);
   };
 
   const { data: currenciesLList = [], isLoading } = useQuery({
@@ -217,7 +156,7 @@ const CurrencySetupWithReset = ({ reset }) => {
     queryKey: "currencies",
   });
 
-  const { data: currencies } = useQuery({
+  const { data: currencies = [], refetch } = useQuery({
     queryKey: ["currencies", filter.currency, filter.period],
     queryFn: getCurrency,
     onSuccess: (data) => {
@@ -279,7 +218,7 @@ const CurrencySetupWithReset = ({ reset }) => {
                           width: "300px",
                         }}
                       >
-                        <option value="GHS">GHS</option>
+                        <option value="all">All</option>
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
                         <option value="YEN">YEN</option>
@@ -305,8 +244,11 @@ const CurrencySetupWithReset = ({ reset }) => {
                           width: "300px",
                         }}
                       >
-                        <option value="CURRENT">Current</option>
-                        <option value="PAST">Past</option>
+                        <option value="0">Current</option>
+                        <option value="1">This Week</option>
+                        <option value="2">This Month</option>
+                        <option value="3">This Year</option>
+                        <option value="4">All Transactions</option>
                       </select>{" "}
                     </div>
                   </div>
@@ -323,13 +265,10 @@ const CurrencySetupWithReset = ({ reset }) => {
               </CardHeader>
               <CardBody style={{ marginTop: -30 }}>
                 <EvatTable
-                  isLoading={false}
+                  isLoading={isLoading}
                   columns={columns}
-                  data={new Array(15).fill({
-                    invoiceNo: "9201921",
-                    date: new Date().toLocaleDateString(),
-                    rate: 11.3,
-                  })}
+                  data={currencies}
+                  // sortKey="transactionDate"
                   // data2={invoices}
                   // setSelectedRow={setSelectedRow}
                   // getPrintPDF={getPrintPDF}
@@ -408,10 +347,8 @@ const CurrencySetupWithReset = ({ reset }) => {
           <NewRateForm
             rate={exchangeFormData}
             currencies={currenciesLList}
-            close={() => {
-              setShowForm(false);
-              setExchangeFormData(init);
-            }}
+            close={handleClose}
+            refetchCurrencies={refetch}
           />
         )}
       </Container>

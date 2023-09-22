@@ -33,22 +33,24 @@ function MyDropzone({
     },
   });
 
-    const { user } = useAuth();
+  
+  const { user } = useAuth();
   const [importedRecords, setimportedRecords] = useState([]);
   const [header, setheader] = useState(0);
   const [first, setfirst] = useState(0);
   const [last, setlast] = useState(0);
-
+  
   React.useEffect(() => {
     setuploadedData(acceptedFiles);
   }, [acceptedFiles]);
-
+  
   const files = acceptedFiles.map((file) => (
     <li key={file.path}>
       {file.path} - {file.size} bytes
     </li>
   ));
-
+  console.log({importedRecords});
+  
   const getSheetData = (e) => {
     setSheet_Name(e.target.value);
     let sheetName = e.target.value;
@@ -96,9 +98,10 @@ function MyDropzone({
     setimportedRecords(excelSheets[0].Data);
     setlast(Number(excelSheets[0].Last.Row));
   };
+  console.log({joy: importedRecords});
 
-  const processUpload = () => {
-    let arr = importedRecords;
+
+  const processUpload = (arr) => {
     let keys = [...new Set(arr)];
     let names = keys.filter((item) => item.Column === "A");
     let prices = keys.filter((item) => item.Column === "B");
@@ -186,6 +189,7 @@ function MyDropzone({
       currencyCode: value["Currency"],
     }));
 
+    console.log({results,renderData})
     setItemsList(renderData);
     setIsSearched(true);
   };
@@ -251,7 +255,7 @@ function MyDropzone({
             color="primary"
             onClick={() => {
               setShow(false);
-              processUpload();
+              processUpload(importedRecords);
             }}
           >
             Upload

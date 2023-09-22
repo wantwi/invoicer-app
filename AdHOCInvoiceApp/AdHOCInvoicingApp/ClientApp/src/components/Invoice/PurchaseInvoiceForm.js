@@ -23,16 +23,16 @@ import { FormContext } from "components/Modals/NewPurchaseInvoice";
 import { moment } from "moment";
 import { useCustomQuery } from "hooks/useCustomQuery";
 import { useCustomPost } from "hooks/useCustomPost";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import useCustomAxios from "hooks/useCustomAxios";
 import useMultiFetchAllSettled from "hooks/useMultiFetchAllSettled";
 import useAuth from "hooks/useAuth";
-import DatePicker from "react-datepicker"
+import DatePicker from "react-datepicker";
 
 function PurchaseInvoiceForm() {
   const queryClient = useQueryClient();
   const axios = useCustomAxios();
-    const { selectedBranch, user } = useAuth();
+  const { selectedBranch, user } = useAuth();
 
   const { invoices, setInvoices } = useContext(PurchaseContext);
   const {
@@ -63,22 +63,7 @@ function PurchaseInvoiceForm() {
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
   );
 
-  //get currency
-  useCustomQuery(
-    `/api/GetCurrency`,
-    "currency",
-    "",
-    (data) => {
-      if (data.length > 0) {
-        setCurrencies(data);
-      } else {
-        setCurrencies([]);
-      }
-    },
-    (err) => {
-      // console.log({ err });
-    }
-  );
+
 
   // Get products list
 
@@ -150,7 +135,7 @@ function PurchaseInvoiceForm() {
       csttourism = 0.01 * item.price * item.quantity;
     }
 
-     if (item.itemName === "") {
+    if (item.itemName === "") {
       toast.warning("Please select an item first");
     } else if (item.quantity === "") {
       toast.warning("Please provide a value for quantity");
@@ -158,7 +143,6 @@ function PurchaseInvoiceForm() {
       toast.warning("Please provide a value for price");
     } else if (item.invoiceNumber === "") {
       toast.warning("Please provide a value for invoice number");
-    
     } else {
       let obj = {};
       let vatableAmt = 0;
@@ -259,7 +243,7 @@ function PurchaseInvoiceForm() {
   };
 
   const { mutate } = useCustomPost(
-      `/api/CreatePurchaseInvoice/${selectedBranch?.code}`,
+    `/api/CreatePurchaseInvoice/${selectedBranch?.code}`,
     "purchase-invoices",
     () => {
       toast.success("Invoice successfully saved");
@@ -272,8 +256,7 @@ function PurchaseInvoiceForm() {
     (error) => {
       // console.log({ useMutationError: error });
       toast.error(
-        error?.response?.data ||
-        "Invoice could not be saved. Please try again"
+        error?.response?.data || "Invoice could not be saved. Please try again"
       );
       setLoading(false);
     }
@@ -282,8 +265,8 @@ function PurchaseInvoiceForm() {
   const saveInvoice = async () => {
     console.log({ formData });
     if (!formData?.date) {
-      toast.warn("Invoice date is required")
-      return
+      toast.warn("Invoice date is required");
+      return;
     }
     let postData = {
       date: new Date(formData?.date).toISOString(),
@@ -295,7 +278,7 @@ function PurchaseInvoiceForm() {
       forexRate: forex,
       supplierTinghcard: formData.identity,
       invoiceNo: formData.invoiceNumber,
-        nameOfUser: user?.name,
+      nameOfUser: user?.name,
       amount: gridData.reduce((total, item) => total + item.totalPayable, 0),
       ysdcid: "",
       ysdcrecnum: formData.recNum,
@@ -326,17 +309,23 @@ function PurchaseInvoiceForm() {
   };
 
   const checkIfRatesExist = async (currency) => {
-    let issuedDate = formData.issuedDate;
+    let issuedDate = formData.date ? new Date(formData.date).toDateString() : null;
+    if (!issuedDate) {
+      toast.info("Select invoice date first");
+      return;
+    }
+    console.log({ issuedDate });
     const request = await axios.get(
-      `/api/checkIfRatesExist/${currency}/${issuedDate}`
+      `/api/checkIfRatesExist/${selectedBranch?.code}/${currency}/${issuedDate}`
     );
 
     if (request) {
       const { data } = request;
       if (data.length > 0) {
+        console.log({now: data})
         setForex(data[0].exchangeRate);
         setExchangeRate(
-          "at GHS" + data[0].exchangeRate + " per " + data[0].currencyCode
+          "at GHS" + data[0]?.exchangeRate + " per " + data[0]?.currencyCode
         );
       } else {
         toast.warning(
@@ -356,71 +345,109 @@ function PurchaseInvoiceForm() {
     } else {
       setExchangeRate("");
     }
-    };
+  };
 
-    const requstCallback = (response) => {
-        const productResponse = response[2];
-        const currencyResponse = response[1];
-        const suppliersResponse = response[0];
+  const makeCall = async (url = "") => {
+    const res = await axios.get(url);
+    return res;
+  };
 
-        if (productResponse?.status === "fulfilled") {
-            console.log({ requstCallback1: productResponse?.value.data });
-            setProductsList(productResponse?.value.data);
-        }
-        if (currencyResponse?.status === "fulfilled") {
-            console.log({ requstCallback2: currencyResponse?.value.data });
+  const res= useQueries({
+    queries: [
+      {
+        queryKey: ["purchase-products"],
+        queryFn: () => makeCall(`/api/GetProductList/${currency}`),
+        enabled: Boolean(currency),
+        cacheTime: 0,
+        onSuccess: ({ data }) => {
+          setProducts(data);
+        },
+      },
+      {
+        queryKey: ["currency-list"],
+        queryFn: () => makeCall(`/api/GetCurrency`),
+        cacheTime: 0,
+        onSuccess: ({ data }) => {
+          setCurrencies(data);
+        },
+      },
+      {
+        queryKey: ["suppliers"],
+        queryFn: () => makeCall(`/api/GetCompanySuppliers`),
+        cacheTime: 0,
+        onSuccess: ({ data }) => {
+          let filteredCustomers = data.filter(
+            (customer) => customer.status === "A"
+          );
+          setCustomers(filteredCustomers);
+          setCashCustomerTin(
+            data.find((cust) => cust.name == "cash customer")?.tin
+          );
+        },
+      },
+    ],
+  });
+  // const requstCallback = (response) => {
+  //   const productResponse = response[2];
+  //   const currencyResponse = response[1];
+  //   const suppliersResponse = response[0];
 
-            if (currencyResponse?.value.data.length > 0) {
-                setCurrencies(currencyResponse?.value.data);
-            } else {
-                setCurrencies(currenciesInit);
-            }
-        }
-        if (suppliersResponse?.status === "fulfilled") {
-            console.log({ requstCallback3: customerResponse?.value.data });
-            let filteredCustomers = customerResponse?.value.data.filter(
-                (customer) => customer.status === "A"
-            );
-            setCustomers(filteredCustomers);
-            setCashCustomerTin(
-                customerResponse?.value.data.find(
-                    (cust) => cust.name == "cash customer"
-                )?.tin
-            );
-        }
-    };
+  //   if (productResponse?.status === "fulfilled") {
+  //     console.log({ requstCallback1: productResponse?.value.data });
+  //     setProductsList(productResponse?.value.data);
+  //   }
+  //   if (currencyResponse?.status === "fulfilled") {
+  //     console.log({ requstCallback2: currencyResponse?.value.data });
 
-    const {
-        data,
-        error,
-        isLoading: multifLoading,
-        setUrls,
-    } = useMultiFetchAllSettled(
-        [
-            `/api/GetCompanySuppliers`,
-            "/api/GetCurrency",
-            `/api/GetProductList/${currency}`,
-        ],
-        requstCallback
-    );
+  //     if (currencyResponse?.value.data.length > 0) {
+  //       console.log("true");
+  //       setCurrencies(currencyResponse?.value.data);
+  //     } else {
+  //       console.log({ request: "no currency like that", currencyResponse });
+  //       setCurrencies(currenciesInit);
+  //     }
+  //   }
+  //   if (suppliersResponse?.status === "fulfilled") {
+  //     console.log({ requstCallback3: customerResponse?.value.data });
+  //     let filteredCustomers = customerResponse?.value.data.filter(
+  //       (customer) => customer.status === "A"
+  //     );
+  //     setCustomers(filteredCustomers);
+  //     setCashCustomerTin(
+  //       customerResponse?.value.data.find(
+  //         (cust) => cust.name == "cash customer"
+  //       )?.tin
+  //     );
+  //   }
+  // };
 
-  useEffect(() => {
-    // console.log('Currency', currency)
-      setFormData((prev) => ({ ...prev, currency: currency }));
-      setUrls([
-          `/api/GetCompanySuppliers`,
-          "/api/GetCurrency",
-          `/api/GetProductList/${currency}`,
-      ])
-    if (currency !== "") {
-      // getProducts()
-    }
-  }, [currency]);
+  // const {
+  //   data,
+  //   error,
+  //   isLoading: multifLoading,
+  //   setUrls,
+  // } = useMultiFetchAllSettled(
+  //   [
+  //     `/api/GetCompanySuppliers`,
+  //     "/api/GetCurrency",
+  //     `/api/GetProductList/${currency}`,
+  //   ],
+  //   requstCallback
+  // );
 
+  // useEffect(() => {
+  //   // console.log('Currency', currency)
+  //   setFormData((prev) => ({ ...prev, currency: currency }));
+  //   setUrls([
+  //     `/api/GetCompanySuppliers`,
+  //     "/api/GetCurrency",
+  //     `/api/GetProductList/${currency}`,
+  //   ]);
+  //   if (currency !== "") {
+  //     // getProducts()
+  //   }
+  // }, [currency]);
 
-
-
-  
 
   return (
     <>
@@ -445,8 +472,7 @@ function PurchaseInvoiceForm() {
             <Row style={{ marginBottom: 10 }}>
               <Col lg="12">
                 <label className="form-control-label label-mb-0">
-                  Supplier{" "}<code style={{ color: "darkred" }}>
-                    *</code>
+                  Supplier <code style={{ color: "darkred" }}>*</code>
                 </label>
                 <Autocomplete
                   suggestions={customers}
@@ -477,9 +503,10 @@ function PurchaseInvoiceForm() {
             </Row>
             <Row style={{ marginBottom: 10 }}>
               <Col lg="6">
-                <label htmlFor="invoiceDate" className="form-control-label">Invoice Date{" "}<code style={{ color: "darkred" }}>
-                  *</code></label>
-                  <DatePicker
+                <label htmlFor="invoiceDate" className="form-control-label">
+                  Invoice Date <code style={{ color: "darkred" }}>*</code>
+                </label>
+                <DatePicker
                   id="dueDate"
                   maxDate={new Date()}
                   placeholderText="Due date"
@@ -489,13 +516,12 @@ function PurchaseInvoiceForm() {
                   dateFormat="yyyy/MM/dd"
                   selected={formData.date}
                   onChange={(e) => {
-                    
                     // console.log({e})
-                    setFormData({ ...formData, date: e })}
-                  }
+                    setFormData({ ...formData, date: e });
+                  }}
                   style={{ height: 29, padding: "0px 5px" }}
                 />
-                  {/* <DatePicker
+                {/* <DatePicker
                   id="invoiceDate"
                   maxDate={new Date().toDateString()}
                   placeholderText="Invoice date"
@@ -515,7 +541,6 @@ function PurchaseInvoiceForm() {
                   }}
                   style={{ height: 29, padding: "0px 5px" }}
                 /> */}
-               
               </Col>
               <Col lg="6">
                 <label className="form-control-label ">
@@ -544,8 +569,9 @@ function PurchaseInvoiceForm() {
 
             <Row style={{ marginBottom: 10 }}>
               <Col lg="6">
-                <label className="form-control-label ">Invoice No{" "}<code style={{ color: "darkred" }}>
-                  *</code></label>
+                <label className="form-control-label ">
+                  Invoice No <code style={{ color: "darkred" }}>*</code>
+                </label>
                 <Input
                   className="form-control font-sm"
                   placeholder="Invoice No."
@@ -561,7 +587,7 @@ function PurchaseInvoiceForm() {
               </Col>
 
               <Col lg="6">
-                <label className="form-control-label">E-VAT Receipt No{" "}</label>
+                <label className="form-control-label">E-VAT Receipt No </label>
                 <Input
                   className="form-control font-sm"
                   placeholder="Receipt No."
@@ -609,8 +635,7 @@ function PurchaseInvoiceForm() {
                       className="form-control-label label-mb-0"
                       htmlFor="input-email"
                     >
-                      Item<code style={{ color: "darkred" }}>
-                  *</code>
+                      Item<code style={{ color: "darkred" }}>*</code>
                     </label>
                     <AutocompleteItems
                       gridData={gridData}
@@ -627,8 +652,7 @@ function PurchaseInvoiceForm() {
                 <Row style={{ marginBottom: 10 }}>
                   <Col lg="6">
                     <label className="form-control-label " htmlFor="input-city">
-                      Quantity<code style={{ color: "darkred" }}>
-                  *</code>
+                      Quantity<code style={{ color: "darkred" }}>*</code>
                     </label>
                     <Input
                       disabled={disabled}
@@ -644,7 +668,12 @@ function PurchaseInvoiceForm() {
                           quantity: e.target.value,
                         })
                       }
-                      onBlur={()=>setFormData(prev=>({...prev, quantity: Number(formData.quantity).toFixed(4)}))}
+                      onBlur={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          quantity: Number(formData.quantity).toFixed(4),
+                        }))
+                      }
                       bsSize="sm"
                     />
                   </Col>
@@ -654,8 +683,8 @@ function PurchaseInvoiceForm() {
                       htmlFor="input-country"
                     >
                       Price({formData?.currency}) {"-"}
-                      {formData.isTaxInclusive ? "Tax Incl." : "Tax Excl."}<code style={{ color: "darkred" }}>
-                  *</code>
+                      {formData.isTaxInclusive ? "Tax Incl." : "Tax Excl."}
+                      <code style={{ color: "darkred" }}>*</code>
                     </label>
                     <Input
                       // disabled={disabled}
@@ -669,11 +698,15 @@ function PurchaseInvoiceForm() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                            price: e.target.value,
+                          price: e.target.value,
                         })
                       }
-                      onBlur={()=>setFormData(prev=>({...prev, price: Number(formData.price).toFixed(4)}))}
-
+                      onBlur={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          price: Number(formData.price).toFixed(4),
+                        }))
+                      }
                     />
                   </Col>
                 </Row>
@@ -699,7 +732,7 @@ function PurchaseInvoiceForm() {
                           })
                         }
                         value={formData?.isTaxable}
-                      // disabled
+                        // disabled
                       />
                       &nbsp; &nbsp;
                       <label htmlFor="isTaxable" className="form-control-label">
@@ -719,7 +752,7 @@ function PurchaseInvoiceForm() {
                           })
                         }
                         value={formData?.isTaxInclusive}
-                      // disabled
+                        // disabled
                       />
                       &nbsp; &nbsp;
                       <label
@@ -777,15 +810,17 @@ function PurchaseInvoiceForm() {
                     </Button>
                   </Col>
                   <Col lg="6">
-                    {gridData?.length > 0 && <Button
-                      color="success"
-                      type="button"
-                      onClick={saveInvoice}
-                      style={{ width: "100%" }}
-                      size="sm"
-                    >
-                      SUBMIT INVOICE
-                    </Button>}
+                    {gridData?.length > 0 && (
+                      <Button
+                        color="success"
+                        type="button"
+                        onClick={saveInvoice}
+                        style={{ width: "100%" }}
+                        size="sm"
+                      >
+                        SUBMIT INVOICE
+                      </Button>
+                    )}
                   </Col>
                 </Row>
                 <Row></Row>

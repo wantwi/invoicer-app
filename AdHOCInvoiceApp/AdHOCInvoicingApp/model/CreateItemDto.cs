@@ -13,6 +13,7 @@ namespace AdHOCInvoicingApp.model
         public decimal? TaxRate { get; set; }
         public decimal? Price { get; set; }
         public string? CompanyId { get; set; }
+        public string? BranchCode { get; set; }
     }
 
     public class UpdateItemDto
@@ -34,6 +35,7 @@ namespace AdHOCInvoicingApp.model
     {
         public string currencyCode { get; set; }
         public string? companyId { get; set; }
+        public string? branchCode { get; set; }
         public string transactionDate { get; set; }
         public double exchangeRate { get; set; }
     }

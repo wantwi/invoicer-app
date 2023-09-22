@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState, useRef } from "react";
 
-import UserHeader from "components/Headers/UserHeader"
+import UserHeader from "components/Headers/UserHeader";
 import {
   Button,
   Card,
@@ -12,14 +12,14 @@ import {
   Input,
   Modal,
   // Label,
-} from "reactstrap"
-import BoldReportViewer from "components/reportViewer/BoldReportViewer"
+} from "reactstrap";
+import BoldReportViewer from "components/reportViewer/BoldReportViewer";
 
 // import { CustomAxios } from "utils/CustomAxios";
 
-import * as Yup from "yup"
-import useCustomAxios from "hooks/useCustomAxios"
-import DatePicker from "react-datepicker"
+import * as Yup from "yup";
+import useCustomAxios from "hooks/useCustomAxios";
+import DatePicker from "react-datepicker";
 import { useAuth } from "hooks/useAuth";
 
 const reportList = [
@@ -47,57 +47,72 @@ const reportList = [
     value: "PeriodicItemReport",
     name: "Periodic Item Report",
   },
-]
+];
 
-let schemaOpt = {}
-let init = {}
-let schema
+let schemaOpt = {};
+let init = {};
+let schema;
+
+function toggle(source) {
+  var checkboxes = document.querySelectorAll('#check-branch"]');
+  for (var i = 0; i < checkboxes.length; i++) {
+    if (checkboxes[i] != source) checkboxes[i].checked = source.checked;
+  }
+}
 
 const Reports = () => {
-  const CustomAxios = useCustomAxios()
-  const [reportPath, setReportPath] = useState("")
-  const [showReport, setShowReport] = useState(false)
-  const [reportHight, setreportHight] = useState("auto")
-  const [reportName, setReportName] = useState("")
-  const [reportParam, setReportParam] = useState({})
-  const [reportParams, setReportParams] = useState([])
-  const [intialValue, setInitialValue] = useState({})
-  const [showBtn, setshowBtn] = useState(true)
-    const submitBtn = useRef(null)
-    const { user } = useAuth();
+  const CustomAxios = useCustomAxios();
+  const [reportPath, setReportPath] = useState("");
+  const [showReport, setShowReport] = useState(false);
+  const [reportHight, setreportHight] = useState("auto");
+  const [reportName, setReportName] = useState("");
+  const [reportParam, setReportParam] = useState({});
+  const [reportParams, setReportParams] = useState([]);
+  const [intialValue, setInitialValue] = useState({});
+  const [showBtn, setshowBtn] = useState(true);
+  const submitBtn = useRef(null);
+  const { user } = useAuth();
+  const [setselectBranches, setSetselectBranches] = useState("");
 
+  const [showReportPramasModal, setShowReportPramasModal] = useState(false);
 
-  const [showReportPramasModal, setShowReportPramasModal] = useState(false)
+  // useEffect(() => {
+  //   toggle()
+
+  //   return () => {
+  //     second
+  //   }
+  // }, [third])
 
   const getReportParameters = async (name) => {
-    let params = {}
-    setReportPath(name)
+    let params = {};
+    setReportPath(name);
     // const { data } = await CustomAxios.get(
     //   `/ReportMetadata/Get${name.slice(2)}Meta`
     // )
-    const { data } = await CustomAxios.get(`/api/GetReportMeta/Get${name}Meta`)
+    const { data } = await CustomAxios.get(`/api/GetReportMeta/Get${name}Meta`);
 
     // console.log({ data });
 
     let userDetails = JSON.parse(
       sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-    )
+    );
 
     if (data) {
-      setReportParams(data)
+      setReportParams(data);
 
       data.forEach((x) => {
         if (x.paramName.toLowerCase() === "userid") {
-            params[`${x.paramName}`] = user.sub
+          params[`${x.paramName}`] = user.sub;
         } else {
-          params[`${x.paramName}`] = ""
+          params[`${x.paramName}`] = "";
         }
-      })
+      });
 
       // console.log({ initval: params })
 
       // setInitialValue(params);
-      setReportParam(params)
+      setReportParam(params);
 
       data.forEach((x) => {
         schemaOpt[`${x.paramName}`] =
@@ -105,65 +120,64 @@ const Reports = () => {
             ? Yup.date().required(`${x.placeholder} is required`)
             : x.type.toLowerCase === "number"
             ? Yup.number().required(`${x.placeholder} is required`)
-            : Yup.string().required(`${x.placeholder} is required`)
-      })
+            : Yup.string().required(`${x.placeholder} is required`);
+      });
 
-      schema = Yup.object().shape(schemaOpt)
+      schema = Yup.object().shape(schemaOpt);
 
-      setReportParams(data)
+      console.log({datal:data})
+
+      setReportParams(data);
     }
-  }
+  };
 
   const handleChange = (e) => {
-    setReportName(e.target.value)
+    setReportName(e.target.value);
 
-    getReportParameters(e.target.value)
-    e.target.value.length > 0 ? setshowBtn(true) : setshowBtn(false)
+    getReportParameters(e.target.value);
+    e.target.value.length > 0 ? setshowBtn(true) : setshowBtn(false);
 
-    closeModal()
-  }
+    closeModal();
+  };
 
   const handleSubmit = (values) => {
     if (isNotNull()) {
-      setShowReportPramasModal(false)
-      setShowReport(true)
+      setShowReportPramasModal(false);
+      setShowReport(true);
     }
-  }
+  };
 
   const closeModal = () => {
-    setShowReportPramasModal(false)
-    setShowReport(false)
+    setShowReportPramasModal(false);
+    setShowReport(false);
 
-    setreportHight("auto")
-    setshowBtn(true)
-  }
+    setreportHight("auto");
+    setshowBtn(true);
+  };
 
   const getReport = () => {
-    setShowReportPramasModal(true)
-    setreportHight("70vh")
-    setshowBtn(false)
-
-  }
-
+    setShowReportPramasModal(true);
+    setreportHight("70vh");
+    setshowBtn(false);
+  };
 
   const handleFormChange = (e) => {
     setReportParam((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }))
-  }
+    }));
+  };
 
   const isNotNull = () => {
-    const isNull = Object.values(reportParam).filter((x) => x === "")
+    const isNull = Object.values(reportParam).filter((x) => x === "");
 
-    return isNull.length === 0 ? true : false
-  }
-
+    return isNull.length === 0 ? true : false;
+  };
 
   useEffect(() => {
-    closeModal()
-    return () => {}
-  }, [reportPath])
+    closeModal();
+    return () => {};
+  }, [reportPath]);
 
   return (
     <>
@@ -266,10 +280,10 @@ const Reports = () => {
           >
             <span aria-hidden={true}>×</span>
           </button>
-              </div>
-              <div className="modal-body" id="report-modal">
+        </div>
+        <div className="modal-body" id="report-modal">
           {reportParams.map((x, i) => {
-            const { type, isRequired, placeholder, value, paramName } = x
+            const { type, isRequired, placeholder, value, paramName } = x;
             return (
               <>
                 {
@@ -298,7 +312,7 @@ const Reports = () => {
                             setReportParam((prev) => ({
                               ...prev,
                               [paramName]: e,
-                            }))
+                            }));
                           }}
                           style={{ height: 29, padding: "0px 5px" }}
                         />
@@ -322,8 +336,23 @@ const Reports = () => {
                   </FormGroup>
                 }
               </>
-            )
+            );
           })}
+          {/* <a href="">Selected branches </a>
+          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
+          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
+          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
+          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
+          {/* {
+            
+          }
+                    <select class="select" multiple>
+                      <option value="1">One</option>
+                      <option value="2">Two</option>
+                      <option value="3">Three</option>
+                      <option value="4">Four</option>
+                      <option value="5">Five</option>
+                    </select> */}
           <Row>
             <Col xs={6}>
               <Button
@@ -351,14 +380,14 @@ const Reports = () => {
         </div>
       </Modal>
     </>
-  )
-}
+  );
+};
 
-export default Reports
+export default Reports;
 
 const styles = {
   formWrapper: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax('150px', '1fr'))",
   },
-}
+};

@@ -31,6 +31,7 @@ const useMultiFetchAllSettled = (initialUrl, callback) => {
       setIsLoading(false)
       setUrls([])
     } catch (error) {
+      
       setError(error);
       setIsLoading(false)
       setUrls([])
@@ -44,6 +45,8 @@ const useMultiFetchAllSettled = (initialUrl, callback) => {
       executeFetch();
     }
   }, [urls]);
+
+  console.log({data});
 
  
 

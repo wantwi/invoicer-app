@@ -449,7 +449,7 @@ function InvoiceForm({ refetch }) {
   const checkIfRatesExist = async (currency) => {
     let today = new Date().toISOString();
     const request = await axios.get(
-      `/api/checkIfRatesExist/${currency}/${today}`
+      `/api/checkIfRatesExist/${selectedBranch?.code}/${currency}/${today}`
     );
     // "(GHS" + data[0].exchangeRate + " / " + data[0].currencyCode
     if (request) {

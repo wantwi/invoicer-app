@@ -81,10 +81,10 @@ const BoldReportViewer = ({
     localStorage.setItem("fromBold", JSON.stringify(args))
     console.log({ args });
 
-    // args?.headerReq.push({
-    //   key: "Authorization",
-    //   value: `Bearer ${auth?.access_token}`,
-    // });
+    args?.headerReq.push({
+      key: "Authorization",
+      value: `Bearer ${auth?.access_token}`,
+    });
   
   };
 
@@ -97,7 +97,7 @@ const BoldReportViewer = ({
           reportServiceUrl={process.env.REACT_APP_REPORTSERVICEURL}
       reportPath={`${REACT_APP_REPORTSERVERPath}${reportPath}`}
       onShowError={onShowError}
-      //ajaxBeforeLoad={onAjaxRequest}
+      // ajaxBeforeLoad={onAjaxRequest}
 
       toolbarSettings={toolbarSettings}
       parameters={renderD()}

@@ -6,7 +6,7 @@ const Login = () => {
   const { login } = useAuth();
   const loginRef = useRef();
   useEffect(() => {
-    //loginRef?.current.click()
+    loginRef?.current.click()
   }, []);
 
   return (

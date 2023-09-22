@@ -97,14 +97,29 @@ namespace AdHOCInvoicingApp.Controllers
             return Ok(response);
 
         }
+        
+        [HttpGet("GetRates/{branchCode}/{currencyCode}/{period}/{pageNumber}/{pageSize}")]
+        public async Task<IActionResult> GetRates( string branchCode, string currencyCode, int period, int pageNumber, int pageSize)
+        {
+            if (currencyCode == "all")
+            {
+                currencyCode = "";
+            }
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v4/TransactionCurrency/{user.Sub}/{branchCode}?currencyCode={currencyCode}&PageNumber={pageNumber}&PageSize={pageSize}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
 
 
-         [HttpGet("checkIfRatesExist/{currency}/{issuedDate}")]
-        public async Task<IActionResult> checkIfRatesExist(string currency, string issuedDate)
+         [HttpGet("checkIfRatesExist/{branchCode}/{currency}/{issuedDate}")]
+        public async Task<IActionResult> checkIfRatesExist(string currency, string issuedDate, string branchCode)
         {
             var user = await UserInfo();
 
-            string url = $"{EvatAdHOCBaseUrl}v4/TransactionCurrency/{user.Sub}/{issuedDate}?currencyCode={currency}";
+            string url = $"{EvatAdHOCBaseUrl}v4/TransactionCurrency/{user.Sub}/{branchCode}/{issuedDate}/{currency}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -223,14 +238,15 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-        [HttpPost("CreateItem")]
-        public async Task<IActionResult> CreateItem([FromBody] List<CreateItemDto> data)
+        [HttpPost("CreateItem/{branchCode}")]
+        public async Task<IActionResult> CreateItem([FromBody] List<CreateItemDto> data, string branchCode)
         {
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
             for (int i = 0; i < data.Count; i++)
             {
                 data[i].CompanyId = user.Sub;
+                data[i].BranchCode = branchCode;
             }
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
@@ -255,14 +271,15 @@ namespace AdHOCInvoicingApp.Controllers
             }
         }
 
-        [HttpPost("AddExcahngeRate")]
-        public async Task<IActionResult> AddExcahngeRate([FromBody] List<ExchangeRateDto> data)
+        [HttpPost("AddExchangeRate/{branchCode}")]
+        public async Task<IActionResult> AddExcahngeRate([FromBody] List<ExchangeRateDto> data, string branchCode)
         {
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
             for (int i = 0; i < data.Count; i++)
             {
                 data[i].companyId = user.Sub;
+                data[i].branchCode = branchCode;
             }
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());

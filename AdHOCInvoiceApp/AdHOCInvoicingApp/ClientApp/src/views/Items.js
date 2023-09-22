@@ -38,13 +38,8 @@ import useAuth from "hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 
 const Items = () => {
-  const { getUser, user, logout } = useAuth();
   const queryClient = useQueryClient();
-  useEffect(async () => {
-    await getUser();
-
-    return () => {};
-  }, []);
+  const { selectedBranch, user } = useAuth();
 
   const [formData, setFormData] = useState({
     companyId: user?.sub,
@@ -165,7 +160,7 @@ const Items = () => {
   };
 
   const { mutate, isLoading: isPostLoading } = useCustomPost(
-    `/api/CreateItem`,
+    `/api/CreateItem/${selectedBranch?.code}`,
     "items",
     postSuccess,
     postError
@@ -205,7 +200,6 @@ const Items = () => {
           currencyCode: item.currencyCode,
           taxRate: item.istaxable ? 0.125 : 0,
           price: Number(item.price),
-          companyId: user?.sub,
           // hasTourismLevy: item.hasTourismLevy,
         };
       });
@@ -280,7 +274,7 @@ const Items = () => {
   };
 
   const { mutate: bultData, isLoading: isPutLoading } = useCustomPost(
-    `/api/CreateItem`,
+    `/api/CreateItem/${selectedBranch?.code}`,
     "items",
     () => {
       setLoading(false);
@@ -321,6 +315,8 @@ const Items = () => {
     bultData(postData);
   };
 
+  console.log({itemsList});
+
   const query = useCustomQuery(
     `/api/GetCurrency`,
     "currency",
@@ -343,6 +339,15 @@ const Items = () => {
       console.log(err);
     }
   );
+
+  useEffect(() => {
+    query.refetch()
+  
+    return () => {
+      
+    }
+  }, [])
+  
 
   useEffect(() => {
     if (isTaxInclusive === true) {

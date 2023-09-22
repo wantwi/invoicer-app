@@ -28,6 +28,7 @@ const ItemsUploadExcel = ({ show, setShow, setItemsList, setIsSearched }) => {
       reader.onload = (e) => {
         // Do whatever you want with the file contents
         let data = e.target.result;
+        console.log({poi: data});
         let workbook = XLSX.read(data, {
           type: "binary",
         });

@@ -29,6 +29,7 @@ import useCustomAxios from "hooks/useCustomAxios";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 import { useMutation } from "@tanstack/react-query";
+import useAuth from "hooks/useAuth";
 
 let userDetails = JSON.parse(
   sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -41,10 +42,10 @@ const init = {
   date: "",
 };
 
-export const NewRateForm = ({ close, currencies, rate }) => {
+export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
   const [exchangeFormData, setExchangeFormData] = useState(rate);
 
-  console.log("djks", currencies);
+  const { selectedBranch } = useAuth();
 
   const [loading, setLoading] = useState(false);
 
@@ -55,13 +56,15 @@ export const NewRateForm = ({ close, currencies, rate }) => {
 
   const axios = useCustomAxios();
   const postExRate = (postData) => {
-    axios.post("/api/AddExcahngeRate", postData);
+    axios.post("/api/AddExchangeRate/"+selectedBranch?.code, postData);
   };
   const { mutate, isLoading } = useMutation({
     mutationFn: postExRate,
     onSuccess: () => {
-      toast.success("Exchange Rates Successfukky Saved");
+      toast.success("Exchange Rates Successfully saved");
       setCurrencyList([]);
+      refetchCurrencies()
+      close()
     },
     onError: (error) => {
       console.log({ error });
@@ -112,7 +115,8 @@ export const NewRateForm = ({ close, currencies, rate }) => {
   };
 
   const handleSaveList = () => {
-    let postData = currencyList.map((item) => {
+    console.log({currencyListToPost});
+    let postData = currencyListToPost.map((item) => {
       return {
         currencyCode: item.iso,
 
@@ -283,7 +287,7 @@ export const NewRateForm = ({ close, currencies, rate }) => {
                     <code style={{ color: "darkred" }}>*</code>
                     <DatePicker
                       id="invoiceDate"
-                      // maxDate={new Date()}
+                      maxDate={new Date()}
                       calendarClassName="rate-picker-date"
                       placeholderText=""
                       className="form-control font-sm"
@@ -291,14 +295,13 @@ export const NewRateForm = ({ close, currencies, rate }) => {
                       dateFormat="yyyy/MM/dd"
                       selected={
                         exchangeFormData?.date
-                          ? moment(exchangeFormData?.date).toDate()
-                          : moment(
-                              new Date().toLocaleDateString("en-gb")
-                            ).toDate()
+                          // ? moment(exchangeFormData?.date).toDate()
+                          // : moment(
+                          //     new Date().toLocaleDateString("en-gb")
+                          //   ).toDate()
                       }
                       // minDate={new Date()}
                       onChange={(e) => {
-                        console.log("llk",e);
                         setExchangeFormData((prev) => ({
                           ...prev,
 
@@ -464,6 +467,7 @@ export const NewRateForm = ({ close, currencies, rate }) => {
                         onClick={() => {
                           setCurrencyList([]);
                           setShowForm(false);
+                          close()
                         }}
                       >
                         Cancel
