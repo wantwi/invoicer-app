@@ -391,6 +391,11 @@ a {
     height: 100%
 }
 
+.sideBar>* {
+    font-family: Open Sans, sans-serif, !important;
+    font-weight: 700;
+}
+
 .sidebar li .submenu {
     list-style: none;
     margin: 0;

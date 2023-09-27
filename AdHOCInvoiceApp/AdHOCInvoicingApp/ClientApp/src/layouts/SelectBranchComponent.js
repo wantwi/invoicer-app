@@ -48,9 +48,12 @@ const SelectBranchComponent = (props) => {
     );
   }
 
-  console.log({
-    ll: localStorage.getItem(process.env.REACT_APP_OIDC_USER + "BRAMCH_NAME"),
-  });
+  console.log(
+    {
+      ll: localStorage.getItem(process.env.REACT_APP_OIDC_USER + "BRAMCH_NAME"),
+    },
+    { selectedBranch, branches }
+  );
 
   return (
     <>
@@ -77,8 +80,8 @@ const SelectBranchComponent = (props) => {
               {branches?.map((branch) => {
                 return (
                   <>
-                    <option className="form-control" value={branch?.branchId}>
-                      {branch?.branchName}
+                    <option className="form-control" value={branch?.code}>
+                      {branch?.name}
                     </option>
                   </>
                 );
@@ -88,23 +91,24 @@ const SelectBranchComponent = (props) => {
               <button
                 className="btn btn-primary"
                 onClick={(e) => {
-                  localStorage.setItem(
-                    process.env.REACT_APP_OIDC_USER + "BRAMCH_NAME",
+                console.log("it's already called");
+                localStorage.setItem(
+                  process.env.REACT_APP_OIDC_USER + "BRAMCH_NAME",
+                  branchRef?.current?.options[
+                    branchRef?.current?.selectedIndex
+                  ]?.value
+                );
+                setSelectedBranch({
+                  branchName:
                     branchRef?.current?.options[
                       branchRef?.current?.selectedIndex
-                    ]?.value
-                  );
-                  setSelectedBranch({
-                    branchName:
-                      branchRef?.current?.options[
-                        branchRef?.current?.selectedIndex
-                      ]?.innerText,
-                    branchId:
-                      branchRef?.current?.options[
-                        branchRef?.current?.selectedIndex
-                      ]?.value,
-                  });
-                }}
+                    ]?.innerText,
+                  branchId:
+                    branchRef?.current?.options[
+                      branchRef?.current?.selectedIndex
+                    ]?.value,
+                });
+              }}
               >
                 Continue
               </button>

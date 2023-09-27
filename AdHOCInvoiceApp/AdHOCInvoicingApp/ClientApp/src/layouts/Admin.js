@@ -137,6 +137,8 @@ const Admin = (props) => {
     });
   };
 
+  console.log({hey:selectedBranch});
+
   const getBrandText = (path) => {
     for (let i = 0; i < routes.length; i++) {
       if (
@@ -179,7 +181,7 @@ const Admin = (props) => {
     )
   }
 
-  if ( !selectedBranch?.branchId ) {
+  if ( !selectedBranch?.code ) {
 
       return (
           <SelectBranchComponent />

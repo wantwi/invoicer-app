@@ -11,6 +11,7 @@ const BranchCompo = ({ loggingOut = false }) => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
+    console.log("click is called")
     localStorage.setItem(
       process.env.REACT_APP_URL + "BRANCH_VALUE",
       branchRef?.current?.options[branchRef?.current?.selectedIndex]?.value
