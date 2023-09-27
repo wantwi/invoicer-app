@@ -179,7 +179,7 @@ const Admin = (props) => {
     )
   }
 
-  if ( !selectedBranch?.code ) {
+  if ( !selectedBranch?.branchId ) {
 
       return (
           <SelectBranchComponent />

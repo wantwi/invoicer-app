@@ -21,6 +21,7 @@ import * as Yup from "yup";
 import useCustomAxios from "hooks/useCustomAxios";
 import DatePicker from "react-datepicker";
 import { useAuth } from "hooks/useAuth";
+import { MultiSelect } from "react-multi-select-component";
 
 const reportList = [
   { value: "JournalInvoiceReport", name: "Invoice Journal Report" },
@@ -71,10 +72,11 @@ const Reports = () => {
   const [intialValue, setInitialValue] = useState({});
   const [showBtn, setshowBtn] = useState(true);
   const submitBtn = useRef(null);
-  const { user } = useAuth();
-  const [setselectBranches, setSetselectBranches] = useState("");
+  const { user, getBranches, branches } = useAuth();
+  const [selectBranches, setSetselectBranches] = useState([]);
 
   const [showReportPramasModal, setShowReportPramasModal] = useState(false);
+  console.log({ branches });
 
   // useEffect(() => {
   //   toggle()
@@ -83,6 +85,8 @@ const Reports = () => {
   //     second
   //   }
   // }, [third])
+
+  console.log({selectBranches});
 
   const getReportParameters = async (name) => {
     let params = {};
@@ -125,13 +129,15 @@ const Reports = () => {
 
       schema = Yup.object().shape(schemaOpt);
 
-      console.log({datal:data})
+      console.log({ datal: data });
 
       setReportParams(data);
     }
   };
 
   const handleChange = (e) => {
+    setReportParams([])
+    setSetselectBranches([])
     setReportName(e.target.value);
 
     getReportParameters(e.target.value);
@@ -144,6 +150,7 @@ const Reports = () => {
     if (isNotNull()) {
       setShowReportPramasModal(false);
       setShowReport(true);
+
     }
   };
 
@@ -250,7 +257,7 @@ const Reports = () => {
               <CardBody className="mt--1">
                 {showReport ? (
                   <BoldReportViewer
-                    reportParam={reportParam}
+                    reportParam={{...reportParam, BranchCode:selectBranches.map(x => x?.value).join(",")}}
                     reportPath={reportPath}
                     setInitialValue={setInitialValue}
                     setShowReport={setShowReport}
@@ -261,6 +268,7 @@ const Reports = () => {
           </Col>
         </Row>
       </div>
+
       <Modal
         // style={{ width: '150%', height: '600px' }}
         className="modal-dialog-centered modal-md"
@@ -281,7 +289,8 @@ const Reports = () => {
             <span aria-hidden={true}>×</span>
           </button>
         </div>
-        <div className="modal-body" id="report-modal">
+        {
+          reportParams.length>0?  <div className="modal-body" id="report-modal">
           {reportParams.map((x, i) => {
             const { type, isRequired, placeholder, value, paramName } = x;
             return (
@@ -338,21 +347,22 @@ const Reports = () => {
               </>
             );
           })}
-          {/* <a href="">Selected branches </a>
-          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
-          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
-          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
-          <input type="checkbox" name="" id="check-branch" value={"Dansoman"} >Dansaoman</input>
-          {/* {
-            
-          }
-                    <select class="select" multiple>
-                      <option value="1">One</option>
-                      <option value="2">Two</option>
-                      <option value="3">Three</option>
-                      <option value="4">Four</option>
-                      <option value="5">Five</option>
-                    </select> */}
+          <Row>
+            <Col>
+            <h3>Branch</h3>
+              <MultiSelect
+                options={branches.map((x) => ({
+                  label: x?.name,
+                  value: x?.code,
+                }))}
+                value={selectBranches}
+                onChange={setSetselectBranches}
+                labelledBy="Select"
+              />
+            </Col>
+          </Row>
+          <br />
+
           <Row>
             <Col xs={6}>
               <Button
@@ -377,7 +387,9 @@ const Reports = () => {
               </Button>
             </Col>
           </Row>
-        </div>
+        </div>: 'Loading report parameters...'
+        }
+       
       </Modal>
     </>
   );

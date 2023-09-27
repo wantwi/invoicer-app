@@ -7,8 +7,10 @@ export const useAuth = () => useContext(AuthContext);
 
 let branchName = localStorage.getItem(
   process.env.REACT_APP_URL + "BRANCH_NAME"
-);
-let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE");
+) || "";
+let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || "";
+
+console.log({branchName,branchId});
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
     branchId,
   });
 
-  console.log({ selectedBranch });
+
 
   const [user, setUser] = useState();
   const axios = useCustomAxios();

@@ -27,6 +27,8 @@ const BoldReportViewer = ({
 
   const [params, setparams] = useState([]);
 
+  console.log({reportParam});
+
   // var parameters = [{
   //   name: 'SalesOrderNumber',
   //   labels: ['SO50751'],
