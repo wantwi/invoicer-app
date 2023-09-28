@@ -11913,3 +11913,7 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 .input-slider-value-output.right:after {
   right: 10px;
   left: auto; }
+
+  span{
+    font-family: Open Sans, sans-serif !important;
+  }

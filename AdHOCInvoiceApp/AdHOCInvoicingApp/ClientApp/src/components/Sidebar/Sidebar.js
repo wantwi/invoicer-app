@@ -130,7 +130,7 @@ const Sidebar = (props) => {
               <span
                 className={isActive ? "isActive "+iconPath : "isPending "+iconPath}
                 onClick={toggle}
-                style={{ marginBottom: "1rem" }}
+                style={{ marginBottom: "0.5rem" }}
               >
                 <span className="pl-1" style={{display:"inline-block"}}>
 
@@ -147,9 +147,9 @@ const Sidebar = (props) => {
         <span
           // color="primary"
           onClick={toggle}
-          style={{ marginBottom: "1rem" }}
+          style={{ marginBottom: "0.5rem", display:"flex", justifyContent:"space-between", width:"95%", cursor:"pointer" }}
         >
-          {name}
+          <span>{name}</span>
           {isOpen ? <FaChevronDown /> : <FaChevronUp />}
         </span>
         <Collapse isOpen={isOpen}>
@@ -159,7 +159,7 @@ const Sidebar = (props) => {
                 to={layout + sub + items[key]?.navicationPath}
                 tag={NavLinkRRD}
                 onClick={closeCollapse}
-                activeStyle={{ color: "red" }}
+                //activeStyle={{ color: "red" }}
                 // activeClassName="active"
               >
                 <i className={items[key]?.icon} />
@@ -169,7 +169,7 @@ const Sidebar = (props) => {
           ))}
           <div
             className="d-flex"
-            style={{ flexDirection: "column", marginLeft: "10px" }}
+            style={{ flexDirection: "column", paddingLeft: "10px", background:"#eff0f3", width:"95%" }}
           >
             {children}
           </div>

@@ -2,3 +2,11 @@
   background-color: #1e40af;
   height: 100%;
 }
+
+.navbar-nav > div{
+  background-color: red !important;
+}
+
+/* .navbar-collapse-header > span{
+  font-family: Open Sans, sans-serif !important;
+} */
