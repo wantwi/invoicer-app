@@ -448,21 +448,7 @@ const Index = () => {
                         </Form>
                       </div>
                       <div className="col text-right mt-0">
-                        <Button
-                          className="badge-success"
-                          onClick={() => {
-                            setOpen((prev) => true);
-                            // setrefundItems(invoice)
-                          }}
-                          title="Refund"
-                        >
-                          <img
-                            src={refund}
-                            alt="refund"
-                            style={{ height: 20 }}
-                          />{" "}
-                          Refund Invoice
-                        </Button>
+                        
                         <Button
                           color="primary"
                           //href='#pablo'
@@ -575,30 +561,7 @@ const Index = () => {
                 setShowNewInvoiceModal={setShowNewInvoiceModal}
               />
             ) : null}
-            <Prompt
-              refundType={refundType}
-              refundTypeForPost={refundTypeForPost}
-              message={promptMessage}
-              showPrompt={showPrompt}
-              setshowPrompt={setshowPrompt}
-              showLoader={showLoader}
-              setShowLoader={setShowLoader}
-              refundInvoice={refundInvoice}
-              reset={setResetInvoicePreviewRefundComponent}
-              setOpen={setOpen}
-            />
-            <InvoicePreviewRefund
-              setPromptMessage={setPromptMessage}
-              setRefundType={setRefundType}
-              refundType={refundType}
-              setRefundTypeForPost={setRefundTypeForPost}
-              show={open}
-              setOpen={setOpen}
-              setshowPrompt={setshowPrompt}
-              setrefundInvoice={setrefundInvoice}
-              reset={setResetInvoicePreviewRefundComponent}
-              key={resetInvoicePreviewRefundComponent}
-            />
+            
             {showReport && (
               <PrintPreview
                 setShowReport={setShowReport}

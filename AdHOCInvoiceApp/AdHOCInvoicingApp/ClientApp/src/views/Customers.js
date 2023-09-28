@@ -22,7 +22,7 @@ import Loader from "components/Modals/Loader";
 import UserHeader from "components/Headers/UserHeader";
 import { FcCancel } from "react-icons/fc";
 import UploadExcel from "components/Modals/UploadExcel";
- import excelFile from "../assets/GRA_INVOICER_BUSINESS_PARTNERS.xlsx";
+import excelFile from "../assets/GRA_INVOICER_BUSINESS_PARTNERS.xlsx";
 import { GrEdit, GrClose } from "react-icons/gr";
 import { useRef } from "react";
 import { debounce } from "lodash";
@@ -53,7 +53,7 @@ const Customers = () => {
 
   const formik = useFormik({
     initialValues: {
-          companyId: user?.sub,
+      companyId: user?.sub,
       customerName: "",
       customerTin: "",
       customerEmail: "",
@@ -112,7 +112,7 @@ const Customers = () => {
   const [cusType, setcusType] = useState("CUS");
 
   const customerRef = useRef();
-    const clearBtn = useRef(null);
+  const clearBtn = useRef(null);
 
   const onSuccess = (data) => {
     if (isCustomers) {
@@ -122,7 +122,7 @@ const Customers = () => {
       setIsViewed(false);
       setIsViewed_sup(true);
     }
-      setLoading(false);
+    setLoading(false);
 
     let allCustomers = data.map((customer) => {
       return {
@@ -183,7 +183,7 @@ const Customers = () => {
     setLoading(true);
     setIsviewMode(!isViewMode);
     getCustomerList();
-    setshowBulkListButt(()=>false);
+    setshowBulkListButt(() => false);
   };
 
   const handleGetSupplier = () => {
@@ -194,7 +194,7 @@ const Customers = () => {
     setLoading(true);
     setIsviewMode(!isViewMode);
     getSupplierList();
-    setshowBulkListButt(()=>false);
+    setshowBulkListButt(() => false);
   };
 
   const handleOnchange = (e) => {
@@ -231,7 +231,7 @@ const Customers = () => {
 
   const postSuccess = () => {
     setLoading(false);
-      setshowBulkListButt(()=>false)
+    setshowBulkListButt(() => false);
 
     if (cusType === "SUP") {
       toast.success("Supplier successfully saved");
@@ -240,29 +240,23 @@ const Customers = () => {
       toast.success("Customer successfully saved");
       setinvoiceQuery(formik?.values?.customerName);
     }
-      formik.resetForm();
+    formik.resetForm();
   };
-    const postError = (err) => {
-        console.log({err})
-            toast.error(
-                err?.response?.Message || "Error creating customer"
-        );
-        setLoading(false)
+  const postError = (err) => {
+    console.log({ err });
+    toast.error(err?.response?.Message || "Error creating customer");
+    setLoading(false);
+  };
 
-    
-    };
-
-    const putError = (err) => {
-        console.log({err})
-            toast.error(
-                err?.response?.Message || "Error updating customer"
-            );
-        setLoading(false)
-    };
+  const putError = (err) => {
+    console.log({ err });
+    toast.error(err?.response?.Message || "Error updating customer");
+    setLoading(false);
+  };
 
   const putSuccess = (data) => {
     setLoading(false);
-      setshowBulkListButt(false)
+    setshowBulkListButt(false);
     formik.resetForm();
 
     if (cusType === "SUP") {
@@ -271,23 +265,22 @@ const Customers = () => {
     } else {
       toast.success("Customer successfully saved");
       setinvoiceQuery(formik?.values?.customerName);
-      }
+    }
     setitemSelected(false);
   };
 
-    const { mutate, isLoading:isPostingLoad, isSuccess } = useCustomPost(
-      `/api/CreateCustomer`,
-    value,
-    postSuccess,
-    postError
-    );
-    console.log({ isSuccess })
+  const {
+    mutate,
+    isLoading: isPostingLoad,
+    isSuccess,
+  } = useCustomPost(`/api/CreateCustomer`, value, postSuccess, postError);
+  console.log({ isSuccess });
 
-    const { mutate: putmutate, isLoading: isPutLoading } = useCustomPut(
-      `/api/UpdateCreateCustomer/${formik?.values?.customerID}`,
+  const { mutate: putmutate, isLoading: isPutLoading } = useCustomPut(
+    `/api/UpdateCreateCustomer/${formik?.values?.customerID}`,
     value_sup,
     putSuccess,
-        putError
+    putError
   );
 
   const saveCustomer = (customer) => {
@@ -389,8 +382,8 @@ const Customers = () => {
       toast.success("Customer List successfully Added");
       setLoading(false);
       setCustomerList([]);
-        getCustomerList();
-        setshowBulkListButt(false)
+      getCustomerList();
+      setshowBulkListButt(false);
     },
     (err) => {
       toast.error("Could not submit list. Please try again.");
@@ -401,22 +394,21 @@ const Customers = () => {
   const submitCustomerList = () => {
     setLoading(true);
     bultData(customerList);
-    
   };
 
-    useEffect(() => {
-        //console.log("kl", formik.values?.customerTin?.length)
-        //if (
-        //    formik.values.customerTin?.length !== 11 ||
-        //    formik.values.customerTin?.length == 15
-        //) {
-        //    formik.errors.customerTin = "Must be 11 or 15 characters";
-        //} else {
-        //    formik.errors.cusromerTin = ""
-        //}
-    }, [formik]);
+  useEffect(() => {
+    //console.log("kl", formik.values?.customerTin?.length)
+    //if (
+    //    formik.values.customerTin?.length !== 11 ||
+    //    formik.values.customerTin?.length == 15
+    //) {
+    //    formik.errors.customerTin = "Must be 11 or 15 characters";
+    //} else {
+    //    formik.errors.cusromerTin = ""
+    //}
+  }, [formik]);
 
-    console.log(showBulkListButt)
+  console.log(showBulkListButt);
   return (
     <>
       <UserHeader
@@ -435,58 +427,56 @@ const Customers = () => {
                   <CardHeader className="bg-white border-0">
                     <Row className="align-items-center">
                       <Col xs="4">
-                                              {showBulkListButt ?
-                                                  <Col
-                                                  lg="12"
-                                                  className="text-align"
-                                                  style={{
-                                                      display: "flex",
-                                                      // flexDirection: 'row-reverse',
-                                                  }}
-                                              >
-
-                                                  <Button
-                                                      color="success"
-                                                      onClick={submitCustomerList}
-                                                      size="md"
-                                                  >
-                                                      Submit Bulk List
-                                                  </Button>
-                                              </Col>
-                                              :
-                                                  <Form
-                                                      className="navbar-search navbar-search-light form-inline "
-                                                      onSubmit={(e) => e.preventDefault()}
-                                                  >
-                                                      <FormGroup className="mb-0">
-                                                          <InputGroup className="input-group-alternative">
-                                                              <InputGroupAddon
-                                                                  addonType="prepend"
-                                                                  style={{ marginTop: 8 }}
-                                                              >
-                                                                  <InputGroupText>
-                                                                      <i className="fas fa-search" />
-                                                                  </InputGroupText>
-                                                              </InputGroupAddon>
-                                                              <Input
-                                                                  placeholder="Search..."
-                                                                  type="text"
-                                                                  value={invoiceQuery || searchText}
-                                                                  onChange={handleOnchange}
-                                                                  style={{ width: 300 }}
-                                                              />
-                                                              <InputGroupAddon addonType="append">
-                                                                  <InputGroupText
-                                                                      onClick={() => setinvoiceQuery("")}
-                                                                  >
-                                                                      {isFocus && <i className="fas fa-times" />}
-                                                                  </InputGroupText>
-                                                              </InputGroupAddon>
-                                                          </InputGroup>
-                                                      </FormGroup>
-                                                  </Form>
-                                              }
-                        
+                        {showBulkListButt ? (
+                          <Col
+                            lg="12"
+                            className="text-align"
+                            style={{
+                              display: "flex",
+                              // flexDirection: 'row-reverse',
+                            }}
+                          >
+                            <Button
+                              color="success"
+                              onClick={submitCustomerList}
+                              size="md"
+                            >
+                              Submit Bulk List
+                            </Button>
+                          </Col>
+                        ) : (
+                          <Form
+                            className="navbar-search navbar-search-light form-inline "
+                            onSubmit={(e) => e.preventDefault()}
+                          >
+                            <FormGroup className="mb-0">
+                              <InputGroup className="input-group-alternative">
+                                <InputGroupAddon
+                                  addonType="prepend"
+                                  style={{ marginTop: 8 }}
+                                >
+                                  <InputGroupText>
+                                    <i className="fas fa-search" />
+                                  </InputGroupText>
+                                </InputGroupAddon>
+                                <Input
+                                  placeholder="Search..."
+                                  type="text"
+                                  value={invoiceQuery || searchText}
+                                  onChange={handleOnchange}
+                                  style={{ width: 300 }}
+                                />
+                                <InputGroupAddon addonType="append">
+                                  <InputGroupText
+                                    onClick={() => setinvoiceQuery("")}
+                                  >
+                                    {isFocus && <i className="fas fa-times" />}
+                                  </InputGroupText>
+                                </InputGroupAddon>
+                              </InputGroup>
+                            </FormGroup>
+                          </Form>
+                        )}
                       </Col>
                       <Col className="text-right" xs="8">
                         {/* {isViewMode && ( */}
@@ -508,7 +498,7 @@ const Customers = () => {
                     </Row>
                   </CardHeader>
                   <CardBody style={styles.body}>
-                                      <h3 className="pb-1">{businessPartnerType}</h3>
+                    <h3 className="pb-1">{businessPartnerType}</h3>
 
                     <Table
                       className="align-items-center  table-flush"
@@ -525,13 +515,14 @@ const Customers = () => {
                           <th style={{ width: "25%" }} scope="col">
                             Email Address
                           </th>
-                                                  {!showBulkListButt &&
-                                                      <th
-                                                          style={{ textAlign: "right", width: "10%" }}
-                                                          scope="col"
-                                                      >
-                                                          Actions
-                                                      </th>}
+                          {!showBulkListButt && (
+                            <th
+                              style={{ textAlign: "right", width: "10%" }}
+                              scope="col"
+                            >
+                              Actions
+                            </th>
+                          )}
                         </tr>
                       </thead>
                       <tbody>
@@ -548,8 +539,8 @@ const Customers = () => {
                               {customer?.customerName}
                             </td>
                             <td>{customer?.customerTin}</td>
-                                <td>{customer?.customerEmail}</td>
-                                {( !showBulkListButt) && (
+                            <td>{customer?.customerEmail}</td>
+                            {!showBulkListButt && (
                               <td
                                 style={{
                                   textAlign: "right",
@@ -575,10 +566,9 @@ const Customers = () => {
                       </tbody>
                     </Table>
                   </CardBody>
-                 
                 </Card>
               </Col>
-                      )}{" "}
+            )}{" "}
             <Col
               className="order-xl-1 mb-5 mb-xl-0"
               sm="12"
@@ -638,7 +628,7 @@ const Customers = () => {
                             title="Download Customer List Excel Template"
                             style={{ width: "100%", height: 29 }}
                           >
-                                                      <a href={excelFile} style={{ color: "white" }}>
+                            <a href={excelFile} style={{ color: "white" }}>
                               Download Template
                             </a>
                           </Button>
@@ -754,8 +744,8 @@ const Customers = () => {
                               placeholder="Ghana Card/TIN"
                               id="customerTin"
                               name="customerTin"
-                                                          type="text"
-                                                          disabled={itemSelected}
+                              type="text"
+                              disabled={itemSelected}
                               value={formik.values.customerTin}
                               onBlur={formik.handleBlur}
                               onChange={formik.handleChange}
@@ -944,9 +934,9 @@ const Customers = () => {
                           </Button>
                           <Button
                             style={{ marginRight: 10 }}
-                                                      color="secondary"
-                                                      disabled={(isPostingLoad || isPutLoading)}
-                                                      ref={clearBtn }
+                            color="secondary"
+                            disabled={isPostingLoad || isPutLoading}
+                            ref={clearBtn}
                             onClick={() => {
                               setitemSelected(false);
 
@@ -963,8 +953,7 @@ const Customers = () => {
                 </CardBody>
               </Card>
             </Col>
-                  </Row>
-
+          </Row>
         </Container>
 
         <UploadExcel
@@ -975,17 +964,17 @@ const Customers = () => {
         />
 
         <DeletePromptCustomer
-                  message={`Are you sure you want to proceed with deleting  "${customerToDelete?.customerName}"?`}
-                  showPrompt={showPrompt}
-                  setShowPrompt={setShowPrompt}
-                  customerToDelete={customerToDelete}
-                  setCustomerList={setCustomerList}
-                  setLoading={setLoading}
-                  getCustomerList={getCustomerList}
-                  getSupplierList={getSupplierList}
-                  resetFormBtn={clearBtn }
+          message={`Are you sure you want to proceed with deleting  "${customerToDelete?.customerName}"?`}
+          showPrompt={showPrompt}
+          setShowPrompt={setShowPrompt}
+          customerToDelete={customerToDelete}
+          setCustomerList={setCustomerList}
+          setLoading={setLoading}
+          getCustomerList={getCustomerList}
+          getSupplierList={getSupplierList}
+          resetFormBtn={clearBtn}
         />
-              {(loading || isPutLoading || isPostingLoad) ? <Loader /> : null}
+        {loading || isPutLoading || isPostingLoad ? <Loader /> : null}
       </ErrorBoundary>
     </>
   );

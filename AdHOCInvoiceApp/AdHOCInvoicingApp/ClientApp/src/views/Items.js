@@ -83,6 +83,7 @@ const Items = () => {
     (data) => {
       setIsViewed(true);
       setitemSelected(false);
+      console.log({fjkdl: data});
       if (data.length > 0) {
         let results = data.map((item) => {
           return {
@@ -315,7 +316,7 @@ const Items = () => {
     bultData(postData);
   };
 
-  console.log({itemsList});
+  console.log({ itemsList });
 
   const query = useCustomQuery(
     `/api/GetCurrency`,
@@ -337,17 +338,17 @@ const Items = () => {
     },
     (err) => {
       console.log(err);
+    },
+    {
+      refetchOnMount: true,
     }
   );
 
   useEffect(() => {
-    query.refetch()
-  
-    return () => {
-      
-    }
-  }, [])
-  
+    query.refetch();
+
+    return () => {};
+  }, []);
 
   useEffect(() => {
     if (isTaxInclusive === true) {
