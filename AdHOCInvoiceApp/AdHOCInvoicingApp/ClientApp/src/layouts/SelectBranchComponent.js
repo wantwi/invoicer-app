@@ -54,6 +54,7 @@ const SelectBranchComponent = (props) => {
     },
     { selectedBranch, branches }
   );
+  
 
   return (
     <>

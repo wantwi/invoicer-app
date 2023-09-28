@@ -14,6 +14,7 @@ function MyDropzone({
   setShow,
   disabled,
   setIsSearched,
+  isPartner=true
 }) {
   const [Files, setFiles] = useState([]);
   const [sheet_Name, setSheet_Name] = useState("");
@@ -132,9 +133,9 @@ function MyDropzone({
     ghanacard.forEach((card) => customerTinArr.push(card.Value));
     email.forEach((email) => customerEmailArr.push(email.Value));
     tel.forEach((tel) => customerTelArr.push(tel.Value));
-    address.forEach((address) => addressArr.push(address.Value));
-    city.forEach((city) => cityArr.push(city.Value));
-    gps.forEach((gps) => ghPostGpsArr.push(gps.Value));
+    address.forEach((address) => addressArr.push(address.Value || ""));
+    city.forEach((city) => cityArr.push(city.Value || ""));
+    gps.forEach((gps) => ghPostGpsArr.push(gps.Value || ""));
     type.forEach((bustype) => typeArr.push(bustype.Value));
 
     let finalData = [];
@@ -179,12 +180,12 @@ function MyDropzone({
       });
 
       results.push(newObject);
-      // console.log(results)
     });
-
+    
     let userDetails = JSON.parse(
       sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
-    );
+      );
+      console.log({results})
 
     const renderData = results.map((value) => ({
       customerTin: value.GhanaCardTIN,

@@ -19,6 +19,8 @@ import {
   InputGroupText,
   Input,
 } from "reactstrap";
+import refund from "../assets/img/theme/refundimg.png";
+
 import { useCustomPaginationQuery } from "hooks/useCustomPaginationQuery";
 import { FaEye } from "react-icons/fa";
 import { useDebounce } from "use-debounce";
@@ -28,6 +30,8 @@ import useCustomAxios from "hooks/useCustomAxios";
 import { EvatTable } from "components/Tables/EvatTable";
 import PrintPreview from "components/Modals/PrintPreview";
 import useAuth from "hooks/useAuth";
+import Prompt from "components/Modals/Prompt";
+import InvoicePreviewRefund from "components/Modals/InvoicePreviewRefund";
 
 const Refunds = () => {
   const [pageNumber, setPageNumber] = useState(1);
@@ -59,6 +63,21 @@ const Refunds = () => {
   const [isRefundLoading, setRefundIsLoading] = useState(false);
   const [, setIsReportDownloading] = useState(false);
   const { selectedBranch } = useAuth();
+
+  const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
+  const [invoices, setInvoices] = useState([]);
+  const [showLoader, setShowLoader] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [showPrompt, setshowPrompt] = useState(false);
+  const [refundInvoice, setrefundInvoice] = useState({});
+  const [isFocus, setIsFocus] = useState(false);
+  const [promptMessage, setPromptMessage] = useState("");
+  const [refundType, setRefundType] = useState("Partial");
+  const [refundTypeForPost, setRefundTypeForPost] = useState("");
+  const [
+    resetInvoicePreviewRefundComponent,
+    setResetInvoicePreviewRefundComponent,
+  ] = useState("");
 
   const columns = React.useMemo(
     () => [
@@ -339,6 +358,19 @@ const Refunds = () => {
                       </FormGroup>
                     </Form>
                   </div>
+                  <div className="col text-right mt-0">
+                    <Button
+                      className="badge-success"
+                      onClick={() => {
+                        setOpen((prev) => true);
+                        // setrefundItems(invoice)
+                      }}
+                      title="Refund"
+                    >
+                      <img src={refund} alt="refund" style={{ height: 20 }} />{" "}
+                      Refund Invoice
+                    </Button>
+                  </div>
                 </Row>
               </CardHeader>
               <div style={styles.body}>
@@ -440,6 +472,31 @@ const Refunds = () => {
           selectedInvoiceNo={selectedInvoiceNo}
         />
       )}
+
+      <Prompt
+        refundType={refundType}
+        refundTypeForPost={refundTypeForPost}
+        message={promptMessage}
+        showPrompt={showPrompt}
+        setshowPrompt={setshowPrompt}
+        showLoader={showLoader}
+        setShowLoader={setShowLoader}
+        refundInvoice={refundInvoice}
+        reset={setResetInvoicePreviewRefundComponent}
+        setOpen={setOpen}
+      />
+      <InvoicePreviewRefund
+        setPromptMessage={setPromptMessage}
+        setRefundType={setRefundType}
+        refundType={refundType}
+        setRefundTypeForPost={setRefundTypeForPost}
+        show={open}
+        setOpen={setOpen}
+        setshowPrompt={setshowPrompt}
+        setrefundInvoice={setrefundInvoice}
+        reset={setResetInvoicePreviewRefundComponent}
+        key={resetInvoicePreviewRefundComponent}
+      />
     </>
   );
 };

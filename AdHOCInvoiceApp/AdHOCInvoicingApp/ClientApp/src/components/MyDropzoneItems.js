@@ -33,6 +33,8 @@ function MyDropzone({
     },
   });
 
+  console.log({dhajhds:acceptedFiles, previewData})
+
   
   const { user } = useAuth();
   const [importedRecords, setimportedRecords] = useState([]);
@@ -49,12 +51,14 @@ function MyDropzone({
       {file.path} - {file.size} bytes
     </li>
   ));
-  console.log({importedRecords});
+  console.log({acceptedFiles,importedRecords});
   
   const getSheetData = (e) => {
     setSheet_Name(e.target.value);
     let sheetName = e.target.value;
     let xdt = previewData.Sheets[sheetName];
+
+    console.log({xdt})
     let xData = Object.keys(xdt).map((key) => {
       return [key, xdt[key].v];
     });
@@ -98,7 +102,7 @@ function MyDropzone({
     setimportedRecords(excelSheets[0].Data);
     setlast(Number(excelSheets[0].Last.Row));
   };
-  console.log({joy: importedRecords});
+  console.log({joy: previewData});
 
 
   const processUpload = (arr) => {
