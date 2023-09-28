@@ -1,11 +1,30 @@
-const NHIL_LEVY = 0.025
-const GETFUND_LEVY = 0.025
-const COVID_LEVY = 0.01
-const CST_LEVY = 0.05
-const TOUR_LEVY = 0.01
-const VAT_LEVY = 0.15
+// const NHIL_LEVY = 0.025
+// const GETFUND_LEVY = 0.025
+// const COVID_LEVY = 0.01
+// const CST_LEVY = 0.05
+// const TOUR_LEVY = 0.01
+// const VAT_LEVY = 0.15
 
-export const getPayableAmount = (item, discount = 0) => {
+   // covidRate: 0;
+  // cstRate: 0;
+  // cstWithVat: 1.03;
+  // getfundRate: 0;
+  // nhilRate: 0;
+  // regularLeviesWithVat: 1.03;
+  // tourismRate: 0;
+  // trsmWithVat: 1.03;
+  // vatRate: 3;
+
+export const getPayableAmount = (item, discount = 0, vatScheme) => {
+  const {covidRate, cstRate, cstWithVat, getfundRate, nhilRate, regularLeviesWithVat,tourismRate, trsmWithVat, vatRate}= vatScheme
+
+  const NHIL_LEVY = nhilRate/100
+const GETFUND_LEVY = getfundRate/100
+const COVID_LEVY = covidRate/100
+const CST_LEVY = cstRate/100
+const TOUR_LEVY = tourismRate/100
+const VAT_LEVY = vatRate/100
+
   const { isTaxable } = item
   //   let csttourism = 0
   //   if (item?.otherLevies === "NON") {
@@ -344,4 +363,25 @@ export const moneyInTxt = (value, standard, dec = 0) => {
     maximumFractionDigits: 2,
   })
   return nf.format(Number(value) ? value : 0.0)
+}
+
+// export function getFormattedDate(dateObj) {
+ 
+//   let month = dateObj.getUTCMonth() + 1; //months from 1-12
+//   let day = dateObj.getUTCDate();
+//   let year = dateObj.getUTCFullYear();
+//   return year + "-" + month + "-" + day;
+// }
+
+
+export  function getFormattedDate(date) {
+  // if (!(date instanceof Date)) {
+  //   throw new Error('Invalid date object');
+  // }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure two digits for month
+  const day = String(date.getDate()).padStart(2, '0'); // Ensure two digits for day
+
+  return `${year}-${month}-${day}`;
 }

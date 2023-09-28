@@ -38,7 +38,7 @@ import { useCustomPut } from "hooks/useCustomPut";
 import { useAuth } from "context/AuthContext";
 
 const Customers = () => {
-    const { getUser, user, logout } = useAuth();
+    const { getUser, user, logout, selectedBranch } = useAuth();
 
   // const [formData, setFormData] = React.useState({
   //   companyId: userDetails.profile.company,
@@ -152,7 +152,7 @@ const Customers = () => {
   };
 
     const { refetch: getCustomerList, isLoading } = useCustomQuery(
-      !value ? `/api/GetCompanyCustomers` : `/api/GetCompanyCustomers/${value}`,
+      !value ? `/api/GetCompanyCustomerslist/${selectedBranch?.code}` : `/api/GetCompanyCustomers/${value}/${selectedBranch?.code}`,
     "customers",
     value,
     onSuccess,
@@ -164,7 +164,7 @@ const Customers = () => {
   );
 
     const { refetch: getSupplierList, isLoading:isLoadingSuppliers } = useCustomQuery(
-        !value_sup ? `/api/GetCompanySuppliers` : `/api/GetCompanySuppliers/${value_sup}`,
+        !value_sup ? `/api/GetCompanySupplierslist/${selectedBranch?.code}` : `/api/GetCompanySuppliers/${value_sup}/${selectedBranch?.code}`,
     "suppliers",
     value_sup,
     onSuccess,
@@ -315,6 +315,7 @@ const Customers = () => {
           city: customer.customerCity,
           address: customer.customerAddress,
           digitalAddress: customer.customerDigitalAddress,
+          branchCode:selectedBranch?.code
         };
       });
 

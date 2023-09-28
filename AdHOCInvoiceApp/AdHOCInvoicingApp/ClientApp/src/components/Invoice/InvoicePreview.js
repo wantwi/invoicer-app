@@ -19,7 +19,19 @@ export const moneyInTxt = (value, standard, dec = 2) => {
 let userDetails = null;
 
 function InvoicePreview() {
-  const { formData, gridData, setGridData, comments } = useContext(FormContext);
+  const { formData, gridData, setGridData, comments, vatAndLeviesScheme } = useContext(FormContext);
+  const {
+    covidRate,
+    cstRate,
+    cstWithVat,
+    getfundRate,
+    nhilRate,
+    regularLeviesWithVat,
+    tourismRate,
+    trsmWithVat,
+    vatRate,
+  } = vatAndLeviesScheme;
+  
   const [userDetails, setUserDetails] = useState(null);
   useEffect(async () => {
     let temp = await getUser();
@@ -192,31 +204,37 @@ function InvoicePreview() {
                 : "0"}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              NHIL (2.5%) : {"   "}
+              NHIL ({vatAndLeviesScheme.nhilRate}%): {"   "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.nhil, 0)
               )}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              GETF (2.5%) :
+              GETF ({vatAndLeviesScheme.getfundRate}%):{" "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.getf, 0)
               )}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              COVID19 (1%) :
+              COVID19 ({vatAndLeviesScheme.covidRate}%):
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.covid, 0)
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              CST/TOURISM :
+               (CST: {vatAndLeviesScheme?.cstRate}%) / (TOURISM: {vatAndLeviesScheme?.tourismRate}%):{" "}
+              {moneyInTxt(
+                gridData.reduce((total, item) => total + item.otherLevies, 0)
+              )}{" "}
+            </h6>
+            <h6 style={{ padding: 0, margin: 0 }} hidden>
+              TOURISM (TOURISM{vatAndLeviesScheme?.tourismRate}%):{" "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.otherLevies, 0)
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              VAT ({process.env.REACT_APP_VAT_RATE}%) :
+              VAT ({vatAndLeviesScheme?.vatRate}%):
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.vat, 0)
               )}{" "}

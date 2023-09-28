@@ -5,20 +5,23 @@ import { useQuery } from "@tanstack/react-query";
 export const AuthContext = React.createContext();
 export const useAuth = () => useContext(AuthContext);
 
-let branchName = localStorage.getItem(
-  process.env.REACT_APP_URL + "BRANCH_NAME"
-) || "";
-let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || "";
+// let branchName = localStorage.getItem(
+//   process.env.REACT_APP_URL + "BRANCH_NAME"
+// ) || "";
+// let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || "";
+const branchInfo =  JSON.parse(localStorage.getItem("BRANCH_INFO")) || {}
 
-console.log({branchName,branchId});
+console.log({branchInfo});
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState({
-    branchName,
-    branchId,
+    name: branchInfo?.name || null,
+    code: branchInfo?.code || null,
+    taxScheme:branchInfo?.taxScheme || null
   });
 
+  console.log({selectedBranch});
 
 
   const [user, setUser] = useState();

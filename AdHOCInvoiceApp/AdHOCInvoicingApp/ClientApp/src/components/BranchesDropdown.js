@@ -4,28 +4,42 @@ import graLogo2 from "../assets/img/brand/GRA_logi.webp";
 
 const BranchCompo = ({ loggingOut = false }) => {
   const { setSelectedBranch, branches } = useAuth();
-  const [branch] = useState(
-    localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || ""
-  );
+  // const [branch, setbranch] = useState(second)
+  const [branch,setBranch] = useState("");
   let branchRef = useRef();
+
+  //localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || ""
+
+  const getBranch = (e) => {
+
+    const getBranch =  branches.find(x => x?.code === e.target.value)
+    localStorage.setItem("BRANCH_INFO", JSON.stringify(getBranch))
+     setSelectedBranch(getBranch)
+    setBranch(e.target.value)
+
+  }
+  
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    console.log("click is called")
-    localStorage.setItem(
-      process.env.REACT_APP_URL + "BRANCH_VALUE",
-      branchRef?.current?.options[branchRef?.current?.selectedIndex]?.value
-    );
-    localStorage.setItem(
-      process.env.REACT_APP_URL + "BRANCH_NAME",
-      branchRef?.current?.options[branchRef?.current?.selectedIndex]?.innerText
-    );
-    setSelectedBranch({
-      name: branchRef?.current?.options[branchRef?.current?.selectedIndex]
-        ?.innerText,
-      code: branchRef?.current?.options[branchRef?.current?.selectedIndex]
-        ?.value,
-    });
+    // console.log("click is called")
+
+      
+
+    // localStorage.setItem(
+    //   process.env.REACT_APP_URL + "BRANCH_VALUE",
+    //   branchRef?.current?.options[branchRef?.current?.selectedIndex]?.value
+    // );
+    // localStorage.setItem(
+    //   process.env.REACT_APP_URL + "BRANCH_NAME",
+    //   branchRef?.current?.options[branchRef?.current?.selectedIndex]?.innerText
+    // );
+    // setSelectedBranch({
+    //   name: branchRef?.current?.options[branchRef?.current?.selectedIndex]
+    //     ?.innerText,
+    //   code: branchRef?.current?.options[branchRef?.current?.selectedIndex]
+    //     ?.value,
+    // });
   };
 
   useEffect(() => {
@@ -58,9 +72,10 @@ const BranchCompo = ({ loggingOut = false }) => {
               </label>
               <select
                 id="branch"
-                defaultValue={branch}
+                value={branch}
                 className="form-control"
-                ref={branchRef}
+                // ref={branchRef}
+                onChange={getBranch}
               >
                 {branches?.map((branch) => {
                   return (

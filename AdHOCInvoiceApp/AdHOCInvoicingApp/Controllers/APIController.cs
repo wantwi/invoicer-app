@@ -127,11 +127,11 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-         [HttpGet("GetCustomers")]
-        public async Task<IActionResult> GetCustomers()
+         [HttpGet("GetCustomers/{branch}")]
+        public async Task<IActionResult> GetCustomers(string branch)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}/{branch}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -516,11 +516,11 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
         // Business partner setup
-         [HttpGet("GetCompanyCustomers")]
-        public async Task<IActionResult> GetCompanyCustomers()
+         [HttpGet("GetCompanyCustomerslist")]
+        public async Task<IActionResult> GetCompanyCustomers(string branch)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}/{branch}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -528,11 +528,11 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-        [HttpGet("GetCompanyCustomers/{search}")]
-        public async Task<IActionResult> GetCompanyCustomersSearch(string search)
+        [HttpGet("GetCompanyCustomers/{search}/{branch}")]
+        public async Task<IActionResult> GetCompanyCustomersSearch(string search, string branch)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}?search={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetCustomerByCompanyId/{user.Sub}/{branch}?search={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -540,11 +540,11 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-        [HttpGet("GetCompanySuppliers")]
-        public async Task<IActionResult> GetCompanySuppliers()
+        [HttpGet("GetCompanySupplierslist/{branch}")]
+        public async Task<IActionResult> GetCompanySuppliers(string branch)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetSuppliersByCompanyId/{user.Sub}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetSuppliersByCompanyId/{user.Sub}/{branch}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -553,11 +553,11 @@ namespace AdHOCInvoicingApp.Controllers
 
         
 
-        [HttpGet("GetCompanySuppliers/{search}")]
-        public async Task<IActionResult> GetCompanySuppliersSearch(string search)
+        [HttpGet("GetCompanySuppliers/{search}/{branch}")]
+        public async Task<IActionResult> GetCompanySuppliersSearch(string search, string branch)
        {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetSuppliersByCompanyId/{user.Sub}?search={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetSuppliersByCompanyId/{user.Sub}/{branch}?search={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -896,7 +896,21 @@ namespace AdHOCInvoicingApp.Controllers
             return Ok(response);
 
         }
-        
+
+        [HttpGet("GetVatAndLeviesByScheme/{date}/{taxScheme}")]
+        public async Task<IActionResult> GetVatAndLeviesByScheme(string date, string taxScheme)
+        {
+            string url = $"{EvatAdHOCBaseUrl}v4/Tax/GetVatAndLeviesByScheme/{date}/{taxScheme}";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
+
+
+
+      
+
     }
 
 }

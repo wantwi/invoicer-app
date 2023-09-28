@@ -33,6 +33,8 @@ import useCustomAxios from "../../hooks/useCustomAxios";
 import { getPayableAmount } from "utils/util";
 import useMultiFetchAllSettled from "hooks/useMultiFetchAllSettled";
 import useAuth from "hooks/useAuth";
+import { useCustomQueryById } from "hooks/useCustomQueryById";
+import { getFormattedDate } from "utils/util";
 
 // import 'react-tooltip/dist/react-tooltip.css'
 
@@ -81,6 +83,8 @@ function InvoiceForm({ refetch }) {
     setShowNewInvoiceModal,
     comments,
     setComments,
+    vatAndLeviesScheme, 
+    setvatAndLeviesScheme
   } = useContext(FormContext);
 
   const [isItemAdded, setIsItemAdded] = useState(false);
@@ -98,11 +102,38 @@ function InvoiceForm({ refetch }) {
   const [exchangeRate, setExchangeRate] = useState(1);
   const [forex, setForex] = useState(1);
   const [productsList, setProductsList] = useState([]);
+  // const [vatAndLeviesScheme, setvatAndLeviesScheme] = useState({
+  //   covidRate: 0,
+  //   cstRate: 0,
+  //   cstWithVat: 0,
+  //   getfundRate: 0,
+  //   nhilRate: 0,
+  //   regularLeviesWithVat: 0,
+  //   tourismRate: 0,
+  //   trsmWithVat: 0,
+  //   vatRate: 0,
+  // });
+  const [schemeDate, setSchemeDate] = useState(
+    `${new Date().getFullYear()}-${
+      new Date().getMonth() + 1
+    }-${new Date().getDate()}`
+  );
   // const [discount, setDiscount] = useState({
   //   type: "",
   //   amount: 0.0,
   //   amountOnItem: 0.0
   // })
+  const {
+    covidRate,
+    cstRate,
+    cstWithVat,
+    getfundRate,
+    nhilRate,
+    regularLeviesWithVat,
+    tourismRate,
+    trsmWithVat,
+    vatRate,
+  } = vatAndLeviesScheme;
   const [discountTypeToShow, setDiscountTypeToShow] = useState({
     discountAmount: false,
     itemDiscountAmnt: false,
@@ -290,12 +321,34 @@ function InvoiceForm({ refetch }) {
     setUrls,
   } = useMultiFetchAllSettled(
     [
-      `/api/GetCustomers`,
+      `/api/GetCustomers/${selectedBranch?.code}`,
       "/api/GetCurrency",
       `/api/GetProductList/${currency}`,
     ],
     requstCallback
   );
+
+  const onSuccess = (data) => {
+    console.log({ GetVatAndLeviesByScheme: data });
+    setvatAndLeviesScheme(data);
+  };
+
+  const { refetch: refetchTaxScheme } = useCustomQueryById(
+    `/api/GetVatAndLeviesByScheme/${schemeDate}/${selectedBranch?.taxScheme || 0}`,
+    "taxScheme",
+    formData?.date,
+    onSuccess
+  );
+
+  useEffect(() => {
+    refetchTaxScheme();
+
+    return () => {};
+  }, [formData?.date]);
+
+  // const fd = new Date(formData?.date)
+
+  // console.log({useCustomQueryById: `${new Date(formData?.date).getFullYear()}-${new Date(formData?.date).getMonth()+ 1}-${new Date(formData?.date).getDate()}`});
 
   const postInvoice = async (postData) => {
     setLoading(true);
@@ -353,9 +406,11 @@ function InvoiceForm({ refetch }) {
     if (item.otherLevies === "NON") {
       csttourism = 0;
     } else if (item.otherLevies === "CST") {
-      csttourism = 0.05 * item.price * item.quantity;
+      csttourism =
+        (cstRate / 100) * item.price * item.quantity;
     } else if (item.otherLevies === "TRSM") {
-      csttourism = 0.01 * item.price * item.quantity;
+      csttourism =
+        (tourismRate / 100) * item.price * item.quantity;
     }
 
     if (item.itemName === "") {
@@ -365,7 +420,11 @@ function InvoiceForm({ refetch }) {
     } else if (item.price === "") {
       toast.warning("Please provide a value for price");
     } else {
-      const gridItem = getPayableAmount({ ...item, isTaxable }, discount);
+      const gridItem = getPayableAmount(
+        { ...item, isTaxable },
+        discount,
+        vatAndLeviesScheme
+      );
 
       setGridData((gridData) => [
         ...gridData,
@@ -454,7 +513,7 @@ function InvoiceForm({ refetch }) {
     // "(GHS" + data[0].exchangeRate + " / " + data[0].currencyCode
     if (request) {
       const { data } = request;
-      console.log({data})
+      console.log({ data });
       if (data.length > 0) {
         setForex(data[0].exchangeRate);
         setExchangeRate(
@@ -558,7 +617,7 @@ function InvoiceForm({ refetch }) {
   useEffect(() => {
     //console.log('Currency', currency)
     setUrls([
-      `/api/GetCustomers`,
+      `/api/GetCustomers/${selectedBranch?.code}`,
       "/api/GetCurrency",
       `/api/GetProductList/${currency}`,
     ]);
@@ -588,6 +647,7 @@ function InvoiceForm({ refetch }) {
 
   //   return () => {}
   // }, [formData?.totalDiscount])
+  // console.log({formData: Date.now()});
 
   return (
     <>

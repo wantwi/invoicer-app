@@ -70,7 +70,8 @@ namespace AdHOCInvoicingApp.model
         public string? city { get; set; }
         public string? address { get; set; }
         public string? digitalAddress { get; set; }
-    }
+        public string?  branchCode { get; set; }
+}
 
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
     public class CustomBrandSettings
