@@ -238,7 +238,7 @@ function MyDropzone({
                 >
                   <option>Select Sheet</option>
                   {previewData.SheetNames.map((sheetname, index) => (
-                    <option key={index}>{sheetname}</option>
+                    <option disabled={sheetname.toLowerCase()==="legend"} key={index}>{sheetname}</option>
                   ))}
                 </select>
               </FormGroup>
