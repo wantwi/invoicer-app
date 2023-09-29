@@ -17,7 +17,7 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import routesData from "routes.js";
 
 import graLogo from "../assets/img/theme/gra.png";
-import graLogo2 from "../assets/img/brand/GRA_logi.webp";
+import graLogo2 from "../assets/img/brand/logo.png";
 
 import SelectBranchComponent from "components/BranchesDropdown";
 

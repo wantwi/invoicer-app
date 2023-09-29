@@ -516,7 +516,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
         // Business partner setup
-         [HttpGet("GetCompanyCustomerslist")]
+         [HttpGet("GetCompanyCustomerslist/{branch}")]
         public async Task<IActionResult> GetCompanyCustomers(string branch)
         {
             var user = await UserInfo();
@@ -528,7 +528,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-        [HttpGet("GetCompanyCustomers/{search}/{branch}")]
+        [HttpGet("GetCompanyCustomers/{search}")]
         public async Task<IActionResult> GetCompanyCustomersSearch(string search, string branch)
         {
             var user = await UserInfo();
@@ -651,23 +651,38 @@ namespace AdHOCInvoicingApp.Controllers
             string url = $"{EvatAdHOCBaseUrl}v4/Customers/{id}";
 
             var response = await client.DeleteAsync(url);
-
-            if (response.StatusCode.ToString() == "BadRequest")
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception("Error Occurred");
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new { result });
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
             }
             else
             {
-                var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new {status = response.StatusCode, data = dataObj });
             }
+
+            //if (response.StatusCode.ToString() == "BadRequest")
+            //{
+            //    throw new Exception("Error Occurred");
+            //}
+            //else if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    return new JsonResult(new { result });
+            //}
+            //else
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    //return new JsonResult(new { result });
+            //    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+            //    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+            //}
         }
 
 

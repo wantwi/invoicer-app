@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     setUser((prev) => ({ ...prev, companyName: data + ", " }));
   };
   const onErrorResponse = (err) => {
-    console.log({ err });
+    console.log({onErrorResponse: err });
     setIsAuthenticated(false);
     window.location = `${process.env.REACT_APP_BASENAME}/login`;
   };

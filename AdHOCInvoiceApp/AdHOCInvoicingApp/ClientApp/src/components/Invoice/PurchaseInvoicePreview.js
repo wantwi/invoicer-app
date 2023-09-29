@@ -17,7 +17,7 @@ export const moneyInTxt = (value, standard, dec = 2) => {
 };
 
 export default function PurchaseInvoicePreview() {
-  const { formData, gridData, setGridData } = useContext(FormContext);
+  const { formData, gridData, setGridData, vatAndLeviesScheme } = useContext(FormContext);
   const [isVATinclusive, setIsvatinclusive] = useState(true);
   const [updateItemData, setUpdateItemData] = useState({
     itemName: "",
@@ -30,6 +30,7 @@ export default function PurchaseInvoicePreview() {
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
   );
+
 
   const handleEditItem = (item, index) => {
     setUpdateItemData({
@@ -140,50 +141,55 @@ export default function PurchaseInvoicePreview() {
           </Table>
         </div>
         <div style={styles.footer}>
-          <div style={styles.total}>
+        <div style={styles.total}>
             <h6 style={{ padding: 0, margin: 0 }}>
-              SUBTOTAL :{"   "}
+              SUBTOTAL (EXCL) :{"   "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.taxableAmount, 0)
               )}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
               DISCOUNT : {"   "}
-              {moneyInTxt(
-                gridData.reduce((total, item) => total + item.discount, 0)
-              )}
+              {formData?.discountType
+                ? formData?.discountType === "general"
+                  ? moneyInTxt(
+                      gridData.reduce((total, item) => total + item.discount, 0)
+                    )
+                  : moneyInTxt(formData?.totalDiscount)
+                : "0"}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              NHIL (2.5%) : {"   "}
+              NHIL ({vatAndLeviesScheme.nhilRate}%): {"   "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.nhil, 0)
               )}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              GETF (2.5%) :{" "}
+              GETF ({vatAndLeviesScheme.getfundRate}%):{" "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.getf, 0)
               )}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              COVID19 (1%) :{" "}
+              COVID19 ({vatAndLeviesScheme.covidRate}%):
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.covid, 0)
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              TOURISM (1%):{" "}
-              {/* TOURISM (
-              {gridData.reduce((total, item) => total + item.tourism, 0) > 0
-                ? '1'
-                : '0'}
-              %) :{' '} */}
+               (CST: {vatAndLeviesScheme?.cstRate}%) / (TOURISM: {vatAndLeviesScheme?.tourismRate}%):{" "}
               {moneyInTxt(
-                gridData.reduce((total, item) => total + item.tourism, 0)
+                gridData.reduce((total, item) => total + item.otherLevies, 0)
+              )}{" "}
+            </h6>
+            <h6 style={{ padding: 0, margin: 0 }} hidden>
+              TOURISM (TOURISM{vatAndLeviesScheme?.tourismRate}%):{" "}
+              {moneyInTxt(
+                gridData.reduce((total, item) => total + item.otherLevies, 0)
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              VAT ({process.env.REACT_APP_VAT_RATE}%) :{" "}
+              VAT ({vatAndLeviesScheme?.vatRate}%):
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.vat, 0)
               )}{" "}
@@ -194,9 +200,22 @@ export default function PurchaseInvoicePreview() {
                 TOTAL PAYABLE
                 {/* TOTAL PAYABLE{isVATinclusive ? '(INC)' : '(EXC)'}{' '} */}:{" "}
               </strong>
-              {moneyInTxt(
-                gridData.reduce((total, item) => total + item.totalPayable, 0)
-              )}
+              {formData.currency}{" "}
+              {formData?.discountType
+                ? formData?.discountType === "selective"
+                  ? moneyInTxt(
+                      gridData.reduce(
+                        (total, item) => total + item.totalPayable,
+                        0
+                      ) - formData?.totalDiscount
+                    )
+                  : moneyInTxt(formData?.totalDiscount)
+                : moneyInTxt(
+                    gridData.reduce(
+                      (total, item) => total + item.totalPayable,
+                      0
+                    )
+                  )}
             </h6>
           </div>
         </div>

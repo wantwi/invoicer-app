@@ -28,6 +28,7 @@ import useCustomAxios from "hooks/useCustomAxios";
 import useMultiFetchAllSettled from "hooks/useMultiFetchAllSettled";
 import useAuth from "hooks/useAuth";
 import DatePicker from "react-datepicker";
+import { useCustomQueryById } from "hooks/useCustomQueryById";
 
 function PurchaseInvoiceForm() {
   const queryClient = useQueryClient();
@@ -41,7 +42,21 @@ function PurchaseInvoiceForm() {
     gridData,
     setGridData,
     setShowNewInvoiceModal,
+    vatAndLeviesScheme, 
+    setvatAndLeviesScheme
   } = useContext(FormContext);
+
+  const {
+    covidRate,
+    cstRate,
+    cstWithVat,
+    getfundRate,
+    nhilRate,
+    regularLeviesWithVat,
+    tourismRate,
+    trsmWithVat,
+    vatRate,
+  } = vatAndLeviesScheme;
 
   const [isItemAdded, setIsItemAdded] = useState(false);
 
@@ -58,6 +73,11 @@ function PurchaseInvoiceForm() {
   const [exchangeRate, setExchangeRate] = useState(1);
   const [forex, setForex] = useState(1);
   const [isTaxInclusive, setIsTaxInclusive] = useState(false);
+  const [schemeDate, setSchemeDate] = useState(
+    `${new Date().getFullYear()}-${
+      new Date().getMonth() + 1
+    }-${new Date().getDate()}`
+  );
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -101,7 +121,7 @@ function PurchaseInvoiceForm() {
   //customers list
 
   useCustomQuery(
-    `/api/GetCompanySuppliers`,
+    `/api/GetCompanySupplierslist/${selectedBranch?.code}`,
     "suppliers",
     "",
     (data) => {
@@ -161,16 +181,16 @@ function PurchaseInvoiceForm() {
           quantity: Number(item.quantity),
           price: Number(item.price),
           taxableAmount: item.quantity * item.price,
-          nhil: 0.025 * item.quantity * item.price,
-          getf: 0.025 * item.quantity * item.price,
-          covid: 0.01 * item.quantity * item.price,
+          nhil: (nhilRate/100) * item.quantity * item.price,
+          getf: (getfundRate/100) * item.quantity * item.price,
+          covid: (covidRate/100) * item.quantity * item.price,
           otherLevies: csttourism,
           vatItemId: item.vatItemId,
         };
 
         if (isTaxable) {
           vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
-          vat = 0.15 * vatableAmt;
+          vat = (vatRate/100) * vatableAmt;
         } else {
           obj.nhil = 0;
           obj.getf = 0;
@@ -187,9 +207,9 @@ function PurchaseInvoiceForm() {
           itemName: item.itemName,
           quantity: Number(item.quantity),
           price: Number(item.price),
-          nhil: 0.025 * ((item.quantity * item.price * 100) / 121.9),
-          getf: 0.025 * ((item.quantity * item.price * 100) / 121.9),
-          covid: 0.01 * ((item.quantity * item.price * 100) / 121.9),
+          nhil: (nhilRate/100) * ((item.quantity * item.price * 100) / 121.9),
+          getf: (getfundRate/100) * ((item.quantity * item.price * 100) / 121.9),
+          covid: (covidRate/100) * ((item.quantity * item.price * 100) / 121.9),
           otherLevies: csttourism,
           vatItemId: item.vatItemId,
           taxableAmount: (item.quantity * item.price * 100) / 121.9,
@@ -373,7 +393,7 @@ function PurchaseInvoiceForm() {
       },
       {
         queryKey: ["suppliers"],
-        queryFn: () => makeCall(`/api/GetCompanySuppliers`),
+        queryFn: () => makeCall(`/api/GetCompanySupplierslist/${selectedBranch?.code}`),
         cacheTime: 0,
         onSuccess: ({ data }) => {
           let filteredCustomers = data.filter(
@@ -447,6 +467,24 @@ function PurchaseInvoiceForm() {
   //     // getProducts()
   //   }
   // }, [currency]);
+
+  const onSuccess = (data) => {
+    console.log({ GetVatAndLeviesByScheme: data });
+    setvatAndLeviesScheme(data);
+  };
+
+  const { refetch: refetchTaxScheme } = useCustomQueryById(
+    `/api/GetVatAndLeviesByScheme/${schemeDate}/${selectedBranch?.taxScheme || 0}`,
+    "taxScheme",
+    formData?.date,
+    onSuccess
+  );
+
+  useEffect(() => {
+    refetchTaxScheme();
+
+    return () => {};
+  }, [formData?.date]);
 
 
   return (

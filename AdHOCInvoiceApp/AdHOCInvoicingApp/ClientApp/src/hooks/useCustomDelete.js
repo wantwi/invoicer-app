@@ -10,6 +10,21 @@ import useCustomAxios from "./useCustomAxios";
 
       const deleteFunction = async (postData) => {
           const request = await axios.delete(url, postData);
+
+        //   if(JSON.parse(request?.data?.data)?.errorId)
+        if(request?.data?.status >=400){
+            // console.log({useMutationError: JSON.parse(request?.data?.data)?.message});
+            
+            const error = new Error(JSON.parse(request?.data?.data)?.message)
+
+            error.code = request?.data?.status 
+
+            console.log({useMutationError: error});
+  
+            throw error;
+        }
+
+       
           return request.data;
       }
 

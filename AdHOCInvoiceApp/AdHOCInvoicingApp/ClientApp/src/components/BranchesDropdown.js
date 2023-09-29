@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import useAuth from "hooks/useAuth";
-import graLogo2 from "../assets/img/brand/GRA_logi.webp";
+import graLogo2 from "../assets/img/brand/logo.png";
 
 const BranchCompo = ({ loggingOut = false }) => {
   const { setSelectedBranch, branches } = useAuth();
@@ -61,12 +61,12 @@ const BranchCompo = ({ loggingOut = false }) => {
         {!loggingOut ? (
           <>
             <div
-              className="d-flex justify-content-between"
-              style={{ alignItems: "center" }}
+              className="d-grid mb-4"
+              style={{ placeContent: "center" }}
             >
-              <img src={graLogo2} style={{ width: "200px", height: "80px" }} />
+              <img src={graLogo2} style={{ width: "200px", height: "80px", }} />
             </div>
-            <form onSubmit={handleFormSubmit}>
+            <form onSubmit={handleFormSubmit} >
               <label htmlFor="branch" className="text-left d-block">
                 Select your branch
               </label>
@@ -77,6 +77,7 @@ const BranchCompo = ({ loggingOut = false }) => {
                 // ref={branchRef}
                 onChange={getBranch}
               >
+                <option selected value={""}>Select branch</option>
                 {branches?.map((branch) => {
                   return (
                     <option
@@ -89,8 +90,8 @@ const BranchCompo = ({ loggingOut = false }) => {
                   );
                 })}
               </select>
-              <div className="text-right py-5">
-                <button autoFocus type="submit" className="btn btn-primary">
+              <div className="text-right py-5" >
+                <button autoFocus type="submit" className="btn btn-primary" hidden>
                   Continue
                 </button>
               </div>

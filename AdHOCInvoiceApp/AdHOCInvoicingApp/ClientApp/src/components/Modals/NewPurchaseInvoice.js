@@ -35,6 +35,17 @@ export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
   const [formData, setFormData] = useState(init);
   const [gridData, setGridData] = useState([]);
   const [comments, setComments] = useState("");
+  const [vatAndLeviesScheme, setvatAndLeviesScheme] = useState({
+    covidRate: 0,
+    cstRate: 0,
+    cstWithVat: 0,
+    getfundRate: 0,
+    nhilRate: 0,
+    regularLeviesWithVat: 0,
+    tourismRate: 0,
+    trsmWithVat: 0,
+    vatRate: 0,
+  })
 
   return (
     <>
@@ -78,6 +89,8 @@ export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
               init,
               comments,
               setComments,
+              vatAndLeviesScheme, 
+              setvatAndLeviesScheme
             }}
           >
             <PurchaseInvoiceForm />

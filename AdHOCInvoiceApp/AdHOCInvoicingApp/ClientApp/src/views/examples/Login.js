@@ -6,7 +6,10 @@ const Login = () => {
   const { login } = useAuth();
   const loginRef = useRef();
   useEffect(() => {
+
+    localStorage.removeItem("BRANCH_INFO")
     loginRef?.current.click()
+
   }, []);
 
   return (

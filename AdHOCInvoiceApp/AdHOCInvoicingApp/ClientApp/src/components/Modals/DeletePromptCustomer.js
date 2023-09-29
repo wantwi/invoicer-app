@@ -31,8 +31,8 @@ export default function DeletePromptCustomer({
   (error)=>{
    
     setShowPrompt(false)
-    // console.log({useMutationError: error});
-    toast.error(error?.response?.data ||"Invoice could not be saved. Please try again")
+  console.log({useMutationError: error});
+    toast.error(error?.message ||"Invoice could not be saved. Please try again")
     setLoading(false)
   }
   )
