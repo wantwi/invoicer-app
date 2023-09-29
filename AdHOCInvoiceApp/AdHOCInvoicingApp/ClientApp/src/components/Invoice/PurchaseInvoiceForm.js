@@ -72,7 +72,8 @@ function PurchaseInvoiceForm() {
   const [isCurrencyDisabled, setIsCurrencyDisbled] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(1);
   const [forex, setForex] = useState(1);
-  const [isTaxInclusive, setIsTaxInclusive] = useState(false);
+  const [vatType, setVatType] = useState(0);
+
   const [schemeDate, setSchemeDate] = useState(
     `${new Date().getFullYear()}-${
       new Date().getMonth() + 1
@@ -150,9 +151,9 @@ function PurchaseInvoiceForm() {
     if (item.trsmCst === "NON") {
       csttourism = 0;
     } else if (item.trsmCst === "CST") {
-      csttourism = 0.05 * item.price * item.quantity;
+      csttourism = (cstRate/100) * item.price * item.quantity;
     } else if (item.trsmCst === "TRSM") {
-      csttourism = 0.01 * item.price * item.quantity;
+      csttourism =  (tourismRate/100) * item.price * item.quantity;
     }
 
     if (item.itemName === "") {
@@ -292,7 +293,7 @@ function PurchaseInvoiceForm() {
       date: new Date(formData?.date).toISOString(),
       supplierName: formData.customer,
       nameOfUser: user?.name,
-
+      supplierScheme: `${vatType}`,
       transactionType: "PURCHASE",
       currency: formData.currency,
       forexRate: forex,
@@ -308,7 +309,7 @@ function PurchaseInvoiceForm() {
       ysdcmrc: "",
       ysdcmrctim: "",
       ysdctime: "",
-
+      // branchId: selectedBranch?.code,
       invoiceItems: gridData?.map((item) => ({
         // itemName: item?.itemName,
         unitPrice: item?.price,
@@ -474,9 +475,9 @@ function PurchaseInvoiceForm() {
   };
 
   const { refetch: refetchTaxScheme } = useCustomQueryById(
-    `/api/GetVatAndLeviesByScheme/${schemeDate}/${selectedBranch?.taxScheme || 0}`,
+    `/api/GetVatAndLeviesByScheme/${schemeDate}/${vatType}`,
     "taxScheme",
-    formData?.date,
+    vatType,
     onSuccess
   );
 
@@ -484,7 +485,11 @@ function PurchaseInvoiceForm() {
     refetchTaxScheme();
 
     return () => {};
-  }, [formData?.date]);
+  }, [vatType]);
+
+  const handleVatTypeChange = (e)=> {
+    setVatType(+e.target.value)
+  }
 
 
   return (
@@ -522,7 +527,7 @@ function PurchaseInvoiceForm() {
             </Row>
 
             <Row style={{ marginBottom: 10 }}>
-              <Col lg="12">
+              <Col>
                 <label className="form-control-label">Ghana Card / TIN </label>
                 <Input
                   disabled
@@ -537,6 +542,19 @@ function PurchaseInvoiceForm() {
                   }
                   bsSize="sm"
                 />
+              </Col>
+              <Col>
+                <label className="form-control-label">VAT Type </label>
+                <select
+                  className="form-control font-sm"
+                  value={vatType}
+                  onChange={handleVatTypeChange}
+                 
+                  style={{ height: 29, padding: "0px 5px" }}
+                >
+                  <option value={0}>Standard Rate</option>
+                  <option value={1}>Flat Rate</option>
+                </select>
               </Col>
             </Row>
             <Row style={{ marginBottom: 10 }}>

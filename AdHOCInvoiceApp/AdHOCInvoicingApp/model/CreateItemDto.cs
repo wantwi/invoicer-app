@@ -74,6 +74,7 @@ namespace AdHOCInvoicingApp.model
         public string? ysdcmrc { get; set; }
         public string? ysdcmrctim { get; set; }
         public string? ysdctime { get; set; }
+        public string supplierScheme { get; set; }
         public List<InvoiceItemPurchase> invoiceItems { get; set; }
     }
 
