@@ -13,7 +13,7 @@ const BranchCompo = ({ loggingOut = false }) => {
   const getBranch = (e) => {
 
     const getBranch =  branches.find(x => x?.code === e.target.value)
-    localStorage.setItem("BRANCH_INFO", JSON.stringify(getBranch))
+    sessionStorage.setItem("BRANCH_INFO", JSON.stringify(getBranch))
      setSelectedBranch(getBranch)
     setBranch(e.target.value)
 

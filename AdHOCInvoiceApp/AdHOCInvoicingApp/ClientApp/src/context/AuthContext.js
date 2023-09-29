@@ -9,7 +9,7 @@ export const useAuth = () => useContext(AuthContext);
 //   process.env.REACT_APP_URL + "BRANCH_NAME"
 // ) || "";
 // let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || "";
-const branchInfo =  JSON.parse(localStorage.getItem("BRANCH_INFO")) || {}
+const branchInfo =  JSON.parse(sessionStorage.getItem("BRANCH_INFO")) || {}
 
 console.log({branchInfo});
 

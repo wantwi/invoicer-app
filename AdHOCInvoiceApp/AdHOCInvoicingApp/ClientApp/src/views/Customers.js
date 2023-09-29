@@ -393,7 +393,7 @@ const Customers = () => {
 
   const submitCustomerList = () => {
     setLoading(true);
-    bultData(customerList);
+    bultData(customerList.map(x => ({...x,branchCode:selectedBranch?.code})));
   };
 
   useEffect(() => {

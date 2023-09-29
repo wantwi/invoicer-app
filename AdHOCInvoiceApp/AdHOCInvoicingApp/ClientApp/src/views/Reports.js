@@ -28,26 +28,26 @@ const reportList = [
   { value: "InvoicePurchaseReport", name: "Purchase Journal Report" },
   { value: "JournalRefundReport", name: "Refund Journal Report" },
   { value: "EvatDailySummaryReport", name: "EVAT Daily Summary Report" },
-  {
-    value: "InvoiceSummaryReport",
-    name: "Invoice Summary Report",
-  },
+  // {
+  //   value: "InvoiceSummaryReport",
+  //   name: "Invoice Summary Report",
+  // },
   {
     value: "DailySummaryReport",
     name: "Daily Summary Report",
   },
-  {
-    value: "EvatInvoiceSummaryReport",
-    name: "EVAT Invoice Summary Report",
-  },
+  // {
+  //   value: "EvatInvoiceSummaryReport",
+  //   name: "EVAT Invoice Summary Report",
+  // },
   {
     value: "JournalInvoiceByCurrencyReport",
     name: "Journal Invoice By Currency Report",
   },
-  {
-    value: "PeriodicItemReport",
-    name: "Periodic Item Report",
-  },
+  // {
+  //   value: "PeriodicItemReport",
+  //   name: "Periodic Item Report",
+  // },
 ];
 
 let schemaOpt = {};

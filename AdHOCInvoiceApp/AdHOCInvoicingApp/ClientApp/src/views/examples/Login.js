@@ -7,7 +7,7 @@ const Login = () => {
   const loginRef = useRef();
   useEffect(() => {
 
-    localStorage.removeItem("BRANCH_INFO")
+    sessionStorage.removeItem("BRANCH_INFO")
     loginRef?.current.click()
 
   }, []);
