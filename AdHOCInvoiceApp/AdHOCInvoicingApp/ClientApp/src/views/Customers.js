@@ -36,9 +36,11 @@ import { useDebounce } from "use-debounce";
 import { useCustomPost } from "hooks/useCustomPost";
 import { useCustomPut } from "hooks/useCustomPut";
 import { useAuth } from "context/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Customers = () => {
-    const { getUser, user, logout, selectedBranch } = useAuth();
+  const { getUser, user, logout, selectedBranch } = useAuth();
+  const queryClient = useQueryClient();
 
   // const [formData, setFormData] = React.useState({
   //   companyId: userDetails.profile.company,
@@ -98,7 +100,7 @@ const Customers = () => {
   const [invoiceQuery, setinvoiceQuery] = useState("");
   const [isSearched, setIsSearched] = useState(false);
   const [businessPartnerType, setBusinessPartnerType] =
-    useState("Customers List");
+    useState("Customer List");
   const [status, setStatus] = useState(true);
   const [showPrompt, setShowPrompt] = useState(false);
   const [customerToDelete, setcustomerToDelete] = useState(null);
@@ -112,9 +114,19 @@ const Customers = () => {
   const [cusType, setcusType] = useState("CUS");
 
   const customerRef = useRef();
-  const clearBtn = useRef(null);
+  const clearBtn = useRef();
 
+  console.log("this file rendered");
   const onSuccess = (data) => {
+    console.log("dhjshds", { data });
+
+    if (data?.length == 0) {
+      toast.info("No record available");
+      setCustomerList([]);
+      setLoading(false);
+      return;
+    }
+
     if (isCustomers) {
       setIsViewed(true);
       setIsViewed_sup(false);
@@ -147,12 +159,19 @@ const Customers = () => {
     } else {
       setLoading(false);
       setIsSearched(true);
-      setCustomerList(allCustomers);
+      console.log({ val: formik.values });
+      if (formik?.values?.customerName) {
+        setCustomerList([formik.values]);
+      } else {
+        setCustomerList(allCustomers);
+      }
     }
   };
 
-    const { refetch: getCustomerList, isLoading } = useCustomQuery(
-      !value ? `/api/GetCompanyCustomerslist/${selectedBranch?.code}` : `/api/GetCompanyCustomers/${value}/${selectedBranch?.code}`,
+  const { refetch: getCustomerList, isLoading } = useCustomQuery(
+    !value
+      ? `/api/GetCompanyCustomerslist/${selectedBranch?.code}`
+      : `/api/GetCompanyCustomers/${value}/${selectedBranch?.code}`,
     "customers",
     value,
     onSuccess,
@@ -163,37 +182,46 @@ const Customers = () => {
     { isEnabled: false, queryTag: "?search=" }
   );
 
-    const { refetch: getSupplierList, isLoading:isLoadingSuppliers } = useCustomQuery(
-        !value_sup ? `/api/GetCompanySupplierslist/${selectedBranch?.code}` : `/api/GetCompanySuppliers/${value_sup}/${selectedBranch?.code}`,
-    "suppliers",
-    value_sup,
-    onSuccess,
-    (err) => {
-      setLoading(false);
-      toast.warning("You have no products/services saved yet");
-    },
-    { isEnabled: false, queryTag: "?search=" }
-  );
+  const { refetch: getSupplierList, isLoading: isLoadingSuppliers } =
+    useCustomQuery(
+      !value_sup
+        ? `/api/GetCompanySupplierslist/${selectedBranch?.code}`
+        : `/api/GetCompanySuppliers/${value_sup}/${selectedBranch?.code}`,
+      "suppliers",
+      value_sup,
+      onSuccess,
+      (err) => {
+        setLoading(false);
+        toast.warning("You have no products/services saved yet");
+      },
+      { isEnabled: false, queryTag: "?search=" }
+    );
 
   const handleGetCustomer = () => {
     setinvoiceQuery("");
     setSearchText("");
-    setBusinessPartnerType("Customers List");
+    setBusinessPartnerType("Customer List");
     setIsCustomer(true);
     setLoading(true);
     setIsviewMode(!isViewMode);
     getCustomerList();
+    setitemSelected(false);
+
+    formik.resetForm();
     setshowBulkListButt(() => false);
   };
 
   const handleGetSupplier = () => {
-    setBusinessPartnerType("Suppliers List");
+    setBusinessPartnerType("Supplier List");
     setinvoiceQuery("");
     setSearchText("");
     setIsCustomer(false);
     setLoading(true);
     setIsviewMode(!isViewMode);
     getSupplierList();
+    setitemSelected(false);
+
+    formik.resetForm();
     setshowBulkListButt(() => false);
   };
 
@@ -234,8 +262,8 @@ const Customers = () => {
     setshowBulkListButt(() => false);
 
     if (cusType === "SUP") {
-      toast.success("Supplier successfully saved");
       setSearchText(formik?.values?.customerName);
+      toast.success("Supplier successfully saved");
     } else {
       toast.success("Customer successfully saved");
       setinvoiceQuery(formik?.values?.customerName);
@@ -260,9 +288,12 @@ const Customers = () => {
     formik.resetForm();
 
     if (cusType === "SUP") {
+      getSupplierList();
       toast.success("Supplier successfully saved");
       setSearchText(formik?.values?.customerName);
+      setCustomerList;
     } else {
+      getCustomerList();
       toast.success("Customer successfully saved");
       setinvoiceQuery(formik?.values?.customerName);
     }
@@ -276,12 +307,24 @@ const Customers = () => {
   } = useCustomPost(`/api/CreateCustomer`, value, postSuccess, postError);
   console.log({ isSuccess });
 
-  const { mutate: putmutate, isLoading: isPutLoading } = useCustomPut(
+  const {
+    mutate: putmutate,
+    isLoading: isPutLoading,
+    isFetched,
+  } = useCustomPut(
     `/api/UpdateCreateCustomer/${formik?.values?.customerID}`,
     value_sup,
-    putSuccess,
+    (data) => putSuccess(data, value_sup),
     putError
   );
+
+  useEffect(() => {
+    if (isFetched && formik?.values?.customerName) {
+      setSearchText(formik?.values?.customerName);
+    }
+
+    return () => {};
+  }, [isFetched]);
 
   const saveCustomer = (customer) => {
     customer = formik.values;
@@ -308,7 +351,7 @@ const Customers = () => {
           city: customer.customerCity,
           address: customer.customerAddress,
           digitalAddress: customer.customerDigitalAddress,
-          branchCode:selectedBranch?.code
+          branchCode: selectedBranch?.code,
         };
       });
 
@@ -364,7 +407,7 @@ const Customers = () => {
       setStatus(false);
     }
 
-    formik.setValues(customer);
+    formik.setValues({...customer, customerType: customer.type});
     setitemSelected(true);
   };
 
@@ -393,7 +436,9 @@ const Customers = () => {
 
   const submitCustomerList = () => {
     setLoading(true);
-    bultData(customerList.map(x => ({...x,branchCode:selectedBranch?.code})));
+    bultData(
+      customerList.map((x) => ({ ...x, branchCode: selectedBranch?.code }))
+    );
   };
 
   useEffect(() => {
@@ -440,6 +485,7 @@ const Customers = () => {
                               color="success"
                               onClick={submitCustomerList}
                               size="md"
+                              disabled={customerList.length === 0}
                             >
                               Submit Bulk List
                             </Button>
@@ -498,7 +544,10 @@ const Customers = () => {
                     </Row>
                   </CardHeader>
                   <CardBody style={styles.body}>
-                    <h3 className="pb-1">{businessPartnerType}</h3>
+                    <div className="d-flex justify-content-between p-0 m-0">
+                      <h3 className="pb-1">{businessPartnerType}</h3>
+                      <span>{isLoading && "Refreshing..."}</span>
+                    </div>
 
                     <Table
                       className="align-items-center  table-flush"
@@ -690,6 +739,7 @@ const Customers = () => {
                               id="customerName"
                               name="customerName"
                               placeholder="Full name"
+                              disabled={itemSelected}
                               type="text"
                               value={formik.values.customerName}
                               onBlur={formik.handleBlur}
@@ -713,6 +763,7 @@ const Customers = () => {
                             <select
                               className="form-control font-sm"
                               id="customerType"
+                              disabled={itemSelected}
                               name="customerType"
                               value={formik.values.customerType}
                               onBlur={formik.handleBlur}
@@ -800,6 +851,7 @@ const Customers = () => {
                             <Input
                               className="form-control font-sm"
                               id="customerEmail"
+                              disabled={itemSelected}
                               name="customerEmail"
                               placeholder="somename@somemail.com"
                               type="email"

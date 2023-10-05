@@ -11,6 +11,14 @@
     pointer-events: all !important;
 }
 
+.modal-dialog {
+    max-width: fit-content;
+}
+
+#idle-popper {
+    max-width: 420px;
+}
+
 #loading-screen {
     height: 80vh;
     display: flex;

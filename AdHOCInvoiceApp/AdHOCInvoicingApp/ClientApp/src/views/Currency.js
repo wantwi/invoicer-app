@@ -72,7 +72,7 @@ const CurrencySetupWithReset = ({ reset }) => {
       iso: currency.iso,
     }));
   };
-  console.log({pageNumber});
+  console.log({ pageNumber });
   const columns = React.useMemo(
     () => [
       {
@@ -174,7 +174,7 @@ const CurrencySetupWithReset = ({ reset }) => {
     enabled: Boolean(filter.currency || filter.period),
   });
 
-  console.log({ exchangeFormData });
+  console.log({ currencies });
 
   return (
     <>
@@ -274,71 +274,79 @@ const CurrencySetupWithReset = ({ reset }) => {
                   // getPrintPDF={getPrintPDF}
                   // pdfData={pdfData}
                 />
-                {currencies?.length > 0 && (
-                  <Pagination
-                    className="pagination justify-content-center mb-0"
-                    listClassName="justify-content-center mb-0"
-                  >
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (pageInfo.pageNumber > 1) {
-                            if (pageNumber < 1) {
-                              return;
-                            }
+                <CardFooter className="py-1">
+                  {!isLoading && currencies.length > 0 && (
+                    <nav aria-label="...">
+                      {pageInfo?.pageNumber ? (
+                        <Pagination
+                          className="pagination justify-content-center mb-0"
+                          listClassName="justify-content-center mb-0"
+                        >
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (pageInfo.pageNumber > 1) {
+                                  if (pageNumber < 1) {
+                                    return;
+                                  }
 
-                            setPageNumber((prev) => Number(prev) - 1);
-                          } else {
-                            return;
-                          }
-                        }}
-                      >
-                        <i className="fas fa-angle-left" />
-                        <span className="sr-only">Previous</span>
-                      </PaginationLink>
-                    </PaginationItem>
+                                  setPageNumber((prev) => Number(prev) - 1);
+                                } else {
+                                  return;
+                                }
+                              }}
+                            >
+                              <i className="fas fa-angle-left" />
+                              <span className="sr-only">Previous</span>
+                            </PaginationLink>
+                          </PaginationItem>
 
-                    <PaginationItem>
-                      <PaginationLink onClick={(e) => setPageNumber(1)}>
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink onClick={(e) => setPageNumber(1)}>
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
 
-                    <PaginationItem className="active">
-                      <PaginationLink onClick={(e) => e.preventDefault()}>
-                        {pageInfo.pageNumber}
-                      </PaginationLink>
-                    </PaginationItem>
+                          <PaginationItem className="active">
+                            <PaginationLink onClick={(e) => e.preventDefault()}>
+                              {pageInfo.pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
 
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={(e) => setPageNumber(pageInfo.totalPages)}
-                      >
-                        {pageInfo.totalPages}
-                      </PaginationLink>
-                    </PaginationItem>
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) =>
+                                setPageNumber(pageInfo.totalPages)
+                              }
+                            >
+                              {pageInfo.totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
 
-                    <PaginationItem>
-                      <PaginationLink
-                        onClick={(e) => {
-                          if (pageInfo.pageNumber < pageInfo.totalPages) {
-                            if (pageNumber === pageInfo.totalPages) {
-                              return;
-                            } else {
-                              setPageNumber((prev) => Number(prev) + 1);
-                            }
-                          } else {
-                            return;
-                          }
-                        }}
-                      >
-                        <i className="fas fa-angle-right" />
-                        <span className="sr-only">Next</span>
-                      </PaginationLink>
-                    </PaginationItem>
-                  </Pagination>
-                )}
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                if (pageInfo.pageNumber < pageInfo.totalPages) {
+                                  if (pageNumber === pageInfo.totalPages) {
+                                    return;
+                                  } else {
+                                    setPageNumber((prev) => Number(prev) + 1);
+                                  }
+                                } else {
+                                  return;
+                                }
+                              }}
+                            >
+                              <i className="fas fa-angle-right" />
+                              <span className="sr-only">Next</span>
+                            </PaginationLink>
+                          </PaginationItem>
+                        </Pagination>
+                      ) : null}
+                    </nav>
+                  )}
+                </CardFooter>
               </CardBody>
             </Card>
           </Col>

@@ -6159,3 +6159,13 @@ html.using-safari #blog_setting_card_radius_to_default:before {
 html.using-safari .friend-link-description:after {
     display: none;
 }
+
+span.pl-1{
+    font-family: Open Sans, sans-serif !important;
+  }
+
+  .isActive {
+    font-weight: 600 !important;
+    border-right: 5px solid slateblue;
+    width: 100%;
+  }

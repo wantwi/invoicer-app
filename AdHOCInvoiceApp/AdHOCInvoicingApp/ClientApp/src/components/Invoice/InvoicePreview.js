@@ -201,7 +201,7 @@ function InvoicePreview() {
                       gridData.reduce((total, item) => total + item.discount, 0)
                     )
                   : moneyInTxt(formData?.totalDiscount)
-                : "0"}
+                : "0.00"}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
               NHIL ({vatAndLeviesScheme.nhilRate}%): {"   "}

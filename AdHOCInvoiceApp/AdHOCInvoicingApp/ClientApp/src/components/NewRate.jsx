@@ -56,15 +56,15 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
 
   const axios = useCustomAxios();
   const postExRate = (postData) => {
-    axios.post("/api/AddExchangeRate/"+selectedBranch?.code, postData);
+    axios.post("/api/AddExchangeRate/" + selectedBranch?.code, postData);
   };
   const { mutate, isLoading } = useMutation({
     mutationFn: postExRate,
     onSuccess: () => {
       toast.success("Exchange Rates Successfully saved");
       setCurrencyList([]);
-      refetchCurrencies()
-      close()
+      refetchCurrencies();
+      close();
     },
     onError: (error) => {
       console.log({ error });
@@ -115,7 +115,7 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
   };
 
   const handleSaveList = () => {
-    console.log({currencyListToPost});
+    console.log({ currencyListToPost });
     let postData = currencyListToPost.map((item) => {
       return {
         currencyCode: item.iso,
@@ -141,18 +141,37 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
       <Modal
         style={{
           // minWidth: "80%",
-          maxWidth: "max-content",
+          // maxWidth: "max-content",
           margin: "30px auto",
           // resize: "both",
           // overflow: "auto",
           // zIndex: 100,
+          height: "fit-content",
         }}
-        className="modal-dialog-centered modal-lg"
+        className="modal-dialog-centered modal-lg "
         isOpen={true}
         toggle={() => console.log("toggled")}
       >
-        <div className="d-flex" style={{ height: "" }}>
-          <Card className="shadow" style={{ height: "fit-content" }}>
+        <button
+          onClick={close}
+          type="button"
+          data-dismiss="modal"
+          class="btn btn-secondary btn-sm"
+          aria-label="Close"
+          style={{
+            position: "absolute",
+            zIndex: "9",
+            right: "0",
+            top: "9",
+          }}
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+        <div className="d-flex bg-secondary" style={{ height: "" }}>
+          <Card
+            className="bg-secondary"
+            style={{ height: "fit-content", background: "" }}
+          >
             <CardHeader className="bg-transparent">
               <h3 className="mb-0">Add New Rate</h3>
             </CardHeader>
@@ -282,23 +301,23 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
                         marginBottom: "5.6px",
                       }}
                     >
-                      Exchange Rate Date
+                      Date
                     </label>{" "}
                     <code style={{ color: "darkred" }}>*</code>
                     <DatePicker
                       id="invoiceDate"
                       maxDate={new Date()}
                       calendarClassName="rate-picker-date"
-                      placeholderText=""
+                      placeholderText="Exchange "
                       className="form-control font-sm"
                       showIcon
                       dateFormat="yyyy/MM/dd"
                       selected={
                         exchangeFormData?.date
-                          // ? moment(exchangeFormData?.date).toDate()
-                          // : moment(
-                          //     new Date().toLocaleDateString("en-gb")
-                          //   ).toDate()
+                        // ? moment(exchangeFormData?.date).toDate()
+                        // : moment(
+                        //     new Date().toLocaleDateString("en-gb")
+                        //   ).toDate()
                       }
                       // minDate={new Date()}
                       onChange={(e) => {
@@ -328,12 +347,12 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
                       className="form-control-label"
                       htmlFor="input-username"
                     >
-                      Exchange Rate
+                      Rate
                     </label>{" "}
                     <code style={{ color: "darkred" }}>*</code>
                     <Input
                       className="form-control font-sm"
-                      placeholder="Rate"
+                      placeholder="Exchange Rate"
                       type="number"
                       value={exchangeFormData?.newRate}
                       onChange={(e) =>
@@ -349,12 +368,17 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
               </Row>
             </CardBody>
 
-            <CardFooter>
-              <Row>
+            <CardFooter className="bg-secondary">
+              <Row
+                style={{
+                  justifyContent: "space-between",
+                }}
+              >
                 <Col
-                  lg="12"
+                  lg="6"
                   style={{
                     display: "flex",
+                    justifyContent: "flex-end",
 
                     flexDirection: "row-reverse",
                   }}
@@ -374,82 +398,88 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
                   </Button>
                 </Col>
 
-                <Col lg="6"></Col>
+                <Col lg="4" style={{ textAlign: "end" }}>
+                  {currencyListToPost.length > 0 && (
+                    <Button
+                      color="success"
+                      className="btn-sm"
+                      onClick={handleSaveList}
+                    >
+                      {isLoading ? "Saving" : "Save"}
+                    </Button>
+                  )}
+                </Col>
               </Row>
             </CardFooter>
           </Card>
-          {currencyListToPost.length > 0 ? (
-            <Col className="order-xl-2 mb-5 mb-xl-0" xl="7">
-              <Card className="shadow" style={{ width: "max-content" }}>
-                <CardHeader className="bg-transparent">
-                  <h3 className="mb-0"> Exchange Rates</h3>
-                </CardHeader>
-                <CardBody style={{ height: "600px" }}>
-                  <Row className="icon-examples"></Row>
-                  <Row>
-                    <Table
-                      className="align-items-center  table-flush"
-                      responsive
-                    >
-                      <thead className="thead-light">
-                        <tr>
-                          <th
-                            style={{
-                              width: "35%",
-                            }}
-                            scope="col"
-                          >
-                            Curency
-                          </th>
-                          <th scope="col">Code</th>
-                          <th scope="col">Date</th>
-                          <th
-                            style={{
-                              textAlign: "right",
-                              width: "25%",
-                            }}
-                            scope="col"
-                          >
-                            Exchange Rate
-                          </th>
-                          <th
-                            scope="col"
+          <Col className="order-xl-2 " xl="7" style={{ paddingRight: 0 }}>
+            <Card className="shadow">
+              <CardHeader className="bg-transparent">
+                <h3 className="mb-0"> Exchange Rates</h3>
+              </CardHeader>
+              <CardBody style={{ height: "600px", paddingTop: "0" }}>
+                {/* <Row className="icon-examples"></Row> */}
+                <Row>
+                  <Table className="align-items-center  table-flush" responsive>
+                    <thead className="thead-light">
+                      <tr>
+                        <th
+                          style={{
+                            width: "35%",
+                          }}
+                          scope="col"
+                        >
+                          Curency
+                        </th>
+                        <th scope="col">Code</th>
+                        <th scope="col">Date</th>
+                        <th
+                          style={{
+                            textAlign: "right",
+                            width: "25%",
+                          }}
+                          scope="col"
+                        >
+                          Exchange Rate
+                        </th>
+                        <th
+                          scope="col"
+                          style={{
+                            textAlign: "right",
+                            width: "10%",
+                          }}
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currencyListToPost?.map((item, key) => (
+                        <tr key={key} style={{ cursor: "pointer" }}>
+                          <td>{item.currencyName}</td>
+
+                          <td>{item.iso}</td>
+
+                          <td>{new Date(item.date).toDateString()}</td>
+                          <td style={{ textAlign: "right" }}>
+                            {moneyInTxt(item.newRate)}
+                          </td>
+                          <td
                             style={{
                               textAlign: "right",
                               width: "10%",
                             }}
+                            onClick={() => handleDeleteClick(key)}
                           >
-                            Actions
-                          </th>
+                            <FcCancel />
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {currencyListToPost?.map((item, key) => (
-                          <tr key={key} style={{ cursor: "pointer" }}>
-                            <td>{item.currencyName}</td>
-
-                            <td>{item.iso}</td>
-
-                            <td>{new Date(item.date).toDateString()}</td>
-                            <td style={{ textAlign: "right" }}>
-                              {moneyInTxt(item.newRate)}
-                            </td>
-                            <td
-                              style={{
-                                textAlign: "right",
-                                width: "10%",
-                              }}
-                              onClick={() => handleDeleteClick(key)}
-                            >
-                              <FcCancel />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </Row>
-                </CardBody>
-                <CardFooter>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Row>
+              </CardBody>
+              {/* <CardFooter>
                   <Row>
                     <Col
                       lg="12"
@@ -467,7 +497,7 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
                         onClick={() => {
                           setCurrencyList([]);
                           setShowForm(false);
-                          close()
+                          close();
                         }}
                       >
                         Cancel
@@ -475,10 +505,9 @@ export const NewRateForm = ({ close, currencies, rate, refetchCurrencies }) => {
                     </Col>
                     <Col lg="6"></Col>
                   </Row>
-                </CardFooter>
-              </Card>
-            </Col>
-          ) : null}
+                </CardFooter> */}
+            </Card>
+          </Col>
         </div>
       </Modal>
     </>

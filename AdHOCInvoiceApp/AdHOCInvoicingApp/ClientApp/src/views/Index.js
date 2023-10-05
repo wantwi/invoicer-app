@@ -98,14 +98,14 @@ const Index = () => {
         Header: "Invoice #",
         accessor: "invoiceNo",
         className: " text-left ",
-
+        sticky: "left",
         width: 190,
       },
       {
         Header: "Date",
         accessor: "date",
         className: " text-left ",
-
+        sticky: "left",
         width: 140,
         Cell: ({ cell: { value } }) => (
           <>{new Date(value).toLocaleDateString("en-GB")}</>
@@ -181,14 +181,21 @@ const Index = () => {
         Header: () => <div align="center">View</div>,
         disableSortBy: true,
         className: " text-center table-action",
-        Cell: ({ cell: { value } }) => {
+        Cell: ({row}) => {
+          console.log({ row, gh:row?.original?.signatureStatus?.toUpperCase() });
           return (
             <Button
               style={{ padding: "2px 8px" }}
               className="badge-success"
               onClick={(e) => {
+                if (row?.original?.signatureStatus?.toUpperCase() !== "SUCCESS") {
+                  e.stopPropagation()
+                  return toast.info("Invoice cannot be previewed because it has no signature")
+                  
+                }
                 // loadPreview(value);
-                setSelectedRow(value);
+                setSelectedRow(row.original.id);
+                // signatureStatus:"SUCCESS"
               }}
               title="Preview"
             >
@@ -222,7 +229,7 @@ const Index = () => {
 
     try {
       setReportIsLoading(true);
-      setMessage("Fetching invoice detail...")
+      setMessage("Fetching invoice detail...");
       const request = await axios.post(
         `/api/GenerateVATInvoiceReportAsync`,
         invoiceNo
@@ -264,7 +271,7 @@ const Index = () => {
       toast.error(error?.response?.data || "System failed to download invoice");
     } finally {
       setReportIsLoading(false);
-      setMessage(null)
+      setMessage(null);
     }
   };
 
@@ -276,7 +283,7 @@ const Index = () => {
     setCurrencyFilter("GHS");
   }, []);
 
-  console.log({pageInfo})
+  console.log({ pageInfo });
 
   const {
     refetch: refetchGetById,
@@ -317,7 +324,6 @@ const Index = () => {
     (data) => {
       // data = JSON.parse(data);
       // const res = JSON.parse(data.data);
-      console.log({ data });
       setInvoices(data?.invoices?.items || []);
       setPageInfo(data.invoices?.paging);
       setSummary(data?.summaries || []);
@@ -361,7 +367,7 @@ const Index = () => {
     return () => {};
   }, [value]);
 
-  console.log({ use: data})
+  console.log({ use: data });
 
   return (
     <>
@@ -448,7 +454,6 @@ const Index = () => {
                         </Form>
                       </div>
                       <div className="col text-right mt-0">
-                        
                         <Button
                           color="primary"
                           //href='#pablo'
@@ -561,7 +566,7 @@ const Index = () => {
                 setShowNewInvoiceModal={setShowNewInvoiceModal}
               />
             ) : null}
-            
+
             {showReport && (
               <PrintPreview
                 setShowReport={setShowReport}

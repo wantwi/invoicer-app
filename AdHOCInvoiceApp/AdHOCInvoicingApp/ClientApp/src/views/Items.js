@@ -83,7 +83,7 @@ const Items = () => {
     (data) => {
       setIsViewed(true);
       setitemSelected(false);
-      console.log({fjkdl: data});
+      console.log({ fjkdl: data });
       if (data.length > 0) {
         let results = data.map((item) => {
           return {
@@ -715,6 +715,7 @@ const Items = () => {
                             className="form-control font-sm"
                             placeholder="Name of product/service"
                             type="text"
+                            disabled={itemSelected}
                             value={formData.productName}
                             onChange={(e) =>
                               setFormData({
@@ -804,6 +805,7 @@ const Items = () => {
                               className="form-control font-sm"
                               placeholder="Currency"
                               type="text"
+                              disabled={itemSelected}
                               value={currencyCode}
                               onClick={() => setShowList(true)}
                               onChange={() => setCurrencyCode(currencyCode)}
@@ -1074,5 +1076,6 @@ const styles = {
     maxHeight: "inherit",
     overflow: "auto",
     marginBottom: 40,
+    paddingTop: "4px",
   },
 };

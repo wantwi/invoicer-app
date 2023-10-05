@@ -528,7 +528,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-        [HttpGet("GetCompanyCustomers/{search}")]
+        [HttpGet("GetCompanyCustomers/{search}/{branch}")]
         public async Task<IActionResult> GetCompanyCustomersSearch(string search, string branch)
         {
             var user = await UserInfo();

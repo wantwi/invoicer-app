@@ -38,8 +38,9 @@ function Prompt(props) {
     })
 
     return (
-        <div>
+        <div >
             <Modal
+                id="idle-popper"
                 className='modal-dialog-centered modal-warning'
                 contentClassName='bg-gradient-info'
                 isOpen={props.open}
@@ -110,7 +111,7 @@ export const IdleTimerProviderWrapper = () => {
             onActive={onActive}
             onAction={onAction}
         >
-            <Prompt open={open} />
+            <Prompt open={true} />
         </IdleTimerProvider>
     );
 };
