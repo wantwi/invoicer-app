@@ -233,7 +233,6 @@ const CurrencySetupWithReset = ({ reset }) => {
                         <option value="all">All</option>
                         <option value="USD">USD</option>
                         <option value="EUR">EUR</option>
-                        <option value="YEN">YEN</option>
                       </select>{" "}
                     </div>
                     <div className="ml-2">
@@ -287,7 +286,7 @@ const CurrencySetupWithReset = ({ reset }) => {
                   // pdfData={pdfData}
                 />
                 <CardFooter className="py-1">
-                  {!isLoading && currencies?.data.length > 0 && (
+                  {!isLoading && currencies?.data?.length > 0 && (
                     <nav aria-label="...">
                       {pageInfo?.pageNumber ? (
                         <Pagination
