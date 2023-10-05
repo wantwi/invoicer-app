@@ -138,12 +138,12 @@ const CurrencySetupWithReset = ({ reset }) => {
     const request = await axios.get(
       `/api/GetRates/${selectedBranch?.code}/${filter.currency}/${Number(
         filter.period
-      )}/${pageInfo.pageNumber}/${pageInfo.pageSize}`
+      )}/${pageNumber}/${pageInfo.pageSize}`
     );
 
     console.log({ hey: request });
 
-    return request.data.data;
+    return request.data;
   };
 
   const getCurrencies = async () => {
@@ -151,15 +151,16 @@ const CurrencySetupWithReset = ({ reset }) => {
     return request.data.filter((item) => item.homeCurrency === false);
   };
 
-  const { data: currenciesLList = [], isLoading } = useQuery({
+  const { data: currenciesLList = []  } = useQuery({
     queryFn: getCurrencies,
     queryKey: "currencies",
   });
 
-  const { data: currencies = [], refetch } = useQuery({
+  const { data: currencies = [], refetch,isLoading } = useQuery({
     queryKey: ["currencies", filter.currency, filter.period],
     queryFn: getCurrency,
     onSuccess: (data) => {
+      setPageInfo(data)
       // console.log({ data });
       // let res = data?.map((item) => {
       //   return {
@@ -171,11 +172,22 @@ const CurrencySetupWithReset = ({ reset }) => {
       // });
       // setCurrencies(res.filter((item) => item.homeCurrency === false));
     },
-    enabled: Boolean(filter.currency || filter.period),
+    enabled: Boolean(filter.currency || filter.period || pageNumber),
   });
 
-  console.log({ currencies });
-
+  useEffect(() => {
+    if (pageNumber === 0) {
+      setPageInfo({
+        totalItems: 10,
+        pageNumber: 1,
+        pageSize: 10,
+        totalPages: 5,
+      });
+      setPageNumber(1);
+    }
+    refetch();
+    return () => {};
+  }, [filter.period, pageNumber]);
   return (
     <>
       <UserHeader
@@ -267,7 +279,7 @@ const CurrencySetupWithReset = ({ reset }) => {
                 <EvatTable
                   isLoading={isLoading}
                   columns={columns}
-                  data={currencies}
+                  data={currencies?.data || [] }
                   // sortKey="transactionDate"
                   // data2={invoices}
                   // setSelectedRow={setSelectedRow}
@@ -275,7 +287,7 @@ const CurrencySetupWithReset = ({ reset }) => {
                   // pdfData={pdfData}
                 />
                 <CardFooter className="py-1">
-                  {!isLoading && currencies.length > 0 && (
+                  {!isLoading && currencies?.data.length > 0 && (
                     <nav aria-label="...">
                       {pageInfo?.pageNumber ? (
                         <Pagination
@@ -290,6 +302,7 @@ const CurrencySetupWithReset = ({ reset }) => {
                                   if (pageNumber < 1) {
                                     return;
                                   }
+                                  console.log("fhhdk got here");
 
                                   setPageNumber((prev) => Number(prev) - 1);
                                 } else {
@@ -310,7 +323,7 @@ const CurrencySetupWithReset = ({ reset }) => {
 
                           <PaginationItem className="active">
                             <PaginationLink onClick={(e) => e.preventDefault()}>
-                              {pageInfo.pageNumber}
+                              {pageNumber}
                             </PaginationLink>
                           </PaginationItem>
 

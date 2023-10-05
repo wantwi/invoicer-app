@@ -111,7 +111,7 @@ export const IdleTimerProviderWrapper = () => {
             onActive={onActive}
             onAction={onAction}
         >
-            <Prompt open={true} />
+            <Prompt open={open} />
         </IdleTimerProvider>
     );
 };
