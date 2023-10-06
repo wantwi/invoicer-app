@@ -190,7 +190,8 @@ const Index = () => {
               onClick={(e) => {
                 if (row?.original?.signatureStatus?.toUpperCase() !== "SUCCESS") {
                   e.stopPropagation()
-                  return toast.info("Invoice cannot be previewed because it has no signature")
+                  toast.info("Invoice cannot be previewed because it has no signature")
+                  return
                   
                 }
                 // loadPreview(value);

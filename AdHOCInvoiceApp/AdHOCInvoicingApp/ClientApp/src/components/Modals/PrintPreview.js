@@ -16,7 +16,7 @@ function PrintPreview({
   showSignature = true,
   bottom = 200,
   pdfData,
-  selectedInvoiceNo
+  selectedInvoiceNo,
 }) {
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -36,7 +36,7 @@ function PrintPreview({
   };
 
   // console.log({pdfData})
- 
+
   return (
     <>
       <Modal
@@ -44,11 +44,11 @@ function PrintPreview({
         isOpen={true}
         toggle={() => console.log("toggled")}
       >
-        <div className="modal-header">
+        <div className="modal-header" style={{ width: "880px"}}>
           <h1 className="modal-title" id="exampleModalLabel">
             Invoice
           </h1>
-          <div>
+          <div >
             {/* <Button
               type="button"
               onClick={() => {
@@ -72,11 +72,13 @@ function PrintPreview({
             </Button>
           </div>
         </div>
-        {pdfData && <PdfViewer invoiceNo = {selectedInvoiceNo} pdfData = {pdfData}/>}
+        {pdfData && (
+          <PdfViewer invoiceNo={selectedInvoiceNo} pdfData={pdfData} />
+        )}
         {/* <div id="modal-body" className="modal-body">
          
         </div> */}
-       {/* OLD IMPLEMETATION HERE */}
+        {/* OLD IMPLEMETATION HERE */}
       </Modal>
     </>
   );

@@ -26,7 +26,12 @@ function PdfViewer({ pdfData, invoiceNo }) {
   // CommentTool
   // SubmitForm
   return (
-    <embed title="Invoice" autoSave="true" src={`${pdfData}`} style={{height:"70vh"}}></embed>
+    <embed
+      title="Invoice"
+      autoSave="true"
+      src={`${pdfData}`}
+      style={{ height: "70vh" }}
+    ></embed>
     // <PdfViewerComponent
     //   downloadFileName={invoiceNo}
     //   toolbarSettings={{

@@ -29,11 +29,14 @@ import useMultiFetchAllSettled from "hooks/useMultiFetchAllSettled";
 import useAuth from "hooks/useAuth";
 import DatePicker from "react-datepicker";
 import { useCustomQueryById } from "hooks/useCustomQueryById";
+import { useHistory } from "react-router-dom";
 
 function PurchaseInvoiceForm() {
   const queryClient = useQueryClient();
   const axios = useCustomAxios();
   const { selectedBranch, user } = useAuth();
+  const history = useHistory();
+
 
   const { invoices, setInvoices } = useContext(PurchaseContext);
   const {
