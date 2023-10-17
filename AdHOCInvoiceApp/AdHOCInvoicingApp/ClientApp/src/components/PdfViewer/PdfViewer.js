@@ -30,7 +30,7 @@ function PdfViewer({ pdfData, invoiceNo }) {
       title="Invoice"
       autoSave="true"
       src={`${pdfData}`}
-      style={{ height: "70vh" }}
+      style={{ height: "60vh" }}
     ></embed>
     // <PdfViewerComponent
     //   downloadFileName={invoiceNo}

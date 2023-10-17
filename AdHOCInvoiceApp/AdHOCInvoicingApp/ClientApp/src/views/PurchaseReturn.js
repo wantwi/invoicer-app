@@ -28,12 +28,12 @@ import { ToastContainer, toast } from "react-toastify";
 import { useCustomQueryById } from "hooks/useCustomQueryById";
 import useCustomAxios from "hooks/useCustomAxios";
 import { EvatTable } from "components/Tables/EvatTable";
-import PrintPreview from "components/Modals/PrintPreview";
+import PrintPreview from "components/Modals/PrintPreview2";
 import useAuth from "hooks/useAuth";
-import Prompt from "components/Modals/Prompt";
-import InvoicePreviewRefund from "components/Modals/InvoicePreviewRefund";
+import Prompt from "components/Modals/Prompt2";
+import InvoicePreviewRefund from "components/Modals/InvoicePreviewRefund2";
 
-const Refunds = () => {
+const PurchaseReturn = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [refunds, setrefunds] = useState([]);
   const [pageSize] = useState(9);
@@ -169,7 +169,7 @@ const Refunds = () => {
 
     try {
       const request = await axios.post(
-        `/api/GenerateRefundReportAsync`,
+        `/api/GeneratePurchaseReturnInvoice`,
         invoiceNo
       );
       if (request) {
@@ -209,9 +209,9 @@ const Refunds = () => {
 
   const { data, refetch, isFetching, isLoading } = useCustomPaginationQuery(
     !value
-      ? `/api/GetRefunds/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`
-      : `/api/GetRefundsSearch/${value}`,
-    "refunds",
+      ? `/api/GetPurchaseReturns/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`
+      : `/api/GetPurchaseReturnsSearch/${value}`,
+    "purchase-returns",
     pageNumber,
     Number(period),
     value,
@@ -238,7 +238,7 @@ const Refunds = () => {
       toast.error(err?.response?.data || "Error loading Refunds");
     },
     {
-      filterUrl: `/api/GetRefundsSearch/${value}`,
+      filterUrl: `/api/GetPurchaseReturnsSearch/${value}`,
       shouldTransform: false,
     }
   );
@@ -250,7 +250,7 @@ const Refunds = () => {
     isFetching: isPageFetching,
   } = useCustomQueryById(
     `/api/GetRefundsById/${selectedRow}`,
-    "refund-detail",
+    "purchase-returns",
     selectedRow,
     (data) => {
       setSelectedRow("");
@@ -310,7 +310,7 @@ const Refunds = () => {
         period={period}
         // displayRecent={false}
         setPeriod={setPeriod}
-        pageName="Refunds"
+        pageName="Purchase Return"
       />
       <ToastContainer />
       <Container className="mt--7" fluid>
@@ -336,7 +336,7 @@ const Refunds = () => {
                             </InputGroupText>
                           </InputGroupAddon>
                           <Input
-                            placeholder="Search by Invoice No, Refund No or Customer name"
+                            placeholder="Search by Invoice No, or Customer name"
                             type="text"
                             value={invoiceQuery}
                             onChange={(e) => {
@@ -368,7 +368,7 @@ const Refunds = () => {
                       title="Refund"
                     >
                       <img src={refund} alt="refund" style={{ height: 20 }} />{" "}
-                      Refund Invoice
+                      Purchase Return Invoice
                     </Button>
                   </div>
                 </Row>
@@ -470,8 +470,6 @@ const Refunds = () => {
           getPrintPDF={getPrintPDF}
           pdfData={pdfData}
           selectedInvoiceNo={selectedInvoiceNo}
-          title="Invoice Refund"
-          isRefund={true}
           
         />
       )}
@@ -504,7 +502,7 @@ const Refunds = () => {
   );
 };
 
-export default Refunds;
+export default PurchaseReturn;
 
 const styles = {
   body: {

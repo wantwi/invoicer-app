@@ -6169,3 +6169,30 @@ span.pl-1{
     border-right: 5px solid slateblue;
     width: 100%;
   }
+
+  ._loading_overlay_wrapper {
+    height: 100vh !important;
+  }
+
+  .table_container{
+    max-height: 35vh;
+    overflow-y: auto;
+  }
+  .table_container > th{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #f8f9fe !important;
+  }
+
+  .badge-danger {
+    color: #730218 !important;
+    background-color: rgba(251, 175, 190, 0.5) !important;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}

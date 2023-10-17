@@ -51,6 +51,52 @@ namespace AdHOCInvoicingApp.model
         public int refundQuantity { get; set; }  
     }
 
+    public class CancelRefundDTO
+    {
+        public string itemId { get; set; }
+        public string companyId { get; set; }
+        public string branchCode { get; set; }
+        public string nameOfUser { get; set; }
+    }
+
+    public class PurchaseReturnItem
+    {
+        public int? returnQuantity { get; set; }
+        public string vatItemId { get; set; }
+        public int? returnAmount { get; set; }
+    }
+
+    public class PurchaseReturn
+    {
+        public string purchaseId { get; set; }
+        public string companyId { get; set; }
+        public string branchCode { get; set; }
+        public string nameOfUser { get; set; }
+        public List<PurchaseReturnItem> purchaseReturnItems { get; set; }
+    }
+
+    public class Invoice
+    {
+        public string InvoiceNo { get; set; }
+        public int? Amount { get; set; }
+        public DateTime? Date { get; set; }
+    }
+
+    public class DebitCreditNote
+    {
+        public string CompanyId { get; set; }
+        public string BranchId { get; set; }
+        public string Tin { get; set; }
+        public string Name { get; set; }
+        public string Reason { get; set; }
+        public int? Amount { get; set; }
+        public DateTime? Date { get; set; }
+        public string NoteType { get; set; }
+        public List<Invoice> Invoices { get; set; }
+    }
+
+
+
 
 }
 

@@ -19,6 +19,8 @@ const Accounts = lazy(()=>import("views/Accounts.js"))
 const Currency = lazy(()=>import("views/Currency.js"))
 const Dashboard = lazy(()=>import("views/Dashboard.js"))
 const Reports = lazy(()=>import("views/Reports.js"))
+const PurchaseReturn = lazy(()=>import("views/PurchaseReturn"))
+const DebitAndCredit = lazy(()=>import("views/DebitAndCredit"))
 
 var routes = [
   {
@@ -50,6 +52,22 @@ var routes = [
     component: Refunds,
     layout: "/admin",
   },
+  {
+    path: "/purchase-return",
+    name: "Purchase Rreturn",
+    icon: "ni ni-money-coins text-primary",
+    component: PurchaseReturn,
+    layout: "/admin",
+  },
+  {
+    path: "/debit-credit",
+    name: "DebitAndCredit",
+    icon: "ni ni-money-coins text-primary",
+    component: DebitAndCredit,
+    layout: "/admin",
+  },
+
+  
   {
     path: "/customers",
     name: "Business Partner Setup",

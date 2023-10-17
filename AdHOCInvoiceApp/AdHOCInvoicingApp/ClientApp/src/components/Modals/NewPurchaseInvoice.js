@@ -50,8 +50,8 @@ export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
   return (
     <>
       <Modal
-        style={{ minWidth: "max-content", margin: "30px auto" }}
-        className="modal-dialog-centered modal-xl"
+        style={{ minWidth: "45vw", maxWidth:"max-content"}}
+        className="modal-dialog-top modal-xl"
         isOpen={true}
         toggle={() => console.log("toggled")}
       >

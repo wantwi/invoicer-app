@@ -41,6 +41,7 @@ import { useLayoutEffect } from "react";
 
 import { toast } from "react-toastify";
 import useCustomAxios from "hooks/useCustomAxios";
+import LoaderComponent from "components/LoadingOverlay/LoaderComponent";
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
@@ -189,7 +190,8 @@ const Admin = (props) => {
   }
 
   return (
-    <>
+    <LoaderComponent>
+    
       <Sidebar
         {...props}
         routes={routes}
@@ -224,7 +226,7 @@ const Admin = (props) => {
           </div>
         </ErrorBoundary>
       </Suspense>
-    </>
+    </LoaderComponent>
   );
 };
 

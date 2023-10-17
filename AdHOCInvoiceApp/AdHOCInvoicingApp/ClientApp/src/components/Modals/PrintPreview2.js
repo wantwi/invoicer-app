@@ -17,8 +17,6 @@ function PrintPreview({
   bottom = 200,
   pdfData,
   selectedInvoiceNo,
-  title="Invoice",
-  isRefund=false
 }) {
   const [showPrompt, setShowPrompt] = useState(false)
  const {setShowLoader} = useOverLayLoader()
@@ -41,7 +39,7 @@ function PrintPreview({
     location.reload();
   };
 
- const {mutate} = useCustomPost('/api/CancelRefund',"refunds",
+ const {mutate} = useCustomPost('/api/CancelPurchaseReturn',"purchase-returns",
  (data)=>{
   toast.success("Cancel Refund successful");
   setShowReport(false)
@@ -78,7 +76,7 @@ function PrintPreview({
       >
         <div className="modal-header" style={{ width: "50vw"}}>
           <h1 className="modal-title" id="exampleModalLabel">
-            {title}
+           Purchase Return Invoice
           </h1>
           <div >
             {/* <Button
@@ -113,12 +111,12 @@ function PrintPreview({
         {/* OLD IMPLEMETATION HERE */}
         <ModalFooter>
         {/* <button className="btn btn-sm btn-secondary"  onClick={() => setShowReport(false)} title="Close">Close</button> */}
-         {isRefund ? <button className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Refund">Cancel Refund</button>: null}
+          <button className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Purchase Return">Cancel Purchase Return</button>
         </ModalFooter>
       </Modal>
 
       {/* Are you sure you want to proceed with deleting the item "Mouse pad"? */}
-      <ComfirmPrompt confirmHandeler= {confirmeDelete} title={"Cancel Refund"} setShowPrompt={setShowPrompt} showPrompt={showPrompt} message={"Are you sure you want to proceed?"}/>
+      <ComfirmPrompt confirmHandeler= {confirmeDelete} title={"Cancel Purchase Return"} setShowPrompt={setShowPrompt} showPrompt={showPrompt} message={"Are you sure you want to proceed?"}/>
     </>
   );
 }

@@ -385,3 +385,18 @@ export  function getFormattedDate(date) {
 
   return `${year}-${month}-${day}`;
 }
+
+
+
+const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' }
+
+export const convertDate = (utcString) => {
+
+  return !utcString
+
+    ? ''
+
+    : new Date(utcString).toUTCString('en-US', dateOptions).substring(5,16)
+
+}
+

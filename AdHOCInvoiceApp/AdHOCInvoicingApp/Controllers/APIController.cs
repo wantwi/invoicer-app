@@ -698,8 +698,19 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
+        [HttpGet("GetPurchaseReturns/{filter}/{pgNumber}/{pgSz}/{branchId}")]
+        public async Task<IActionResult> GetPurchaseReturns(int filter, int pgSz, int pgNumber, string branchId)
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/GetPurchaseReturnsByCompanyId/{filter}?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}&BranchId={branchId}";
 
-         [HttpGet("GetRefundsSearch/{search}")]
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
+
+        [HttpGet("GetRefundsSearch/{search}")]
         public async Task<IActionResult> GetRefundsSearch(string search)
         {
             var user = await UserInfo();
@@ -709,6 +720,18 @@ namespace AdHOCInvoicingApp.Controllers
             return Ok(response);
 
         }
+
+        [HttpGet("GetPurchaseReturnsSearch/{search}")]
+        public async Task<IActionResult> GetPurchaseReturnSearch(string search)
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/GetPurchaseReturnsByCompanyId/6?CompanyId={user.Sub}&Filter={search}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
         [HttpGet("GetRefundsById/{refundId}")]
         public async Task<IActionResult> GetRefundsById(string refundId)
         {
@@ -725,6 +748,33 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
             string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateRefundReportAsync?Id={id}"; 
+            var response = await client.PostAsJsonAsync(url, id);
+
+            if (response.StatusCode.ToString() == "BadRequest")
+            {
+                throw new Exception("Error Occurred");
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                var secResult = JsonConvert.DeserializeObject<string>(result);
+                return Ok(secResult);
+            }
+            else
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                //return new JsonResult(new { result });
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
+        [HttpPost("GeneratePurchaseReturnInvoice")]
+
+        public async Task<IActionResult> GeneratePurchaseReturnInvoice([FromBody] string id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={id}";
             var response = await client.PostAsJsonAsync(url, id);
 
             if (response.StatusCode.ToString() == "BadRequest")
@@ -778,9 +828,57 @@ namespace AdHOCInvoicingApp.Controllers
             }
         }
 
+        [HttpPost("PurchaseReturn")]
+        public async Task<IActionResult> PostPurchaseReturn([FromBody] PurchaseReturn data)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.companyId = user.Sub;
+            
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/PurchaseReturn";
+
+            var response = await client.PostAsync(url, content);
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+            
+            //if (response.StatusCode.ToString() == "BadRequest")
+            //{
+            //    throw new Exception("Error Occurred");
+            //}
+            //else if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    return new JsonResult(new { result });
+            //}
+            //else
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    //return new JsonResult(new { result });
+            //    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+            //    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+            //}
+        }
+
 
         // purchase
-         [HttpGet("GetPurchase/{filter}/{pgNumber}/{pgSz}/{branchId}")]
+        [HttpGet("GetPurchase/{filter}/{pgNumber}/{pgSz}/{branchId}")]
         public async Task<IActionResult> GetPurchase(int filter, int pgNumber, int pgSz, string branchId)
         {
             var user = await UserInfo();
@@ -921,11 +1019,102 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
+        [HttpPost("CancelRefund")]
+        public async Task<IActionResult> CancelRefund([FromBody] CancelRefundDTO data)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.companyId = user.Sub;
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/RefundCancellation";
+
+            var response = await client.PostAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
 
 
+        [HttpPost("CancelPurchaseReturn")]
+        public async Task<IActionResult> CancelPurchaseReturn([FromBody] CancelRefundDTO data)
+        {
 
-      
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.companyId = user.Sub;
 
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Refunds/PurchaseReturnCancellation";
+
+            var response = await client.PostAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
+
+        [HttpPost("Note")]
+        public async Task<IActionResult> DebitAndCredit([FromBody] DebitCreditNote data)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.CompanyId = user.Sub;
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Notes";
+
+            var response = await client.PostAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
     }
 
 }

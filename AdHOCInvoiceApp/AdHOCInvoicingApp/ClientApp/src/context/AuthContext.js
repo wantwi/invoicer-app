@@ -98,14 +98,16 @@ export const AuthProvider = ({ children }) => {
     refetch: getBranches,
     data: branches,
     isLoading: isLoadingBraches,
-    isError: isErrorLoadingBranches,
+    isError: isErrorLoadingBranches
   } = useQuery({
     enabled: false,
     queryKey: ["branches"],
     queryFn: fecthBranches,
+    cacheTime: Infinity,
+    staleTime: Infinity
   });
 
-  console.log({ branches });
+  // console.log({ branchLoading,isFetching });
 
   return (
     <AuthContext.Provider
@@ -124,6 +126,7 @@ export const AuthProvider = ({ children }) => {
         setSelectedBranch,
         selectedBranch,
         isErrorLoadingBranches,
+       
       }}
     >
       {children}

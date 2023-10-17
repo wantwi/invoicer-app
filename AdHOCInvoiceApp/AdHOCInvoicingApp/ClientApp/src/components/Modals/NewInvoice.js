@@ -81,11 +81,12 @@ function NewInvoice({ setShowNewInvoiceModal, refetch }) {
           className="modal-body "
           style={{
             display: "flex",
-            width: "70vw",
+            minWidth: "40vw",
             marginTop: -30,
             resize: "both",
             overflow: "auto",
             justifyContent: "center",
+            maxWidth:"max-content"
           }}
         >
           <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>

@@ -2,6 +2,7 @@
 
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const million = require('million/compiler');
 
 module.exports = ({ mode } = { mode: "production" }) => {
     console.log(`mode is: ${mode}`);
@@ -18,6 +19,7 @@ module.exports = ({ mode } = { mode: "production" }) => {
             new HtmlWebpackPlugin({
                 template: "./public/index.html"
             }),
+             million.webpack({ auto: true }),
         ],
         rules: [
             {

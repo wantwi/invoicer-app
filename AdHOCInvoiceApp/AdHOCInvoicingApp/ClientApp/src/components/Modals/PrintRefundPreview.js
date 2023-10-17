@@ -5,6 +5,7 @@ import graLogo from "../../assets/img/theme/gra.png";
 import { FcDownload, FcPrint } from "react-icons/fc";
 import QRCode from "react-qr-code";
 import moment from "moment";
+import { useAuth } from "context/AuthContext";
 
 export const PrintRefundPreview = ({
   setShowReport,
@@ -25,6 +26,7 @@ export const PrintRefundPreview = ({
     let originalContents = document.body.innerHTML;
     document.body.innerHTML = printContents;
     window.print(printContents);
+   const {user} = useAuth()
 
     //setShowReport(false)
     document.body.innerHTML = originalContents;
