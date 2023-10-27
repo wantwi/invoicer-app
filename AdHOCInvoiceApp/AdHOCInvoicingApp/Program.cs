@@ -67,7 +67,8 @@ builder.Services.AddAuthentication(options =>
 
 });
 
-//builder.Services.AddOpenIdConnectAccessTokenManagement();
+
+builder.Services.AddOpenIdConnectAccessTokenManagement();
 
 var app = builder.Build();
 

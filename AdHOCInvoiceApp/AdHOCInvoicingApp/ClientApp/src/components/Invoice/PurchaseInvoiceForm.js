@@ -298,7 +298,7 @@ function PurchaseInvoiceForm() {
       nameOfUser: user?.name,
       supplierScheme: `${vatType}`,
       transactionType: "PURCHASE",
-      currency: formData.currency,
+      currency: currency,
       forexRate: forex,
       supplierTinghcard: formData.identity,
       invoiceNo: formData.invoiceNumber,

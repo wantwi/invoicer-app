@@ -63,7 +63,7 @@ namespace AdHOCInvoicingApp.model
     {
         public int? returnQuantity { get; set; }
         public string vatItemId { get; set; }
-        public int? returnAmount { get; set; }
+        public double? returnAmount { get; set; }
     }
 
     public class PurchaseReturn
@@ -75,11 +75,11 @@ namespace AdHOCInvoicingApp.model
         public List<PurchaseReturnItem> purchaseReturnItems { get; set; }
     }
 
-    public class Invoice
+  
+
+    public class NoteLine
     {
-        public string InvoiceNo { get; set; }
-        public int? Amount { get; set; }
-        public DateTime? Date { get; set; }
+        public string InvoiceId { get; set; }
     }
 
     public class DebitCreditNote
@@ -87,13 +87,30 @@ namespace AdHOCInvoicingApp.model
         public string CompanyId { get; set; }
         public string BranchId { get; set; }
         public string Tin { get; set; }
+        public string Currency { get; set; }
+        public int? ForexRate { get; set; }
         public string Name { get; set; }
         public string Reason { get; set; }
-        public int? Amount { get; set; }
+        public double? Amount { get; set; }
         public DateTime? Date { get; set; }
         public string NoteType { get; set; }
-        public List<Invoice> Invoices { get; set; }
+        public string NameOfUser { get; set; }
+        public string Remarks { get; set; }
+        public List<NoteLine> NoteLines { get; set; }
     }
+
+
+
+    public class CheckInvoice
+    {
+        public string CustomerName { get; set; }
+        public string CustomerTin { get; set; }
+        public string Invoice { get; set; }
+        public string CompanyId { get; set; }
+        public string BranchId { get; set; }
+        public string NoteType { get; set; }
+    }
+
 
 
 

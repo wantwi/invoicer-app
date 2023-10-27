@@ -36,8 +36,6 @@ import { EvatTable } from "components/Tables/EvatTable";
 import ReactTooltip from "react-tooltip";
 import useAuth from "hooks/useAuth";
 
-
-
 export const PurchaseContext = createContext();
 const DebitAndCredit = () => {
   const axios = useCustomAxios();
@@ -67,7 +65,8 @@ const DebitAndCredit = () => {
   const dayOfWeekSelRef = useRef();
   const [value] = useDebounce(invoiceQuery, 100);
   const [selectedRow, setSelectedRow] = useState(null);
-    const { selectedBranch, user } = useAuth();
+  const { selectedBranch, user } = useAuth();
+  const [noteType, setNoteType] = useState("")
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -76,10 +75,8 @@ const DebitAndCredit = () => {
     () => [
       {
         Header: "Note #",
-        accessor: "invoiceNo",
+        accessor: "number",
         className: " text-left ",
-
-        width: 180,
       },
       {
         Header: "Date",
@@ -93,7 +90,7 @@ const DebitAndCredit = () => {
       },
       {
         Header: "customer Name",
-        accessor: "customerName",
+        accessor: "name",
         className: " text-left ",
 
         Cell: ({ cell: { value } }) => {
@@ -102,7 +99,7 @@ const DebitAndCredit = () => {
               <span data-tip={value}>{value}</span>
               <ReactTooltip />
             </>
-          )
+          );
         },
         // minWidth: 340,
         width: "auto",
@@ -110,17 +107,17 @@ const DebitAndCredit = () => {
       {
         Header: () => (
           <span align="right" style={{ float: "right", width: "100%" }}>
-            Total Payable (GHS)
+            Amount
           </span>
         ),
-        accessor: "totalAmount",
+        accessor: "amount",
         className: " text-right ",
         Cell: ({ cell: { value } }) => <>{moneyInTxt(value)}</>,
         width: "auto",
       },
       {
         Header: "Reason",
-        accessor: "nameOfUser",
+        accessor: "reason",
         className: " text-left ",
 
         Cell: ({ cell: { value } }) => {
@@ -129,40 +126,37 @@ const DebitAndCredit = () => {
               <span data-tip={value}>{value}</span>
               <ReactTooltip />
             </>
-          )
+          );
         },
         // minWidth: 340,
         width: "auto",
       },
 
-     
       {
         Header: () => <div align="center">View</div>,
         disableSortBy: true,
         className: " text-center table-action",
-        Cell: ({ row },) => {
+        Cell: ({ row }) => {
           return (
             <Button
               style={{ padding: "2px 8px" }}
               className="badge-success"
               onClick={(e) => {
                 // loadPreview(value);
-                setSelectedRow(row?.values)
-                getInvoiceById(row?.values?.id)
+                setSelectedRow(row?.values);
+                getInvoiceById(row?.values?.id);
               }}
               title="Preview"
             >
               <FaEye />
             </Button>
-          )
+          );
         },
         accessor: "id",
       },
     ],
     []
-  )
-
-
+  );
 
   const errorHandler = (err) => {
     return <h1>Something happened while previewing purchase</h1>;
@@ -171,10 +165,10 @@ const DebitAndCredit = () => {
   const getInvoiceById = async (id) => {
     setIsReportDownloading(true);
     const res = await axios.post(
-        `/api/GenerateVAPurchaseInvoiceReportAsync`,id
+      `/api/GenerateVAPurchaseInvoiceReportAsync`,
+      id
     );
     return res?.data;
-
   };
 
   const {
@@ -186,8 +180,8 @@ const DebitAndCredit = () => {
     queryFn: () => getInvoiceById(selectedRow?.id),
     enabled: Boolean(selectedRow?.id),
     onSuccess: (data) => {
-      let base64 = `data:application/pdf;base64,` + data
-      const pdfContentType = "application/pdf"
+      let base64 = `data:application/pdf;base64,` + data;
+      const pdfContentType = "application/pdf";
 
       setIsReportDownloading(false);
       setSelectedRow(null);
@@ -196,7 +190,9 @@ const DebitAndCredit = () => {
     },
     onError: (res) => {
       setIsReportDownloading(false);
-      toast.error(res?.data || "Error. Unable to load preview. Please try again");
+      toast.error(
+        res?.data || "Error. Unable to load preview. Please try again"
+      );
     },
   });
 
@@ -208,83 +204,137 @@ const DebitAndCredit = () => {
   // }, [selectedRow]);
 
   const getInvoice = async (pageNumber, searchText) => {
-    setShowLoader(true)
+    // setShowLoader(true);
     let url, result;
     if (searchText.length > 1) {
-      url = `/api/GetPurchaseSearch/${period}/${pageNumber}/${pageSize}/${searchText}`;
+      url = `/api/Notes/${period}/${pageNumber}/${pageSize}/${searchText}/${noteType}`;
     } else {
-        url = `/api/GetPurchase/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`;
+      url = `/api/Notes/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}/${noteType}`;
     }
 
     const request = await axios.get(url);
-    setShowLoader(false)
 
-    if (searchText.length > 1) {
-      result = request?.data;
-      let obj = {},
-        pageObj = {};
-      pageObj.paging = 1;
-      pageObj.items = result;
-      obj.invoices = pageObj;
-      obj.summaries = result;
-      return obj;
-    } else {
-      result = request?.data;
+    console.log({ getInvoice: request });
+    setShowLoader(false);
 
-      setPageInfo(result.invoices?.paging);
+    if (request?.data?.notes) {
+      const result = request?.data?.notes;
+
+      console.log({ getInvoice2: result });
       return result;
+      // let obj = {},
+      //   pageObj = {};
+      // pageObj.paging = 1;
+      // pageObj.items = result?.items;
+      // obj.invoices = pageObj;
+      // obj.summaries = result;
+
+      // setPageInfo(result?.paging);
+      // return obj;
+    } else {
+
+      // setPageInfo(result.notes?.paging);
+      // return result;
     }
+
+    // if(JSON.parse(request?.data)?.StatusCode >=400){
+    //    const response = JSON.parse(request?.data)?.ErrorMessage
+    //    const error = new Error(response)
+    //   error.code = JSON.parse(request?.data)?.StatusCode
+    //   throw error;
+
+    // }else{
+    //   setShowLoader(false)
+
+    //   console.log({getInvoice: request});
+
+    //   if (searchText.length > 1) {
+    //     result = request?.data?.notes;
+    //     let obj = {},
+    //       pageObj = {};
+    //     pageObj.paging = 1;
+    //     pageObj.items = result;
+    //     obj.invoices = pageObj;
+    //     obj.summaries = result;
+    //     return obj;
+    //   } else {
+    //     result = request?.data.notes;
+
+    //     setPageInfo(result.notes?.paging);
+    //     return result;
+    //   }
+    // }
   };
 
-  // const query = useQuery({
-  //   queryKey: ["purchase-invoices", pageNumber, Number(period), value],
-  //   queryFn: () => getInvoice(pageNumber, value),
-  //   onSuccess: (data) => {
-  //     if (!data?.invoices?.items.length) {
-  //       const msg =
-  //         "No invoices available for " +
-  //         dayOfWeekSelRef.current.options[dayOfWeekSelRef.current.selectedIndex]
-  //           .innerText;
-  //       // toast.info(msg)
-  //       setMessage(msg);
-  //       setPageInfo({});
-  //       setInvoices([]);
-  //       return;
-  //     }
-  //     setInvoices(data.invoices?.items);
-  //     setPageInfo(data.invoices?.paging);
-  //     setSummary({
-  //       totalPayable: data.totalPayable,
-  //       totalSalesVAT: data.totalSalesVAT,
-  //       totalNoSalesInvoices: data.totalNoSalesInvoices,
-  //     });
-  //     setMessage(null);
-  //     },
-  //     onError: (err) => {
-  //         console.log({"treat":err})
-  //     }
-
-  //   //  placeholderData: true
-  // });
-  // const { data, refetch, isFetching, isLoading } = query;
-
-  // useEffect(() => {
-  //   refetch();
-  //   return () => { };
-  // }, [period, pageNumber]);
-
-  // useEffect(() => {
-  //   if (value.length > 1) {
-  //     refetch();
-  //   }
-  //   if (invoiceQuery) {
-  //     setInvoices([]);
-  //     refetch();
-  //   }
-  //   return () => { };
-  // }, [value]);
-
   
+
+  const query = useQuery({
+    queryKey: ["notes", pageNumber, Number(period), value, noteType],
+    queryFn: () => getInvoice(pageNumber, value),
+    onSuccess: (data) => {
+      console.log({ onSuccess: data });
+
+      if (!data?.items.length) {
+        const msg =
+          "No invoices available for " +
+          dayOfWeekSelRef.current.options[dayOfWeekSelRef.current.selectedIndex]
+            .innerText;
+        // toast.info(msg)
+        setMessage(msg);
+        setPageInfo({});
+        setInvoices([]);
+        return;
+      }
+
+      setInvoices(data?.items);
+      setPageInfo(data?.paging);
+      setSummary({
+        totalPayable: data.totalPayable,
+        totalSalesVAT: data.totalSalesVAT,
+        totalNoSalesInvoices: data.totalNoSalesInvoices,
+      });
+      setMessage(null);
+    },
+    onError: (err) => {
+      console.log({ treat: err });
+    },
+
+    //  placeholderData: true
+  });
+  const { data, refetch, isFetching, isLoading, isError } = query;
+
+  useEffect(() => {
+    refetch();
+    return () => { };
+  }, [period, pageNumber]);
+
+  useEffect(() => {
+    if (value.length > 1) {
+      refetch();
+    }
+    if (invoiceQuery) {
+      setInvoices([]);
+      refetch();
+    }
+    return () => { };
+  }, [value]);
+
+  const handleNoteTypeChange = (e)=>{
+     setNoteType(e.target.value)
+  }
+
+  console.log({ invoices,pageInfo });
+
+  useEffect(() => {
+    setShowLoader(isLoading);
+  
+    return () => {
+      
+    }
+  }, [isLoading])
+  
+  console.log({isLoading, isError});
+
   return (
     <PurchaseContext.Provider value={{ invoices, setInvoices }}>
       <Header
@@ -303,6 +353,13 @@ const DebitAndCredit = () => {
               <Card className="shadow">
                 <CardHeader className="border-0">
                   <Row className="align-items-center">
+                    <Col md="2">
+                    <select className="form-control" onChange={handleNoteTypeChange}>
+                      <option disabled selected>Select note type</option>
+                      <option value={"DEBIT"}>DEBIT</option>
+                      <option value={"CREDIT"}>CREDIT</option>
+                    </select>
+                    </Col>
                     <div className="col">
                       <Form
                         className="navbar-search navbar-search-light form-inline "
@@ -313,7 +370,7 @@ const DebitAndCredit = () => {
                       >
                         <FormGroup className="mb-0">
                           {" "}
-                          <InputGroup className="input-group-alternative">
+                          <InputGroup className="input-group-alternative ">
                             <InputGroupAddon
                               addonType="prepend"
                               style={{ marginTop: 7 }}
@@ -358,14 +415,13 @@ const DebitAndCredit = () => {
                 </CardHeader>
                 <div style={styles.body}>
                   <EvatTable
-                    isLoading={(showLoader || isReportDownloading)}
+                    isLoading={showLoader || isReportDownloading}
                     columns={columns}
-                    data={ []}
+                    data={invoices}
                     getPrintPDF={() => null}
                     message={message}
                     sortKey="date"
                   />
-
                 </div>
 
                 {pageInfo?.totalItems > 0 && (
@@ -434,9 +490,9 @@ const DebitAndCredit = () => {
           {showNewInvoiceModal ? (
             <NewPurchaseInvoice
               setShowNewInvoiceModal={setShowNewInvoiceModal}
+              refetch={refetch}
             />
           ) : null}
-          
         </Container>
       </ErrorBoundary>
     </PurchaseContext.Provider>

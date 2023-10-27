@@ -12,6 +12,7 @@ export const EvatTable = ({
   getPrintPDF = () => null,
   sortKey,
   message,
+  tablesm=""
 }) => {
   const {
     getTableProps,
@@ -59,7 +60,7 @@ export const EvatTable = ({
       <div style={{ position: "relative", lineHeight: 1, height: "520px" }}>
         <Table
           {...getTableProps()}
-          className="align-items-center table-flush "
+          className={`align-items-center table-flush ${tablesm} `}
           id="index-table"
           responsive
         >
@@ -98,7 +99,7 @@ export const EvatTable = ({
                   className="table-record"
                   //onClick={() => console.log({row})}
                   // onClick={() => setSelectedRow(row?.original?.id)}
-                  onClick={() => getPrintPDF(row?.original?.id)}
+                  // onClick={() => getPrintPDF(row?.original?.id)}
                 >
                   {row.cells.map((cell) => {
                     return (

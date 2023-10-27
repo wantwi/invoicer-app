@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { ToastContainer, toast } from "react-toastify"
 
 import {
@@ -13,6 +13,10 @@ import {
   Modal,
 } from "reactstrap"
 import { getPayableAmount } from "utils/util"
+import { FormContext } from "./NewInvoice"
+
+
+
 
 function EditInvoiceItem({
   updateItemData,
@@ -22,7 +26,10 @@ function EditInvoiceItem({
   setGridData,
   showDiscountField,
 }) {
-  // const [csttourism, setCsttourism] = useState(0);
+  const {
+    
+    vatAndLeviesScheme
+  } = useContext(FormContext);
   const handleUpdate = () => {
     // console.log(gridData)
 
@@ -160,7 +167,8 @@ function EditInvoiceItem({
         isTaxable: rowData?.isTaxable,
         isTaxInclusive: rowData?.isTaxInclusive,
       },
-      updateItemData?.discount
+      updateItemData?.discount,
+      vatAndLeviesScheme
     )
     let obj = {
       ...updateItemData,

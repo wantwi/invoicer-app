@@ -31,7 +31,7 @@ const init = {
 };
 export const FormContext = createContext(null);
 
-export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
+export default function NewPurchaseInvoice({ setShowNewInvoiceModal, refetch }) {
 
 
   return (
@@ -60,7 +60,7 @@ export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
           </Button>
         </div>
         <ModalBody style={{marginTop:-50}}>
-           <DebitAndCreditForm setShowNewInvoiceModal={setShowNewInvoiceModal}/>
+           <DebitAndCreditForm refetch={refetch} setShowNewInvoiceModal={setShowNewInvoiceModal}/>
         </ModalBody>
        
          

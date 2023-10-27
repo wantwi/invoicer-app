@@ -1083,6 +1083,37 @@ namespace AdHOCInvoicingApp.Controllers
             }
 
         }
+        [HttpPost("GetInvoice")]
+        public async Task<IActionResult> GetInvoice([FromBody] CheckInvoice data)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.CompanyId = user.Sub;
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Notes/ValidateNoteInvoice";
+
+            var response = await client.PostAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
 
         [HttpPost("Note")]
         public async Task<IActionResult> DebitAndCredit([FromBody] DebitCreditNote data)
@@ -1115,6 +1146,28 @@ namespace AdHOCInvoicingApp.Controllers
             }
 
         }
+
+        // purchase
+        [HttpGet("Notes/{filter}/{pgNumber}/{pgSz}/{branchId}/{type}")]
+        public async Task<IActionResult> GetNotes(int filter, int pgNumber, int pgSz, string branchId, string type)
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v4/Notes/GetNotes?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}&BranchId={branchId}&transFilter={filter}&type={type}";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+            //GetNotes?CompanyId=9e6688a9-00de-4be9-8ce2-155d1dc79bbf&PageNumber=1&PageSize=1&BranchId=003&transFilter=0&type=CREDIT
+
+        }
+
+
+        //[HttpGet("Notes")]
+        //public async Task<IActionResult> GetNote(string date, string taxScheme)
+        //{
+        //    string url = $"{EvatAdHOCBaseUrl}v4/Notes/GetNotes/{date}/{taxScheme}";
+        //    var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+        //    return Ok(response);
+
+        //}
     }
 
 }

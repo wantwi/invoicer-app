@@ -18,6 +18,7 @@ import {
   InputGroupAddon,
   InputGroupText,
   Input,
+  Badge,
 } from "reactstrap";
 import refund from "../assets/img/theme/refundimg.png";
 
@@ -74,6 +75,7 @@ const PurchaseReturn = () => {
   const [promptMessage, setPromptMessage] = useState("");
   const [refundType, setRefundType] = useState("Partial");
   const [refundTypeForPost, setRefundTypeForPost] = useState("");
+  const [isActive, setIsActive] = useState(true)
   const [
     resetInvoicePreviewRefundComponent,
     setResetInvoicePreviewRefundComponent,
@@ -136,17 +138,32 @@ const PurchaseReturn = () => {
         width: 140,
       },
       {
+        Header: "Status",
+        accessor: "status",
+        className: "text-left",
+        Cell: (data) => {
+          console.log({success: data?.row});
+          return (
+            data?.row?.original?.status === "ACTIVE" ? <Badge color="primary">{data?.row?.original?.status}</Badge> : <Badge color="danger">{data?.row?.original?.status}</Badge>
+          );
+        },
+        width: 150,
+      },
+      {
         Header: () => <div align="center">View</div>,
         disableSortBy: true,
         className: " text-center table-action",
         accessor: "action",
         width: 140,
         Cell: (data) => {
+          
+          // data?.row?.original?.status === "ACTIVE" ? setIsActive(true) : setIsActive(false)
           return (
             <Button
               style={{ padding: "2px 8px" }}
               className="badge-success"
               onClick={(e) => {
+                data?.row?.original?.status === "ACTIVE" ? setIsActive(true) : setIsActive(false)
                 getPrintPDF(data?.row?.original?.id);
               }}
               title="Preview"
@@ -383,6 +400,7 @@ const PurchaseReturn = () => {
                   getPrintPDF={() => null}
                   pdfData={pdfData}
                   message={message}
+                  tablesm="table-sm"
                 />
               </div>
               <CardFooter className="py-1">
@@ -470,6 +488,7 @@ const PurchaseReturn = () => {
           getPrintPDF={getPrintPDF}
           pdfData={pdfData}
           selectedInvoiceNo={selectedInvoiceNo}
+          isActive={isActive}
           
         />
       )}

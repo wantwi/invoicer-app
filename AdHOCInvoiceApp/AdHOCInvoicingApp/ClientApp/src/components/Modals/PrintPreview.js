@@ -18,7 +18,8 @@ function PrintPreview({
   pdfData,
   selectedInvoiceNo,
   title="Invoice",
-  isRefund=false
+  isRefund=false,
+  isActive=true
 }) {
   const [showPrompt, setShowPrompt] = useState(false)
  const {setShowLoader} = useOverLayLoader()
@@ -43,12 +44,24 @@ function PrintPreview({
 
  const {mutate} = useCustomPost('/api/CancelRefund',"refunds",
  (data)=>{
+
+  if(data.status >=400){
+
+    const response = JSON.parse(data?.data)?.Message
+  const error = new Error(response)
+  error.code = data.status
+  throw error;
+
+}else{
   toast.success("Cancel Refund successful");
   setShowReport(false)
   setShowLoader(false)
+}
+ 
  
  },
-()=>{
+(error)=>{
+  toast.error(error?.message ||"Refund faild. Please contact admin.")
   setShowLoader(false)
 
  })
@@ -113,7 +126,7 @@ function PrintPreview({
         {/* OLD IMPLEMETATION HERE */}
         <ModalFooter>
         {/* <button className="btn btn-sm btn-secondary"  onClick={() => setShowReport(false)} title="Close">Close</button> */}
-         {isRefund ? <button className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Refund">Cancel Refund</button>: null}
+         {isRefund ? <button hidden={!isActive} className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Refund">Cancel Refund</button>: null}
         </ModalFooter>
       </Modal>
 

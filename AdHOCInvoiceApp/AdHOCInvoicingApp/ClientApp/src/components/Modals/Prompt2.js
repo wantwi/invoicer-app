@@ -25,6 +25,7 @@ export default function Prompt({
 
   const submitRefund = async ({ postData, refundType }) => {
     setLoading(true);
+   
     const request = await axios.post(
       `/api/PurchaseReturn`,
       postData
@@ -49,7 +50,9 @@ console.log({request});
     mutationFn: submitRefund,
     onSuccess: (data) => {
 
-      toast.success("Purchase Invoice successfully cancelled");
+      console.log({PurchaseReturn: data});
+
+      toast.success("Purchase Return successful");
       setLoading(false);
       setshowPrompt(false);
       setOpen(false);
@@ -62,7 +65,7 @@ console.log({request});
     onError: (error) => {
       console.log({ useMutationError: error });
       toast.error(
-        error?.message|| "Could not refund invoice. Please contact support."
+        error?.message|| "Could not return invoice. Please contact support."
       );
       setLoading(false);
       setshowPrompt(false);

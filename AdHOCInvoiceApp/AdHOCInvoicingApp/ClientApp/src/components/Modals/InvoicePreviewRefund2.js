@@ -177,12 +177,12 @@ function InvoicePreviewRefund({
 
   useEffect(() => {
     if (togglePartialRefund) {
-      setPromptMessage("Do you want to proceed with the PARTIAL refund?");
+      setPromptMessage("Do you want to proceed with the PARTIAL return?");
       setRefundTypeForPost("Partial");
       setRefundType("Partial");
       // setConfirmDisabled(true);
     } else {
-      setPromptMessage("Do you want to proceed with a FULL refund?");
+      setPromptMessage("Do you want to proceed with a FULL return?");
       setRefundTypeForPost("Full");
       setRefundType("Full");
       // setConfirmDisabled(false);
@@ -233,13 +233,13 @@ function InvoicePreviewRefund({
       setRefundTypeForPost("Full");
 
       setPromptMessage(
-        "Your current setup is a FULL refund. Do you want to proceed?"
+        "Your current setup is a FULL return. Do you want to proceed?"
       );
     } else {
       // setRefundType("Partial");
       setRefundTypeForPost("Partial");
 
-      setPromptMessage("Do you want to proceed with the PARTIAL refund?");
+      setPromptMessage("Do you want to proceed with the PARTIAL return?");
     }
     setrefundInvoice({ ...searchResults, invoiceItemsToPost: invoicesPrePost });
     setIsRefunded(false);

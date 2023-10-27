@@ -17,6 +17,7 @@ function PrintPreview({
   bottom = 200,
   pdfData,
   selectedInvoiceNo,
+  isActive
 }) {
   const [showPrompt, setShowPrompt] = useState(false)
  const {setShowLoader} = useOverLayLoader()
@@ -41,13 +42,25 @@ function PrintPreview({
 
  const {mutate} = useCustomPost('/api/CancelPurchaseReturn',"purchase-returns",
  (data)=>{
-  toast.success("Cancel Refund successful");
-  setShowReport(false)
-  setShowLoader(false)
+  console.log({Purchase: data});
+  if(data.status >=400){
+
+      const response = JSON.parse(data?.data)?.Message
+    const error = new Error(response)
+    error.code = data.status
+    throw error;
+
+  }else{
+    toast.success("Cancel Purchase Return successful");
+    setShowReport(false)
+    setShowLoader(false)
+  }
+ 
  
  },
-()=>{
+(error)=>{
   setShowLoader(false)
+  toast.error(error?.message)
 
  })
 
@@ -66,6 +79,8 @@ function PrintPreview({
     setShowPrompt(false)
     setShowLoader(true)
   }
+
+  console.log({isActive})
 
   return (
     <>
@@ -111,7 +126,7 @@ function PrintPreview({
         {/* OLD IMPLEMETATION HERE */}
         <ModalFooter>
         {/* <button className="btn btn-sm btn-secondary"  onClick={() => setShowReport(false)} title="Close">Close</button> */}
-          <button className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Purchase Return">Cancel Purchase Return</button>
+         {isActive ? <button className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Purchase Return">Cancel Purchase Return</button>:null}
         </ModalFooter>
       </Modal>
 
