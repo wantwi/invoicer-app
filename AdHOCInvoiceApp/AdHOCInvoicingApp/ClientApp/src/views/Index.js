@@ -192,7 +192,6 @@ const Index = () => {
                   e.stopPropagation()
                   toast.info("Invoice cannot be previewed because it has no signature")
                   return
-                  
                 }
                 // loadPreview(value);
                 setSelectedRow(row.original.id);

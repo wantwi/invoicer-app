@@ -66,7 +66,7 @@ const DebitAndCredit = () => {
   const [value] = useDebounce(invoiceQuery, 100);
   const [selectedRow, setSelectedRow] = useState(null);
   const { selectedBranch, user } = useAuth();
-  const [noteType, setNoteType] = useState("")
+  const [noteType, setNoteType] = useState("CREDIT")
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -165,7 +165,7 @@ const DebitAndCredit = () => {
   const getInvoiceById = async (id) => {
     setIsReportDownloading(true);
     const res = await axios.post(
-      `/api/GenerateVAPurchaseInvoiceReportAsync`,
+      `/api/GenerateCreditReportAsync`,
       id
     );
     return res?.data;
@@ -342,7 +342,7 @@ const DebitAndCredit = () => {
         period={period}
         setPeriod={setPeriod}
         dayOfWeekSelRef={dayOfWeekSelRef}
-        pageName="Purchase Invoice"
+        pageName="Debit & Credit Note"
       />
       <ErrorBoundary FallbackComponent={FcCallback} onError={errorHandler}>
         {/* Page content */}
@@ -354,7 +354,7 @@ const DebitAndCredit = () => {
                 <CardHeader className="border-0">
                   <Row className="align-items-center">
                     <Col md="2">
-                    <select className="form-control" onChange={handleNoteTypeChange}>
+                    <select className="form-control" value={noteType} onChange={handleNoteTypeChange}>
                       <option disabled selected>Select note type</option>
                       <option value={"DEBIT"}>DEBIT</option>
                       <option value={"CREDIT"}>CREDIT</option>

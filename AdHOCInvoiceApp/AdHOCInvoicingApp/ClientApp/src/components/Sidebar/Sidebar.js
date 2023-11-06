@@ -113,7 +113,6 @@ const Sidebar = (props) => {
         // setIsOpen(false)
 
       }
-      
 
       return () => {};
     }, [location]);
@@ -252,8 +251,14 @@ const Sidebar = (props) => {
               iconPath={routes[transactionsIdx].menus[3]?.iconPath}
               name="Purchase Return"
             />
+             <MenuItem
+              path={routes[transactionsIdx].menus[0]?.navicationPath}
+              iconPath={routes[transactionsIdx].menus[3]?.iconPath}
+              name="Credit & Debit Note"
+            />
 
-            {cancelIdx != -1 && (
+
+            {/* {cancelIdx != -1 && (
               <MenuItem items={[]} name="Cancelation">
                 <MenuItem
                   items={[routes[transactionsIdx][3]?.menus]}
@@ -280,7 +285,7 @@ const Sidebar = (props) => {
                   name="Refund"
                 />
               </MenuItem>
-            )}
+            )} */}
           </MenuItem>
         )}
 
@@ -318,7 +323,7 @@ const Sidebar = (props) => {
     );
   };
   const createLinks = (routes) => {
-    console.log({ toti: routes });
+    //console.log({ toti: routes });
     // transactions: [],
     // setups: [],
     // report: [],

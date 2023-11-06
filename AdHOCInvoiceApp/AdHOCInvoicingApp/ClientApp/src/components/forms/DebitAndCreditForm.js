@@ -12,7 +12,7 @@ import {
   Col,
   Table,
   Badge,
-  Alert
+  Alert,
 } from "reactstrap";
 import { convertDate } from "utils/util";
 import { FaTrashAlt } from "react-icons/fa";
@@ -23,9 +23,10 @@ import { useAuth } from "context/AuthContext";
 import Autocomplete from "components/Invoice/Autocomplete";
 import { useCustomPost } from "hooks/useCustomPost";
 import useCustomAxios from "hooks/useCustomAxios";
-import {  toast } from "react-toastify";
+import { toast } from "react-toastify";
+import CurrencyInput from "react-currency-input-field";
 
-const NoteForm = ({ setShowNewInvoiceModal, refetch:refetchData }) => {
+const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
   const axios = useCustomAxios();
   const history = useHistory();
   const { selectedBranch, user } = useAuth();
@@ -40,7 +41,7 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch:refetchData }) => {
   const [forex, setForex] = useState(1);
   const [currencies, setCurrencies] = useState([]);
   const [currency, setCurrency] = useState("GHS");
-  const [notValid, setNotValid] = useState(false)
+  const [notValid, setNotValid] = useState(false);
 
   const successRespond = (response) => {
     let filteredCustomers = response?.filter(
@@ -50,24 +51,21 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch:refetchData }) => {
   };
   console.log({ successRespond: customers, customer });
 
-  const {refetch:customerRefetch} = useCustomQuery(
+  const { refetch: customerRefetch } = useCustomQuery(
     `/api/GetCustomers/${selectedBranch?.code}`,
     "customers",
     "",
     successRespond
   );
-const successResult = (response)=>{
-  setCurrencies(response)
-
-}
- const {refetch:currencyRefetch} = useCustomQuery(
+  const successResult = (response) => {
+    setCurrencies(response);
+  };
+  const { refetch: currencyRefetch } = useCustomQuery(
     `/api/GetCurrency`,
     "currency",
     "",
     successResult
   );
-
-  
 
   const checkIfRatesExist = async (currency) => {
     let today = new Date().toISOString();
@@ -103,13 +101,13 @@ const successResult = (response)=>{
     }
   };
 
-
   const { handleSubmit, control, setValue, getValues, watch } = useForm({
     defaultValues: {
       customerName: "",
-      amount: 0,
+      amount: "",
       date: "",
       reason: "",
+      noteType: "CREDIT",
       entries: [],
     },
   });
@@ -135,40 +133,39 @@ const successResult = (response)=>{
   );
 
   const noteRespond = (response) => {
-
-    if(response?.status >=400){
-      const res = JSON.parse(response?.data)?.title
-      const error = new Error(res)
-      error.code = response.status
+    if (response?.status >= 400) {
+      const res = JSON.parse(response?.data)?.title;
+      const error = new Error(res);
+      error.code = response.status;
       throw error;
+    } else {
+      toast.success("Note saved Successfully.");
 
+      console.log({ noteRespond: response });
+      refetchData();
+      setShowNewInvoiceModal(false);
     }
-    else{
-      toast.success("Note saved Successfully.")
+  };
 
-      console.log({noteRespond: response});
-      refetchData()
-      setShowNewInvoiceModal(false)
-    }
-  
-  }
+  const noteError = (error) => {
+    toast.error(error?.message);
+  };
 
-  const noteError = (error)=>{
-    toast.error(error?.message)
+  const { mutate: postNote } = useCustomPost(
+    "/api/Note",
+    "notes",
+    noteRespond,
+    noteError
+  );
 
-  }
-
-
-  const {mutate:postNote} = useCustomPost("/api/Note", "notes", noteRespond, noteError)
-
-  const noteType = watch("noteType")
+  const noteType = watch("noteType");
 
   const onSubmit = (data) => {
     // Handle form submission here
     const postData = {
       companyId: "",
       branchId: selectedBranch?.code,
-      tin:customer?.identity,
+      tin: customer?.identity,
       currency,
       forexRate: Number(forex),
       name: customer?.customer,
@@ -178,11 +175,12 @@ const successResult = (response)=>{
       noteType,
       nameOfUser: user?.name,
       remarks: data?.reason,
-      noteLines: data?.entries.map(x => ({invoiceId: x?.invoiceId}))
-       
-    }
-    console.log({postData});
-    postNote(postData)
+      noteLines: data?.entries.map((x) => ({ invoiceId: x?.invoiceId })),
+    };
+    console.log({ postData });
+
+    // return
+    postNote(postData);
   };
 
   const handleAppendEntry = () => {
@@ -195,22 +193,22 @@ const successResult = (response)=>{
   };
   useEffect(() => {
     setValue("entries", []);
-    setValue("date",  `${new Date().getFullYear()}-${
-      new Date().getMonth() + 1
-    }-${new Date().getDate()}`)
-    currencyRefetch()
-    customerRefetch()
+    setValue(
+      "date",
+      `${new Date().getFullYear()}-${
+        new Date().getMonth() + 1
+      }-${new Date().getDate()}`
+    );
+    currencyRefetch();
+    customerRefetch();
 
     return () => {};
   }, []);
 
-  
-
   const toggleAddItem = () => {
-    if(noteType && customer?.customer){
+    if (noteType && customer?.customer) {
       setShowAdd(!showAdd);
     }
-    
   };
   const resetItemsForm = () => {
     setInvoiceAmount("");
@@ -219,53 +217,53 @@ const successResult = (response)=>{
   };
 
   const invoiceValidateRespond = (data) => {
+    console.log({ invoiceValidateRespond: data });
+    setNotValid(false);
 
-    console.log({invoiceValidateRespond:data});
-    setNotValid(false)
-    
-    if(data?.status === "OK"){
-      const resData = JSON.parse(data?.data)
+    if (data?.status === "OK") {
+      const resData = JSON.parse(data?.data);
 
-      setInvoiceDated(resData?.invoiceDate.split("T")[0])
-      setInvoiceAmount(resData?.invoiceAmount)
+      setInvoiceDated(resData?.invoiceDate.split("T")[0]);
+      setInvoiceAmount(resData?.invoiceAmount);
 
-      append({invoiceId:resData?.invoiceId, invoiceNo: invoiceNo, date: resData?.invoiceDate.split("T")[0], amount: resData?.invoiceAmount });
+      append({
+        invoiceId: resData?.invoiceId,
+        invoiceNo: invoiceNo,
+        date: resData?.invoiceDate.split("T")[0],
+        amount: resData?.invoiceAmount,
+      });
       resetItemsForm();
-
-    }else{
-
-        const response = JSON.parse(data?.data)?.Message
-      const error = new Error(response)
-      error.code = data.status
+    } else {
+      const response = JSON.parse(data?.data)?.Message;
+      const error = new Error(response);
+      error.code = data.status;
       throw error;
     }
-
-
-  }
+  };
   const invoiceValidateErr = (data) => {
-    setNotValid(true)
+    setNotValid(true);
     toast.error(data?.message);
+  };
 
-  }
-
-  const {mutate} = useCustomPost("/api/GetInvoice", "invoice", invoiceValidateRespond, invoiceValidateErr)
-
- 
+  const { mutate } = useCustomPost(
+    "/api/GetInvoice",
+    "invoice",
+    invoiceValidateRespond,
+    invoiceValidateErr
+  );
 
   const handleAddItems = () => {
-   
     let postObj = {
-      customerName:customer?.customer,
-      customerTin:customer?.identity,
-      invoice:invoiceNo,
-      companyId:"",
+      customerName: customer?.customer,
+      customerTin: customer?.identity,
+      invoice: invoiceNo,
+      companyId: "",
       branchId: selectedBranch?.code,
-      noteType
-    }
+      noteType,
+    };
 
-    mutate(postObj)
+    mutate(postObj);
     //console.log({postObj});
-
 
     // refetch();
   };
@@ -278,11 +276,8 @@ const successResult = (response)=>{
         (previousValue, currentValue) => previousValue + currentValue,
         0
       ) || 0;
-      //0 && invoiceDate.length > 0 && invoiceNo.length > 0
-  const canAdd =
-  invoiceNo.length > 0
-      ? true
-      : false;
+  //0 && invoiceDate.length > 0 && invoiceNo.length > 0
+  const canAdd = invoiceNo.length > 0 ? true : false;
   const isValidAmt =
     Number(watch("amount")) === totalAmount
       ? "primary"
@@ -292,24 +287,22 @@ const successResult = (response)=>{
 
   const isValidText =
     isValidAmt === "danger"
-      ? `Amount must be less than total amount for the invoice ${moneyInTxt(
+      ? `Amount ${moneyInTxt(getValues("amount"),"en", 2)} should not be more than total invoice amount ${moneyInTxt(
           totalAmount,
           "en",
           2
         )}`
       : "";
 
-  
   const handleCheckEvent = (e) => {
     setIsCashCustomer(!isCashCustomer);
     if (e.target.checked) {
     }
   };
-const handleSetter = (data)=>{
-  setCustomer(data)
-  console.log({handleSetter: data});
-
-}
+  const handleSetter = (data) => {
+    setCustomer(data);
+    console.log({ handleSetter: data });
+  };
   return (
     <Form onSubmit={handleSubmit(onSubmit)} className="mt-3">
       <Row>
@@ -321,7 +314,6 @@ const handleSetter = (data)=>{
                   <Controller
                     name="noteType"
                     control={control}
-                    defaultValue="CREDIT"
                     render={({ field }) => (
                       <Input
                         {...field}
@@ -329,7 +321,7 @@ const handleSetter = (data)=>{
                         value="DEBIT"
                         id="debitNote"
                         name="noteType"
-                       
+                        onClick={() => setValue("noteType", "DEBIT")}
                       />
                     )}
                   />{" "}
@@ -341,7 +333,6 @@ const handleSetter = (data)=>{
                   <Controller
                     name="noteType"
                     control={control}
-                    defaultValue="CREDIT"
                     render={({ field }) => (
                       <Input
                         {...field}
@@ -350,6 +341,7 @@ const handleSetter = (data)=>{
                         id="creditNote"
                         name="noteType"
                         defaultChecked={true}
+                        onClick={() => setValue("noteType", "CREDIT")}
                       />
                     )}
                   />{" "}
@@ -359,7 +351,14 @@ const handleSetter = (data)=>{
             </div>
           </Row>
           <Row form style={styles.mb__5}>
-            <div style={{ position: "absolute", right: 20, zIndex: 1, display:"none" }}>
+            <div
+              style={{
+                position: "absolute",
+                right: 20,
+                zIndex: 1,
+                display: "none",
+              }}
+            >
               <FormGroup check>
                 <Label check className="text-sm">
                   <Input
@@ -441,36 +440,44 @@ const handleSetter = (data)=>{
                 />
               </FormGroup>
             </Col>
-            <Col lg="6" >
-                <label htmlFor="currency" className="form-control-label ">
-                  Currency {exchangeRate === 1 ? "" : exchangeRate}
-                </label>
-                <select
-                  className="form-control font-sm"
-                  id="currency"
-                  value={currency}
-                  onChange={handleCurrencySelect}
-                
-                  style={{ height: 29, padding: "0px 5px" }}
-                >
-                  {currencies.map((currency, index) => (
-                    <option
-                      key={index}
-                      name={currency.name}
-                      id={currency.code}
-                      value={currency.code}
-                    >
-                      {currency.code}
-                    </option>
-                  ))}
-                </select>{" "}
-              </Col>
+            <Col lg="6">
+              <label htmlFor="currency" className="form-control-label ">
+                Currency {exchangeRate === 1 ? "" : exchangeRate}
+              </label>
+              <select
+                className="form-control font-sm"
+                id="currency"
+                value={currency}
+                onChange={handleCurrencySelect}
+                style={{ height: 29, padding: "0px 5px" }}
+              >
+                {currencies.map((currency, index) => (
+                  <option
+                    key={index}
+                    name={currency.name}
+                    id={currency.code}
+                    value={currency.code}
+                  >
+                    {currency.code}
+                  </option>
+                ))}
+              </select>{" "}
+            </Col>
             <Col md={6}>
-              <FormGroup style={{marginTop:-15}}>
+              <FormGroup style={{ marginTop: -15 }}>
                 <Label for="amount" className="text-sm mb-0">
                   Amount
                 </Label>
-                <Controller
+                <CurrencyInput
+                  id="input-example"
+                  name="input-name"
+                  className={`form-control form-control-sm text-right`}
+                  placeholder="0.00"
+                  defaultValue={getValues(`amount`)}
+                  decimalsLimit={2}
+                  onValueChange={(value, name) => setValue(`amount`, value)}
+                />
+                {/* <Controller
                   name="amount"
                   control={control}
                   defaultValue=""
@@ -485,7 +492,7 @@ const handleSetter = (data)=>{
                     <Input size={"sm"} {...field} type="text" id="amount"/>
                     
                   )}
-                />
+                /> */}
               </FormGroup>
             </Col>
           </Row>
@@ -538,9 +545,9 @@ const handleSetter = (data)=>{
                       onChange={(e) => setInvoiceNo(e.target.value)}
                     />
                   </FormGroup>
-                  {
-                    notValid ? <Alert color="danger">Invoice No. is not valid</Alert> : null
-                  }
+                  {notValid ? (
+                    <Alert className="p-1 m-1" color="danger">Invoice No. is not valid</Alert>
+                  ) : null}
                 </Col>
                 <Col md={6} hidden>
                   <FormGroup style={{ marginTop: -20 }}>
@@ -599,7 +606,7 @@ const handleSetter = (data)=>{
                     size="sm"
                     type="submit"
                     color="success"
-                    disabled={entriesList.length === 0}
+                    disabled={entriesList.length > 0 && isValidAmt ==="success" ? false: true}
                   >
                     Submit
                   </Button>
@@ -613,7 +620,7 @@ const handleSetter = (data)=>{
             <div
               className="table-responsive"
               style={{
-                height: window.screen.height > 864 ? "32.5vh":"40vh",
+                height: window.screen.height > 864 ? "32.5vh" : "40vh",
 
                 overflowY: "auto",
                 width: "100%",
@@ -675,6 +682,9 @@ const handleSetter = (data)=>{
                 </tr>
               </tbody>
             </Table>
+            {isValidAmt === "danger" ? (
+                    <Alert className="p-1 m-1" color="danger" style={{background:"#d73d5c", borderColor:"#d73d5c"}}>{isValidText}</Alert>
+                  ) : null}
           </Card>
         </Col>
       </Row>

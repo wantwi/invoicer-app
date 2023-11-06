@@ -27,7 +27,6 @@ function EditInvoiceItem({
   showDiscountField,
 }) {
   const {
-    
     vatAndLeviesScheme
   } = useContext(FormContext);
   const handleUpdate = () => {

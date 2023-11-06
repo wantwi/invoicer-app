@@ -126,7 +126,6 @@ export const AuthProvider = ({ children }) => {
         setSelectedBranch,
         selectedBranch,
         isErrorLoadingBranches,
-       
       }}
     >
       {children}

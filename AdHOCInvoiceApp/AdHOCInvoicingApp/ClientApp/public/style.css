@@ -6185,7 +6185,7 @@ span.pl-1{
     background-color: #f8f9fe !important;
   }
 
-  .badge-danger {
+  .badge-danger, .alert-danger {
     color: #730218 !important;
     background-color: rgba(251, 175, 190, 0.5) !important;
 }

@@ -932,6 +932,32 @@ namespace AdHOCInvoicingApp.Controllers
             }
         }
 
+        [HttpPost("GenerateCreditReportAsync")]
+        public async Task<IActionResult> GenerateCreditReportAsync([FromBody] string invoiceNo)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateCreditReportAsync?Id={invoiceNo}";
+            var response = await client.PostAsJsonAsync(url, invoiceNo);
+
+            if (response.StatusCode.ToString() == "BadRequest")
+            {
+                throw new Exception("Error Occurred");
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                var secResult = JsonConvert.DeserializeObject<string>(result);
+                return Ok(secResult);
+            }
+            else
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                //return new JsonResult(new { result });
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+        }
+
         [HttpPost("CreatePurchaseInvoice/{branchId}")]
         public async Task<IActionResult> CreatePurchaseInvoice([FromBody] PurchaseInvoiceDto data, string branchId)
         {
