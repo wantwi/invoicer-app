@@ -492,6 +492,7 @@ const Refunds = () => {
           title="Invoice Refund"
           isRefund={true}
           isActive={isActive}
+          refetch={refetch}
         />
       )}
 

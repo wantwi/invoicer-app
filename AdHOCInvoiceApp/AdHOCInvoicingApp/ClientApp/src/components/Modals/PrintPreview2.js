@@ -17,7 +17,8 @@ function PrintPreview({
   bottom = 200,
   pdfData,
   selectedInvoiceNo,
-  isActive
+  isActive,
+  refetch
 }) {
   const [showPrompt, setShowPrompt] = useState(false)
  const {setShowLoader} = useOverLayLoader()
@@ -55,8 +56,7 @@ function PrintPreview({
     setShowReport(false)
     setShowLoader(false)
   }
- 
- 
+  refetch()
  },
 (error)=>{
   setShowLoader(false)

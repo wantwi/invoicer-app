@@ -143,6 +143,7 @@ const DebitAndCredit = () => {
               className="badge-success"
               onClick={(e) => {
                 // loadPreview(value);
+               // console.log({getInvoiceById: row})
                 setSelectedRow(row?.values);
                 getInvoiceById(row?.values?.id);
               }}
@@ -163,6 +164,7 @@ const DebitAndCredit = () => {
   };
 
   const getInvoiceById = async (id) => {
+    
     setIsReportDownloading(true);
     const res = await axios.post(
       `/api/GenerateCreditReportAsync`,
@@ -176,7 +178,7 @@ const DebitAndCredit = () => {
     data: invoceData,
     isLoading: isInvoiceLoading,
   } = useQuery({
-    queryKey: ["purchase-invoice", selectedRow?.id],
+    queryKey: ["note-invoice", selectedRow?.id],
     queryFn: () => getInvoiceById(selectedRow?.id),
     enabled: Boolean(selectedRow?.id),
     onSuccess: (data) => {
@@ -265,8 +267,6 @@ const DebitAndCredit = () => {
     //   }
     // }
   };
-
-  
 
   const query = useQuery({
     queryKey: ["notes", pageNumber, Number(period), value, noteType],
@@ -493,6 +493,17 @@ const DebitAndCredit = () => {
               refetch={refetch}
             />
           ) : null}
+          {showReport && (
+            <PrintPreview
+              setShowReport={setShowReport}
+              pdfData={formData}
+              getPrintPDF={() => null}
+              salesType={salesType}
+              showSignature={false}
+              selectedInvoiceNo={selectedRow?.invoiceNo}
+              bottom={0}
+            />
+          )}
         </Container>
       </ErrorBoundary>
     </PurchaseContext.Provider>

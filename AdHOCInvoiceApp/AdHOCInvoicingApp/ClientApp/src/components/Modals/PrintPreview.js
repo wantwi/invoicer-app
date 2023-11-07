@@ -19,7 +19,8 @@ function PrintPreview({
   selectedInvoiceNo,
   title="Invoice",
   isRefund=false,
-  isActive=true
+  isActive=true,
+  refetch
 }) {
   const [showPrompt, setShowPrompt] = useState(false)
  const {setShowLoader} = useOverLayLoader()
@@ -58,7 +59,7 @@ function PrintPreview({
   setShowLoader(false)
 }
  
- 
+refetch()
  },
 (error)=>{
   toast.error(error?.message ||"Refund faild. Please contact admin.")

@@ -489,7 +489,7 @@ const PurchaseReturn = () => {
           pdfData={pdfData}
           selectedInvoiceNo={selectedInvoiceNo}
           isActive={isActive}
-          
+          refetch={refetch}
         />
       )}
 
