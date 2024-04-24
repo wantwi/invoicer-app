@@ -23,11 +23,17 @@ const BoldReportViewer = ({
 }) => {
   //<bold-report-viewer id="reportviewer1" report-service-url="../SyncReport" report-path="~/WHT/AllTransactionsReport" report-server-url="http://psl-dbserver-vm/Reports_SSRS/" processing-mode="Remote" ajax-before-load="ajaxBeforeLoad" />
   const reportviewrinstance = useRef(null);
-  const  auth  = useAuth();
+  const auth = useAuth();
 
   const [params, setparams] = useState([]);
+  const [reportURL, setReportURL] = useState({})
 
-  console.log({reportParam});
+  console.log({ reportParam });
+
+  const getReportURLs = async () => {
+    const { data } = await axios.get(`/api/ReportURL`)
+    setReportURL(data)
+  }
 
   // var parameters = [{
   //   name: 'SalesOrderNumber',
@@ -51,9 +57,18 @@ const BoldReportViewer = ({
     });
 
     return arr;
-    };
+  };
 
-    console.log({auth})
+  console.log({ auth })
+
+
+
+
+useEffect(() => {
+  getReportURLs()
+
+  return () => {};
+}, []);
 
   useEffect(() => {
     // dReportDateFrom
@@ -87,17 +102,20 @@ const BoldReportViewer = ({
       key: "Authorization",
       value: `Bearer ${auth?.access_token}`,
     });
-  
+
   };
 
   return (
     <BoldReportViewerComponent
       id="reportviewer-container"
-          //reportServerUrl={"/api/GetReportMeta" + reportPath}
-       reportServerUrl={process.env.REACT_APP_REPORTSERVERURL}
-      // reportServiceUrl={"http://192.168.0.26/BReport/api/ReportViewer"}
-          reportServiceUrl={process.env.REACT_APP_REPORTSERVICEURL}
-      reportPath={`${REACT_APP_REPORTSERVERPath}${reportPath}`}
+      reportServerUrl={`${reportURL?.reportServerUrl}`}
+      reportServiceUrl={`${reportURL?.reportServiceUrl}`}
+      reportPath={`${reportURL?.reportPath}${rptName}`}
+      //reportServerUrl={"/api/GetReportMeta" + reportPath}
+      //  reportServerUrl={process.env.REACT_APP_REPORTSERVERURL}
+      // // reportServiceUrl={"http://192.168.0.26/BReport/api/ReportViewer"}
+      //     reportServiceUrl={process.env.REACT_APP_REPORTSERVICEURL}
+      // reportPath={`${REACT_APP_REPORTSERVERPath}${reportPath}`}
       onShowError={onShowError}
       // ajaxBeforeLoad={onAjaxRequest}
 

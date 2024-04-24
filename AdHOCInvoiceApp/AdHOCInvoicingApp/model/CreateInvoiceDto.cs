@@ -30,6 +30,7 @@ namespace AdHOCInvoicingApp.model
         public decimal? amount { get; set; }
         public string? discountType { get; set; } = "";
         public double? totalDiscount { get; set; } = 0.00;
+        public string? pon { get; set; } = "";
         public List<InvoiceItem> invoiceItems { get; set; }
     }
 

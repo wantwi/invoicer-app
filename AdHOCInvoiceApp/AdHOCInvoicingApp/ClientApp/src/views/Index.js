@@ -195,6 +195,7 @@ const Index = () => {
                 }
                 // loadPreview(value);
                 setSelectedRow(row.original.id);
+                  getPrintPDF(row.original.id)
                 // signatureStatus:"SUCCESS"
               }}
               title="Preview"

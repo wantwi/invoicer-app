@@ -102,6 +102,9 @@ function InvoiceForm({ refetch }) {
   const [exchangeRate, setExchangeRate] = useState(1);
   const [forex, setForex] = useState(1);
   const [productsList, setProductsList] = useState([]);
+  const [defaultProductsList, setDefaultProductsList] = useState([]);
+  const [poNumber, setPONumber] = useState("")
+  const [selectedItem, setSelectedItem] = useState([])
   // const [vatAndLeviesScheme, setvatAndLeviesScheme] = useState({
   //   covidRate: 0,
   //   cstRate: 0,
@@ -150,15 +153,15 @@ function InvoiceForm({ refetch }) {
 
   //Ensure an item is added before taking discount amount
   useEffect(() => {
-    if (
-      formData?.discountType === "selective" &&
-      !gridData?.length &&
-      formData?.totalDiscount
-    ) {
-      toast.error("Please add Item(s) first");
-      setFormData((prev) => ({ ...prev, totalDiscount: "" }));
-      return;
-    }
+    // if (
+    //   // formData?.discountType === "selective" &&
+    //   !gridData?.length 
+    //   // formData?.totalDiscount
+    // ) {
+    //   toast.error("Please add Item(s) first");
+    //   setFormData((prev) => ({ ...prev, totalDiscount: "" }));
+    //   return;
+    // }
 
     //ensure discount amount is not greater than total payable
     let totalPayable = gridData.reduce(
@@ -187,6 +190,7 @@ function InvoiceForm({ refetch }) {
     if (productResponse?.status === "fulfilled") {
       console.log({ requstCallback1: productResponse?.value.data });
       setProductsList(productResponse?.value.data);
+      setDefaultProductsList(productResponse?.value.data)
     }
     if (currencyResponse?.status === "fulfilled") {
       console.log({ requstCallback2: currencyResponse?.value.data });
@@ -225,6 +229,32 @@ function InvoiceForm({ refetch }) {
     requstCallback
   );
 
+//  const {refetch: refetchPOItems} = useCustomQueryById(`/api/GetPOItems/${formData?.pon}`,formData?.pon, (data) => {
+//   alert("This")
+//   console.log({refetchPOItems: data});
+//   // setProductsList(data)
+//   })
+
+  const refetchProductList = async () => {
+    
+
+    try {
+        const request = await axios.get(`/api/GetProductList/${currency}`)
+        console.log({responseData: request})
+        
+         responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data)
+        
+    } catch (error) {
+      
+    }
+
+  }
+
+  // const {refetch: refetchProductList} = useCustomQueryById(`/api/GetProductList/${currency}`, currency, (data) => {
+  //   // setProductsList(data)
+  //   })
+
+
   const onSuccess = (data) => {
     console.log({ GetVatAndLeviesByScheme: data });
     setvatAndLeviesScheme(data);
@@ -242,6 +272,18 @@ function InvoiceForm({ refetch }) {
 
     return () => {};
   }, [formData?.date]);
+
+  const getPOItems = (e) => {
+
+    if(e.target.value.length > 0) {
+      refetchPOItems()
+    }else {
+      refetchProductList()
+    }
+
+  }
+
+  console.log({productsList});
 
   // const fd = new Date(formData?.date)
 
@@ -299,6 +341,7 @@ function InvoiceForm({ refetch }) {
   const addRecordToData = (item) => {
     // setIsCurrencyDisbled(true)
 
+   
     let csttourism = 0;
     if (item.otherLevies === "NON") {
       csttourism = 0;
@@ -335,7 +378,10 @@ function InvoiceForm({ refetch }) {
   };
 
   const saveInvoice = async () => {
-    if (!Boolean(gridData?.length)) {
+    console.log({gridData})
+
+    
+    if (gridData?.length === 0) {
       toast.error("Please add invoice item(s)");
       return;
     }
@@ -352,6 +398,7 @@ function InvoiceForm({ refetch }) {
       currency: formData.currency,
       forexRate: forex,
       amount: gridData.reduce((total, item) => total + item.totalPayable, 0),
+      pon: formData?.pon,
 
       invoiceItems: gridData.map((item) => {
         return {
@@ -426,43 +473,7 @@ function InvoiceForm({ refetch }) {
       }
     }
 
-    // fetch(
-    //   `${process.env.REACT_APP_CLIENT_ROOT}/TransactionCurrency/${userDetails.profile.company}/${today}?currencyCode=${currency}`,
-    //   {
-    //     method: 'GET', // or 'PUT'
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${userDetails.access_token}`,
-    //     },
-    //   }
-    // )
-    //   .then((res) => {
-    //     if (res.status === 401) {
-    //       toast.error('Token timed out. Logging you out')
-    //       setTimeout(() => {
-    //         window.location = '/'
-    //       }, 3000)
-    //     } else {
-    //       return res.json()
-    //     }
-    //   })
-    //   .then((data) => {
-    //     if (data.length > 0) {
-    //       setForex(data[0].exchangeRate)
-    //       setExchangeRate(
-    //         'at GHS' + data[0].exchangeRate + ' per ' + data[0].currencyCode
-    //       )
-    //     } else {
-    //       toast.warning(
-    //         'There are no exchange rates set for today. Redirecting you to currency set up to add exchange rates'
-    //       )
-    //       setTimeout(() => {
-    //         window.location = '/admin/currency'
-    //         history.push('/admin/currency')
-    //       }, 3000)
-    //     }
-    //   })
-    //   .catch((err) => console.log(err))
+ 
   };
 
   const handleCurrencySelect = (e) => {
@@ -521,6 +532,8 @@ function InvoiceForm({ refetch }) {
     setFormData((prev) => ({ ...prev, currency: currency }));
   }, [currency]);
 
+  
+
   const [isCashCustomer, setIsCashCustomer] = useState(true);
 
   useEffect(() => {
@@ -537,14 +550,130 @@ function InvoiceForm({ refetch }) {
     return () => {};
   }, [isCashCustomer]);
 
-  // useEffect(() => {
-  //   if(){
 
-  //   }
+  const refetchPOItems = async () => {
 
-  //   return () => {}
-  // }, [formData?.totalDiscount])
-  // console.log({formData: Date.now()});
+    try {
+        const request = await axios.get(`/api/GetPOItems/${formData?.pon}`)
+
+        console.log({request: request.data})
+       
+        if(request?.data){
+          setGridData([])
+            let arr=[], gridItem={}
+          for (let i = 0; i < request.data.items.length; i++) {
+            let obj={}
+            const item = request.data.items[i];
+            const getItem =  defaultProductsList.find(x => x?.code === item?.itemCode)
+
+            if(getItem){
+               
+                   obj = {
+                
+                price:item?.price,
+                stockQuantity:item?.quantity,
+                quantity: item?.quantity,
+                itemName: getItem.name,
+                price: item?.price,
+                vatItemId: getItem?.id,
+                itemCode: item?.itemCode,
+                otherLevies: getItem?.otherLevies,
+                isTaxInclusive: getItem?.isTaxInclusive
+              }
+
+                 let csttourism = 0;
+                 if (getItem.otherLevies === "NON") {
+                  csttourism = 0;
+                } else if (getItem.otherLevies === "CST") {
+                  csttourism =
+                    (cstRate / 100) * obj.price * obj.quantity;
+                } else if (getItem.otherLevies === "TRSM") {
+                  csttourism =
+                    (tourismRate / 100) * obj.price * obj.quantity;
+                }
+
+                 gridItem = getPayableAmount(
+                  { ...item, isTaxable },
+                  discount,
+                  vatAndLeviesScheme
+                );
+                setGridData((gridData) => ([...gridData,gridItem]));
+
+              console.log({refetchPOItemsfound: gridItem})
+
+              
+
+            }else {
+              console.log({refetchPOItemsfoundNot: getItem})
+            }
+            
+
+            // if(getItem){
+            //   obj = {
+            //     ...getItem,
+            //     price:item?.price,
+            //     stockQuantity:item?.quantity,
+            //     quantity: item?.quantity,
+            //     itemName: getItem.name,
+            //     price: getItem?.price,
+            //     vatItemId: getItem?.id,
+            //     itemCode: getItem?.code,
+            //     otherLevies: getItem?.otherLevies,
+            //     isTaxInclusive: getItem?.isTaxInclusive,
+
+            //   }
+            //   let csttourism = 0;
+            //   if (obj.otherLevies === "NON") {
+            //     csttourism = 0;
+            //   } else if (obj.otherLevies === "CST") {
+            //     csttourism =
+            //       (cstRate / 100) * obj.price * obj.quantity;
+            //   } else if (obj.otherLevies === "TRSM") {
+            //     csttourism =
+            //       (levy4Rate / 100) * obj.price * obj.quantity;
+            //   }
+
+              
+            //      gridItem = getPayableAmount(
+            //       { ...item, isTaxable },
+            //       discount,
+            //       vatAndLeviesScheme
+            //     );
+
+              
+               
+             
+
+            //   arr.push(gridItem)
+              
+            // }
+
+            // setGridData((gridData) => [...gridData,{ ...gridItem, otherLeviesType: obj.otherLevies }]);
+          
+          }
+
+          console.log({AddedArry: arr});
+
+          setShowAddItem(true)
+          setIsItemAdded(true)
+         
+
+
+          // const poItems = request.data.items.map(x => ({id:x?.itemCode,code:x?.itemCode, name:x?.itemName,price:x?.price,stockQuantity:x?.quantity, isTaxInclusive:false, taxable:false, otherLevies:"None"}))
+          
+        }
+        const responseData =  JSON.parse(request?.data)
+       
+        responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data)
+       
+    } catch (error) {
+      
+    }
+
+  }
+
+
+console.log({defaultProductsList})
 
   return (
     <>
@@ -752,7 +881,7 @@ function InvoiceForm({ refetch }) {
                   className="form-control font-sm"
                   value={formData.discountType}
                   onChange={handleDiscountTypeOnchange}
-                  // disabled={Boolean(gridData?.length)}
+                  disabled={!isCashCustomer}
                   style={{ height: 29, padding: "0px 5px" }}
                 >
                   <option value={""}>No discount</option>
@@ -786,6 +915,31 @@ function InvoiceForm({ refetch }) {
                   />
                 </Col>
               )}
+              <Col lg="6" hidden={isCashCustomer} >
+                  <label
+                    className="form-control-label label-mb-0"
+                    htmlFor="discountAmt"
+                  >
+                    Purchase Order Number
+                  </label>
+                  <Input
+                    type="text"
+                    className="form-control"
+                    placeholder="Purchase order number"
+                    id="pon"
+                    name="pon"
+                    onBlur={getPOItems}
+                    value={formData?.pon || ""}
+                   
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        pon: e.target.value,
+                      })
+                    }
+                    bsSize="sm"
+                  />
+                </Col>
             </Row>
             <Row>
               <Col lg="6">
@@ -840,6 +994,11 @@ function InvoiceForm({ refetch }) {
                     {multifLoading ? (
                       <p>Please wait, loading items ...</p>
                     ) : (
+                      <>
+                      <div hidden={formData?.pon.length > 0 ? false: true}>
+                        <input disabled className="form-control" style={{height:30}}/>
+                      </div>
+                      <div hidden={formData?.pon.length > 0 ? true: false}>
                       <AutocompleteItems
                         gridData={gridData}
                         suggestions={productsList}
@@ -847,7 +1006,11 @@ function InvoiceForm({ refetch }) {
                         setFormData={setFormData}
                         setDisabled={setDisabled}
                         setIsTaxable={setIsTaxable}
+                        // setSelectedItem={setSelectedItem}
                       />
+                      </div>
+                      </>
+                      
                     )}
                   </Col>
                   <Col
@@ -934,7 +1097,7 @@ function InvoiceForm({ refetch }) {
                         (formData.isTaxInclusive ? "-Tax Incl." : "-Tax Excl.")}
                     </label>
                     <Input
-                      // disabled
+                       disabled={formData?.pon.length > 0 ? true: false}
                       className="form-control-alternative"
                       id="price"
                       placeholder="Price"

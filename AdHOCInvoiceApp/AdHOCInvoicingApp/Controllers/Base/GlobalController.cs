@@ -14,6 +14,9 @@ namespace AdHOCInvoicingApp.Controllers.Base
         public static string EvatAdHOCBaseUrl = APISettings.Current.EvatAdHOCBaseUrl;
         public static string REACT_APP_DASHBOARD_URL = APISettings.Current.REACT_APP_DASHBOARD_URL;
         public static string REACT_APP_USERS_MGT_URL = APISettings.Current.REACT_APP_USERS_MGT_URL;
+        public static string ReportServiceUrl = APISettings.Current.ReportServiceUrl;
+        public static string ReportServerUrl = APISettings.Current.ReportServerUrl;
+        public static string ReportPath = APISettings.Current.ReportPath;
         public GlobalController()
         {
 

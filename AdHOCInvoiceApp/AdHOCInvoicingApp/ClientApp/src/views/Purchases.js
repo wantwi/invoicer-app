@@ -216,6 +216,13 @@ const Purchases = () => {
     }
 
     const request = await axios.get(url);
+    if(typeof request?.data == 'string'){
+      setShowLoader(false)
+
+
+      return 
+    }
+    console.log({request: typeof request?.data})
     setShowLoader(false)
 
     if (searchText.length > 1) {

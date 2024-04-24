@@ -150,6 +150,18 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
+        [HttpGet("GetPOItems/{poNumber}")]
+        public async Task<IActionResult> GetPOItems(string poNumber)
+        {
+            var user = await UserInfo();
+
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetPurchaseOrderByReference/{user.Sub}/{poNumber}/{user.TIN}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
 
         [HttpPost("PostInvoice/{branchId}")]
         public async Task<IActionResult> PostInvoice([FromBody] CreateInvoiceDto data, string branchId)
@@ -891,7 +903,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetPurchaseSearch(int filter, int pgNumber, int pgSz, string search)
         {
             var user = await UserInfo();
-            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetPurchaseInvoicesByCompnyId/{user.Sub}/?filter={search}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/SearchPurchaseInvoicesByCompanyId/{user.Sub}/?filter={search}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
 
@@ -903,7 +915,6 @@ namespace AdHOCInvoicingApp.Controllers
             string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={id}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
-
         }
 
         [HttpPost("GenerateVAPurchaseInvoiceReportAsync")]
@@ -1185,15 +1196,14 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
+        [HttpGet("ReportURL")]
+        public async Task<IActionResult> GetReportURLs()
+        {
+            return new JsonResult(new { ReportPath, ReportServerUrl, ReportServiceUrl });
+        }
 
-        //[HttpGet("Notes")]
-        //public async Task<IActionResult> GetNote(string date, string taxScheme)
-        //{
-        //    string url = $"{EvatAdHOCBaseUrl}v4/Notes/GetNotes/{date}/{taxScheme}";
-        //    var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
-        //    return Ok(response);
 
-        //}
+       
     }
 
 }

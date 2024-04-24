@@ -5,8 +5,8 @@ import { usePagination, useTable, useSortBy } from "react-table";
 import Loader from "components/Modals/Loader";
 
 export const EvatTable = ({
-  columns,
-  data,
+  columns=[],
+  data =[],
   isLoading,
   setSelectedRow,
   getPrintPDF = () => null,
@@ -99,7 +99,7 @@ export const EvatTable = ({
                   className="table-record"
                   //onClick={() => console.log({row})}
                   // onClick={() => setSelectedRow(row?.original?.id)}
-                  // onClick={() => getPrintPDF(row?.original?.id)}
+                 // onClick={() =>  getPrintPDF(row?.original?.id)}
                 >
                   {row.cells.map((cell) => {
                     return (
