@@ -88,7 +88,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-         [HttpGet("GetCurrency")]
+        [HttpGet("GetCurrency")]
         public async Task<IActionResult> GetCurrency()
         {
             string url = $"{EvatAdHOCBaseUrl}v4/Currency";
@@ -97,9 +97,9 @@ namespace AdHOCInvoicingApp.Controllers
             return Ok(response);
 
         }
-        
+
         [HttpGet("GetRates/{branchCode}/{currencyCode}/{period}/{pageNumber}/{pageSize}")]
-        public async Task<IActionResult> GetRates( string branchCode, string currencyCode, int period, int pageNumber, int pageSize)
+        public async Task<IActionResult> GetRates(string branchCode, string currencyCode, int period, int pageNumber, int pageSize)
         {
             if (currencyCode == "all")
             {
@@ -114,7 +114,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-         [HttpGet("checkIfRatesExist/{branchCode}/{currency}/{issuedDate}")]
+        [HttpGet("checkIfRatesExist/{branchCode}/{currency}/{issuedDate}")]
         public async Task<IActionResult> checkIfRatesExist(string currency, string issuedDate, string branchCode)
         {
             var user = await UserInfo();
@@ -127,7 +127,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-         [HttpGet("GetCustomers/{branch}")]
+        [HttpGet("GetCustomers/{branch}")]
         public async Task<IActionResult> GetCustomers(string branch)
         {
             var user = await UserInfo();
@@ -150,12 +150,12 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
-        [HttpGet("GetPOItems/{poNumber}")]
-        public async Task<IActionResult> GetPOItems(string poNumber)
+        [HttpGet("GetPOItems/{poNumber}/{tin}")]
+        public async Task<IActionResult> GetPOItems(string poNumber, string tin)
         {
             var user = await UserInfo();
 
-            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetPurchaseOrderByReference/{user.Sub}/{poNumber}/{user.TIN}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/GetPurchaseOrderByReference/{user.Sub}/{poNumber}/{tin}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
@@ -167,16 +167,16 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> PostInvoice([FromBody] CreateInvoiceDto data, string branchId)
         {
             var user = await UserInfo();
-            data.companyId =  user.Sub;
+            data.companyId = user.Sub;
             data.branchId = branchId;
             var client = _httpClientFactory.CreateClient();
             //client.DefaultRequestHeaders.Add("usr", user.CompanyName);
             //client.DefaultRequestHeaders.Add("usr", $"{user.CompanyName}");
-            
-           
+
+
             client.SetBearerToken(await AccessToken());
             string url = $"{EvatAdHOCBaseUrl}v4/Invoices/Sales";
-            var json = JsonConvert.SerializeObject( data);
+            var json = JsonConvert.SerializeObject(data);
 
             //    httpContent.Headers.Add("usr", user.CompanyName);
 
@@ -240,7 +240,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
         [HttpGet("GetItemsList/{search}")]
         public async Task<IActionResult> SearchItem(string search)
-       {
+        {
             var user = await UserInfo();
             string url = $"{EvatAdHOCBaseUrl}v4/VatItems/GetByCompanyId/{user.Sub}?filter={search}";
 
@@ -279,7 +279,7 @@ namespace AdHOCInvoicingApp.Controllers
                 var result = await response.Content.ReadAsStringAsync();
                 //return new JsonResult(new { result });
                 var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-                return StatusCode(StatusCodes.Status500InternalServerError,  error.Message );
+                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
 
@@ -343,9 +343,9 @@ namespace AdHOCInvoicingApp.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
-        
+
         [HttpDelete("DeleteItem/{id}")]
-        public async Task<IActionResult> DeleteItem( Guid id)
+        public async Task<IActionResult> DeleteItem(Guid id)
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
@@ -375,7 +375,7 @@ namespace AdHOCInvoicingApp.Controllers
         //users section
         [HttpPost("CreateUser")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto data)
-        {            
+        {
 
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
@@ -411,7 +411,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetUsers()
         {
             var res = await UserInfo();
-            
+
             string url = $"{EvatAdHOCBaseUrl}v4/Account/GetUsersByCompanyTin/{res.TIN}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
@@ -419,7 +419,7 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
-         [HttpPost("SendUserEmail")]
+        [HttpPost("SendUserEmail")]
         public async Task<IActionResult> SendUserEmail([FromBody] SendInviteDto Id)
         {
 
@@ -449,7 +449,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
 
-         [HttpPost("PostReportAction")]
+        [HttpPost("PostReportAction")]
         public async Task<IActionResult> PostReportAction([FromBody] PostReportActionDto data)
         {
 
@@ -477,7 +477,7 @@ namespace AdHOCInvoicingApp.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
             }
         }
-         [HttpPut("UpdateUserDto/{userId}")]
+        [HttpPut("UpdateUserDto/{userId}")]
         public async Task<IActionResult> UpdateUserDto([FromBody] UpdateUserDto data, string userId)
         {
 
@@ -509,7 +509,7 @@ namespace AdHOCInvoicingApp.Controllers
         public async Task<IActionResult> GetUsersSearch(string search)
         {
             var res = await UserInfo();
-            
+
             string url = $"{EvatAdHOCBaseUrl}v4/Account/GetUsersByCompanyTin/{res.TIN}?filter={search}";
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
@@ -518,7 +518,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
         [HttpGet("GetReportMeta/{reportType}")]
-        public async Task<IActionResult> GetReportMeta( string reportType)
+        public async Task<IActionResult> GetReportMeta(string reportType)
         {
             string url = $"{EvatAdHOCBaseUrl}v4/ReportMetadata/{reportType}";
 
@@ -528,7 +528,7 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
         // Business partner setup
-         [HttpGet("GetCompanyCustomerslist/{branch}")]
+        [HttpGet("GetCompanyCustomerslist/{branch}")]
         public async Task<IActionResult> GetCompanyCustomers(string branch)
         {
             var user = await UserInfo();
@@ -563,11 +563,11 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
-        
+
 
         [HttpGet("GetCompanySuppliers/{search}/{branch}")]
         public async Task<IActionResult> GetCompanySuppliersSearch(string search, string branch)
-       {
+        {
             var user = await UserInfo();
             string url = $"{EvatAdHOCBaseUrl}v4/Customers/GetSuppliersByCompanyId/{user.Sub}/{branch}?search={search}";
 
@@ -651,12 +651,12 @@ namespace AdHOCInvoicingApp.Controllers
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-            }             
+            }
         }
 
 
         [HttpDelete("DeleteCustomer/{id}")]
-        public async Task<IActionResult> DeleteCustomer( Guid id)
+        public async Task<IActionResult> DeleteCustomer(Guid id)
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
@@ -676,7 +676,7 @@ namespace AdHOCInvoicingApp.Controllers
             else
             {
                 dataObj = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new {status = response.StatusCode, data = dataObj });
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
 
             //if (response.StatusCode.ToString() == "BadRequest")
@@ -699,8 +699,8 @@ namespace AdHOCInvoicingApp.Controllers
 
 
         // refunds
-         [HttpGet("GetRefunds/{filter}/{pgNumber}/{pgSz}/{branchId}")]
-        public async Task<IActionResult> GetRefunds(int filter,  int pgSz ,int pgNumber, string branchId)
+        [HttpGet("GetRefunds/{filter}/{pgNumber}/{pgSz}/{branchId}")]
+        public async Task<IActionResult> GetRefunds(int filter, int pgSz, int pgNumber, string branchId)
         {
             var user = await UserInfo();
             string url = $"{EvatAdHOCBaseUrl}v4/Refunds/GetRefundInvoicesByCompanyId/{filter}?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}&BranchId={branchId}";
@@ -752,14 +752,14 @@ namespace AdHOCInvoicingApp.Controllers
             return Ok(response);
 
         }
-        
+
         [HttpPost("GenerateRefundReportAsync")]
 
         public async Task<IActionResult> GenerateRefundReportAsync([FromBody] string id)
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateRefundReportAsync?Id={id}"; 
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateRefundReportAsync?Id={id}";
             var response = await client.PostAsJsonAsync(url, id);
 
             if (response.StatusCode.ToString() == "BadRequest")
@@ -847,7 +847,7 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             var user = await UserInfo();
             data.companyId = user.Sub;
-            
+
 
             var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
             client.SetBearerToken(await AccessToken());
@@ -869,7 +869,7 @@ namespace AdHOCInvoicingApp.Controllers
                 dataObj = await response.Content.ReadAsStringAsync();
                 return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
-            
+
             //if (response.StatusCode.ToString() == "BadRequest")
             //{
             //    throw new Exception("Error Occurred");
@@ -899,7 +899,7 @@ namespace AdHOCInvoicingApp.Controllers
             return Ok(response);
 
         }
-         [HttpGet("GetPurchaseSearch/{filter}/{pgNumber}/{pgSz}/{search}")]
+        [HttpGet("GetPurchaseSearch/{filter}/{pgNumber}/{pgSz}/{search}")]
         public async Task<IActionResult> GetPurchaseSearch(int filter, int pgNumber, int pgSz, string search)
         {
             var user = await UserInfo();
@@ -909,7 +909,7 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
-         [HttpGet("GetPurchaseById/{id}")]
+        [HttpGet("GetPurchaseById/{id}")]
         public async Task<IActionResult> GetPurchaseById(string id)
         {
             string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={id}";
@@ -1003,20 +1003,20 @@ namespace AdHOCInvoicingApp.Controllers
         }
 
         //dashboard
-         [HttpGet("GetDashboard")]
+        [HttpGet("GetDashboard")]
         public async Task<IActionResult> GetDashboardData()
         {
             var user = await UserInfo();
-            
+
             return Ok(user.Sub);
 
         }
-        
+
         [HttpGet("GetCompanyName")]
         public async Task<IActionResult> GetCompanyName()
         {
             var user = await UserInfo();
-            
+
             return Ok(user.CompanyName);
 
         }
@@ -1202,8 +1202,18 @@ namespace AdHOCInvoicingApp.Controllers
             return new JsonResult(new { ReportPath, ReportServerUrl, ReportServiceUrl });
         }
 
+        [HttpGet("UserInfo")]
+        public async Task<IActionResult> UserDetail()
+        {
+            var user = await UserInfo();
+            return new JsonResult(new { user, path = DashboardUrl });
 
-       
+        }
+
+
+
     }
 
 }
+
+

@@ -65,6 +65,8 @@ const AutocompleteItems = ({
         itemCode: suggestion?.code,
         otherLevies: suggestion?.otherLevies,
         isTaxInclusive: suggestion?.isTaxInclusive,
+        discountTypeName: suggestion?.discountTypeName,
+        discount: suggestion?.discount
       };
     });
     // suggestion.taxable === true ? setIsTaxable(true) : setIsTaxable(false)

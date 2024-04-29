@@ -31,12 +31,12 @@ function InvoicePreview() {
     trsmWithVat,
     vatRate,
   } = vatAndLeviesScheme;
-  
+
   const [userDetails, setUserDetails] = useState(null);
   useEffect(async () => {
     let temp = await getUser();
     setUserDetails(temp);
-    return () => {};
+    return () => { };
   }, []);
 
   const [updateItemData, setUpdateItemData] = useState({
@@ -48,7 +48,7 @@ function InvoicePreview() {
   const [showUpdate, setShowUpdate] = useState(false);
 
   const handleEditItem = (item, index) => {
-    // console.log({ item });
+    console.log({ handleEditItem: item });
     setUpdateItemData({
       index: index,
       itemName: item.itemName,
@@ -57,10 +57,13 @@ function InvoicePreview() {
       discount: Number(item.discount),
       isInclusive: item.isINC,
       isTaxable: item.taxable,
-      otherLevies: item?.otherLevies || 0,
+      otherLevies: item?.otherLevies,
+      stockQuantity: item?.stockQuantity
     });
     setShowUpdate(true);
   };
+
+  console.log({ formData });
 
   return (
     <>
@@ -193,36 +196,36 @@ function InvoicePreview() {
                 gridData.reduce((total, item) => total + item.taxableAmount, 0)
               )}
             </h6>
-            <h6 style={{ padding: 0, margin: 0 }}>
+            {/* <h6 style={{ padding: 0, margin: 0 }}>
               DISCOUNT : {"   "}
               {formData?.discountType
-                ? formData?.discountType === "general"
+                ? formData?.discountType === "general...."
                   ? moneyInTxt(
-                      gridData.reduce((total, item) => total + item.discount, 0)
-                    )
+                    gridData.reduce((total, item) => total + item.discount, 0)
+                  )
                   : moneyInTxt(formData?.totalDiscount)
                 : "0.00"}
-            </h6>
+            </h6> */}
             <h6 style={{ padding: 0, margin: 0 }}>
-              NHIL ({vatAndLeviesScheme.nhilRate}%): {"   "}
+              NHIL ({formData?.pon ? formData?.ponTaxes?.nhilRate : vatAndLeviesScheme.nhilRate}%): {"   "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.nhil, 0)
               )}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              GETF ({vatAndLeviesScheme.getfundRate}%):{" "}
+              GETF ({formData?.pon ? formData?.ponTaxes?.getfundRate : vatAndLeviesScheme.getfundRate}%):{" "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.getf, 0)
               )}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              COVID19 ({vatAndLeviesScheme.covidRate}%):
+              COVID19 ({formData?.pon ? formData?.ponTaxes?.covidRate : vatAndLeviesScheme.covidRate}%):
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.covid, 0)
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-               (CST: {vatAndLeviesScheme?.cstRate}%) / (TOURISM: {vatAndLeviesScheme?.tourismRate}%):{" "}
+              (CST: {formData?.pon ? formData?.ponTaxes?.cstRate : vatAndLeviesScheme?.cstRate}%) / (TOURISM: {formData?.pon ? formData?.ponTaxes?.tourismRate : vatAndLeviesScheme?.tourismRate}%):{" "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.otherLevies, 0)
               )}{" "}
@@ -234,7 +237,7 @@ function InvoicePreview() {
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              VAT ({vatAndLeviesScheme?.vatRate}%):
+              VAT ({formData?.pon ? formData?.ponTaxes?.vatRate : vatAndLeviesScheme?.vatRate}%):
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.vat, 0)
               )}{" "}
@@ -249,18 +252,21 @@ function InvoicePreview() {
               {formData?.discountType
                 ? formData?.discountType === "selective"
                   ? moneyInTxt(
-                      gridData.reduce(
-                        (total, item) => total + item.totalPayable,
-                        0
-                      ) - formData?.totalDiscount
-                    )
-                  : moneyInTxt(formData?.totalDiscount)
-                : moneyInTxt(
                     gridData.reduce(
                       (total, item) => total + item.totalPayable,
                       0
-                    )
-                  )}
+                    ) - formData?.totalDiscount
+                  )
+                  : moneyInTxt(gridData.reduce(
+                    (total, item) => total + item.totalPayable,
+                    0
+                  ))
+                : moneyInTxt(
+                  gridData.reduce(
+                    (total, item) => total + item.totalPayable,
+                    0
+                  )
+                )}
             </h6>
           </div>
         </div>
@@ -285,6 +291,9 @@ function InvoicePreview() {
           gridData={gridData}
           setGridData={setGridData}
           showDiscountField={formData?.discountType}
+          isPO={formData?.pon.lenght > 0 ? true : false}
+          formData={formData}
+
         />
       )}
     </>

@@ -19,6 +19,9 @@
         public string ReportServiceUrl { get; set; }
         public string ReportServerUrl { get; set; }
         public string ReportPath { get; set; }
+        public string DashboardUrl { get; set; }
+
+
 
 
     }

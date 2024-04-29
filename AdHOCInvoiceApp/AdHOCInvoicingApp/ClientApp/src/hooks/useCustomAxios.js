@@ -11,17 +11,17 @@ import { login } from "services/AuthService";
 import useAuth from "hooks/useAuth";
 
 const CustomAxios = axios.create({
-  baseURL: process.env.REACT_APP_BASENAME,
+    baseURL: process.env.REACT_APP_BASENAME,
 
-  headers: {
-    Accept: "application/json",
+    headers: {
+        Accept: "application/json",
 
-    "Content-Type": "application/json",
+        "Content-Type": "application/json",
 
-    "X-CSRF": 1,
-  },
+        "X-CSRF": 1,
+    },
 
-  //withCredentials: true
+    //withCredentials: true
 });
 
 function useCustomAxios() {
@@ -34,14 +34,14 @@ function useCustomAxios() {
                 response.data = JSON.parse(temp?.data);
                 return response;
             } catch (error) {
-                
+
 
                 return response;
             }
         }, (error) => {
-            console.log({error})
+            console.log({ error })
             if (!error.response) {
-                alert('NETWORK ERROR')
+                // alert('NETWORK ERROR')
             } else {
                 const code = error.response.status
                 const response = error.response.data
@@ -53,16 +53,16 @@ function useCustomAxios() {
 
                 }
 
-            //if (!Boolean(error?.data)) {
-            //console.log("mr error ", error, Boolean(error?.data))
-            //    login()
-            //}
+                //if (!Boolean(error?.data)) {
+                //console.log("mr error ", error, Boolean(error?.data))
+                //    login()
+                //}
                 return Promise.reject(error)
             }
         }
-  );
+    );
 
-  return CustomAxios;
+    return CustomAxios;
 }
 
 export default useCustomAxios;

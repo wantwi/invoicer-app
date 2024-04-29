@@ -16,25 +16,57 @@ import { Modal, Button } from "reactstrap";
 import { useCustomQuery } from "hooks/useCustomQuery"
 import Fallback from "components/Fallback"
 import { ErrorBoundary } from "react-error-boundary"
+import useCustomAxios from "hooks/useCustomAxios";
+import Loader from "components/Modals/Loader";
+import { useAuth } from "context/AuthContext";
 
+function getCurrentMonthDates() {
+    // Get current date
+    var currentDate = new Date();
+
+    // Get year and month
+    var year = currentDate.getFullYear();
+    var month = currentDate.getMonth() + 1; // Months are zero indexed
+
+    // Format month and day to have leading zeros if necessary
+    var formattedMonth = month < 10 ? '0' + month : month;
+
+    // Get the first day of the current month
+    var firstDay = year + '-' + formattedMonth + '-01';
+
+    // Get the last day of the current month
+    var lastDay = new Date(year, month, 0).toISOString().split('T')[0];
+
+    return {
+        firstDay: firstDay,
+        lastDay: lastDay
+    };
+}
+
+const BRANCH_INFO = JSON.parse(sessionStorage.getItem("BRANCH_INFO"))
 const Dashboard = () => {
+  const axios = useCustomAxios()
+  const { user } = useAuth()
   const [period, setPeriod] = useState("today");
   const [from, setfrom] = useState("");
   const [to, setTo] = useState("");
+  const [isLoading, setisLoading] = useState(false)
+  const [userAccount, setuserAccount] = useState({ companyName: "", sub: "", tin: "" })
+  const [url, seturl] = useState("")
 
-    const [isCustom, setIsCustom] = useState(false);
-    const { data="" } = useCustomQuery("/api/GetDashboard")
-    console.log({ data })
+  const [isCustom, setIsCustom] = useState(false);
+  const { data = "" } = useCustomQuery("/api/GetDashboard")
+  console.log({ data })
 
   const handleSubmit = ({ from, to }) => {
     setfrom(from);
     setTo(to);
     setIsCustom(false);
-    };
+  };
 
-    const errorHandler = (error, errorInfo) => {
-        console.log("Logging", error, errorInfo)
-    }
+  const errorHandler = (error, errorInfo) => {
+    console.log("Logging", error, errorInfo)
+  }
 
 
   useEffect(() => {
@@ -60,55 +92,86 @@ const Dashboard = () => {
         break;
     }
 
-    return () => {};
+    return () => { };
   }, [period]);
+
+  const getUserInfo = async () => {
+    setisLoading(true)
+
+    try {
+      const request = await axios.get("/api/UserInfo")
+      console.log({ request });
+      setuserAccount(request?.data?.user)
+      seturl(request?.data?.path)
+    } catch (error) {
+
+    } finally {
+      setisLoading(false)
+    }
+
+  }
+
+  useEffect(() => {
+
+    getUserInfo()
+
+    return () => { }
+  }, [])
+
+
+    console.log({ user, userAccount });
+
+
 
   return (
     <>
-          <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
-      <UserHeader message={"Dashboard"} />
-      {isCustom && (
-        <CustomDateFormModal
-          handleSubmit={handleSubmit}
-          setIsCustom={setIsCustom}
-        />
-      )}
-      <Container className="mt--7" fluid>
-        <Row className="mt-5">
-          <Col className="mb-5 mb-xl-0" xl="12">
-            <Card className="shadow">
-              <CardHeader className="border-0">
-                <div
-                  calssname="filterCard"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "19px",
-                    height: "43px",
-                    paddingRight: "20px",
-                  }}
-                >
-                  <span>Business&nbsp;Insights</span>
-                  
-                </div>
-              </CardHeader>
-              {data && <EmbededDashboard from={from} to={to} companyId={data} />}
-            </Card>
-          </Col>
-        </Row>
-              </Container>
-          </ErrorBoundary >
+      {isLoading ? <Loader /> : null}
+      <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
+        <UserHeader message={"Dashboard"} />
+        {isCustom && (
+          <CustomDateFormModal
+            handleSubmit={handleSubmit}
+            setIsCustom={setIsCustom}
+          />
+        )}
+        <Container className="mt--7" fluid>
+          <Row className="mt-5">
+            <Col className="mb-5 mb-xl-0" xl="12">
+              <Card className="shadow">
+                <CardHeader className="border-0">
+                  <div
+                    calssname="filterCard"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "19px",
+                      height: "43px",
+                      paddingRight: "20px",
+                    }}
+                  >
+                    <span>Business&nbsp;Insights</span>
+
+                  </div>
+                </CardHeader>
+                              {data && <EmbededDashboard url={url} from={getCurrentMonthDates()?.firstDay} to={getCurrentMonthDates()?.lastDay} companyId={userAccount?.sub} />}
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </ErrorBoundary >
     </>
   );
 };
 
-const EmbededDashboard = ({ from, to, companyId }) => {
-    return (
+console.log({ BRANCH_INFO });
+
+const EmbededDashboard = ({ url, from, to, companyId }) => {
+  return (
     <>
       <CardBody>
         <iframe
-                    src={`${process.env.REACT_APP_DASHBOARD_URL}&CompanyId=${companyId}&FromDate=${from}&ToDate=${to}`}
+          src={`${url}CompanyId=${companyId}&FromDate=${from}&ToDate=${to}&Br_ch=${BRANCH_INFO?.code || ""}`}
           id="dashboard-frame"
           width="100%"
           height="900px"

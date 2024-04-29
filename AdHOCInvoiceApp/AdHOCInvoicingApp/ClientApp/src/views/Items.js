@@ -15,6 +15,7 @@ import {
   InputGroupAddon,
   InputGroupText,
   InputGroup,
+  Badge,
 } from "reactstrap";
 import { FcCancel } from "react-icons/fc";
 
@@ -49,6 +50,8 @@ const Items = () => {
     code: "",
     taxRate: "",
     price: "",
+    discountType: null,
+    discount: 0
   });
   const [itemsList, setItemsList] = useState([]);
   const [istaxable, setIstaxable] = useState(false);
@@ -70,6 +73,7 @@ const Items = () => {
   const [searchText, setSearchText] = useState("");
   const [value] = useDebounce(searchText, 500);
   const [isViewed, setIsViewed] = useState(false);
+  const [hasDiscount, setHasDiscount] = useState(false);
 
   const {
     refetch: getItemsList,
@@ -99,6 +103,8 @@ const Items = () => {
             status: item.status,
             hasTrans: item.hasTrans,
             currencyCode: item.currencyCode,
+            discountType: item?.discountType,
+            discount: item?.discount
           };
         });
         setLoading(false);
@@ -123,10 +129,12 @@ const Items = () => {
       id: "",
       productName: "",
       description: "",
-      taxable: true,
+      taxable: false,
       code: "",
       taxRate: "",
       price: "",
+      discountType: 2001,
+      discount: 0
     });
     setOtherLevies("");
     setCurrencyCode("");
@@ -201,9 +209,15 @@ const Items = () => {
           currencyCode: item.currencyCode,
           taxRate: item.istaxable ? 0.125 : 0,
           price: Number(item.price),
+          discountType: item?.discountType || null,
+          discount: item?.discount || 0
           // hasTourismLevy: item.hasTourismLevy,
         };
       });
+
+      console.log({ postData })
+
+      // return
 
       setLoading(true);
       mutate(postData);
@@ -224,6 +238,8 @@ const Items = () => {
       isTaxInclusive: isTaxInclusive,
       // hasTourismLevy: hasTourismLevy,
       otherLevies: otherLevies,
+      discountType: item?.discountType || null,
+      discount: item?.discount || 0
     };
     console.log({ postData }, otherLevies, item);
     // return
@@ -235,6 +251,9 @@ const Items = () => {
   };
 
   const handleEditItem = (item) => {
+
+    console.log({ handleEditItem: item });
+
     setIstaxable(item.istaxable);
     setHasTourismLevy(item.hasTourismLevy);
     setIsTaxInclusive(item.isTaxInclusive);
@@ -251,6 +270,8 @@ const Items = () => {
         currencyCode: item?.currencyCode,
         isTaxInclusive: item?.isTaxInclusive,
         otherLevies: item?.otherLevies,
+        discountType: item?.discountType,
+        discount: item?.discount
       };
     });
     setCurrencyCode(item.currencyCode);
@@ -294,6 +315,8 @@ const Items = () => {
   );
 
   const submitItemList = () => {
+
+
     setLoading(true);
     let postData = itemsList.map((item) => {
       return {
@@ -347,7 +370,7 @@ const Items = () => {
   useEffect(() => {
     query.refetch();
 
-    return () => {};
+    return () => { };
   }, []);
 
   useEffect(() => {
@@ -364,6 +387,16 @@ const Items = () => {
       getItemsList();
     }
   }, [value, searchText]);
+
+  useEffect(() => {
+    if (hasDiscount) {
+      setFormData((pre) => ({ ...pre, discountType: 2001 }))
+    } else if (!hasDiscount) {
+      setFormData((pre) => ({ ...pre, discountType: "" }))
+    }
+  }, [hasDiscount]);
+
+
 
   return (
     <>
@@ -517,8 +550,8 @@ const Items = () => {
                       {itemsList.map((item, key) => (
                         <tr
                           key={key}
-                          // style={{ cursor: 'pointer' }}
-                          // onClick={() => handleEditItem(item)}
+                        // style={{ cursor: 'pointer' }}
+                        // onClick={() => handleEditItem(item)}
                         >
                           <td
                             style={{ cursor: "pointer" }}
@@ -694,12 +727,16 @@ const Items = () => {
                 style={{ minHeight: "max-content", backgroundColor: "#fff" }}
               >
                 <Form>
-                  <h6
-                    className="heading-small text-muted"
-                    style={{ marginTop: -20 }}
-                  >
-                    Product/Service information
-                  </h6>
+                  <div style={{ display: "flex", gap: 20, justifyContent: "space-between" }}>
+                    <h6
+                      className="heading-small text-muted"
+                      style={{ marginTop: -20 }}
+                    >
+                      Product/Service information
+                    </h6>
+                    {formData?.code ? <span color="info" className="heading-small text-muted" style={{ marginTop: -20, paddingBottom: 0 }}>Item Code: {formData?.code}</span> : null}
+                  </div>
+
                   <div className="" style={{ marginTop: -10 }}>
                     <Row>
                       <Col lg="7">
@@ -920,6 +957,7 @@ const Items = () => {
                         </FormGroup>
                       </Col>
                     </Row>
+
                   </div>
                   <hr className="my-1 mt-0" />
                   {/* Address */}
@@ -965,6 +1003,78 @@ const Items = () => {
                       </Col>
                     </Row>
                   </div>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col lg="5" className="pt-4">
+                        <Input
+                          className="form-control-checkbox "
+                          type="checkbox"
+                          value={hasDiscount}
+                          onChange={() => setHasDiscount(!hasDiscount)}
+                          checked={hasDiscount}
+                        />
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-first-name"
+                          >
+                            Apply Discount?
+                          </label>
+                        </FormGroup>
+                      </Col>
+                      <Col>
+                        <label
+                          className="form-control-label"
+                          htmlFor="input-first-name"
+                        >
+                          Discount Basis
+                        </label>
+                        <select
+                          disabled={!hasDiscount}
+                          className="form-control font-sm"
+                          value={formData?.discountType}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, discountType: +e.target.value }))}
+                          style={{ height: 29, padding: "0px 5px" }}
+                        >
+                          <option value={""}>Select basis</option>
+                          <option value={"2001"}>Flat</option>
+                          {/* <option value={"2002"}>Rate</option> */}
+
+                        </select>
+                      </Col>
+                      <Col>
+                        <FormGroup>
+                          <label
+                            className="form-control-label"
+                            htmlFor="input-first-name"
+                          >
+                            Value
+                          </label>{" "}
+                          <code style={{ color: "darkred" }}>*</code>
+                          <Input
+                            disabled={!hasDiscount}
+                            className="form-control font-sm"
+                            placeholder="discount"
+                            type="number"
+                            name="discountValue"
+                            value={formData.discount}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                discount: +e.target.value,
+                              })
+                            }
+                            onBlur={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                discount: +formData?.discount,
+                              }))
+                            }
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  </div>
                   {itemSelected && (
                     <Row>
                       <Col lg="12">
@@ -992,6 +1102,10 @@ const Items = () => {
                       </Col>
                     </Row>
                   )}
+
+
+
+
                 </Form>
               </CardBody>
               <CardFooter style={{ height: 60 }}>

@@ -5,25 +5,27 @@
 // const TOUR_LEVY = 0.01
 // const VAT_LEVY = 0.15
 
-   // covidRate: 0;
-  // cstRate: 0;
-  // cstWithVat: 1.03;
-  // getfundRate: 0;
-  // nhilRate: 0;
-  // regularLeviesWithVat: 1.03;
-  // tourismRate: 0;
-  // trsmWithVat: 1.03;
-  // vatRate: 3;
+// covidRate: 0;
+// cstRate: 0;
+// cstWithVat: 1.03;
+// getfundRate: 0;
+// nhilRate: 0;
+// regularLeviesWithVat: 1.03;
+// tourismRate: 0;
+// trsmWithVat: 1.03;
+// vatRate: 3;
 
 export const getPayableAmount = (item, discount = 0, vatScheme) => {
-  const {covidRate, cstRate, cstWithVat, getfundRate, nhilRate, regularLeviesWithVat,tourismRate, trsmWithVat, vatRate}= vatScheme
+  const { covidRate, cstRate, cstWithVat, getfundRate, nhilRate, regularLeviesWithVat, tourismRate, trsmWithVat, vatRate } = vatScheme
 
-  const NHIL_LEVY = nhilRate/100
-const GETFUND_LEVY = getfundRate/100
-const COVID_LEVY = covidRate/100
-const CST_LEVY = cstRate/100
-const TOUR_LEVY = tourismRate/100
-const VAT_LEVY = vatRate/100
+
+  console.log({ getPayableAmountBefore: item, vatScheme });
+  const NHIL_LEVY = nhilRate / 100
+  const GETFUND_LEVY = getfundRate / 100
+  const COVID_LEVY = covidRate / 100
+  const CST_LEVY = cstRate / 100
+  const TOUR_LEVY = tourismRate / 100
+  const VAT_LEVY = vatRate / 100
 
   const { isTaxable } = item
   //   let csttourism = 0
@@ -48,7 +50,26 @@ const VAT_LEVY = vatRate/100
 
     // console.log({ nonTaxable: item, discount: discount })
 
-    totalPayable = item.quantity * item.price
+
+    if (item?.discountType === 'general') {
+      if (item?.discountTypeName === "RATE") {
+
+        totalPayable = +item.quantity * (+item.price - +item?.discount)
+
+      } else {
+        totalPayable = +item.quantity * (+item.price - +item?.discount)
+      }
+
+    } else {
+      totalPayable = +item.quantity * +item.price
+    }
+
+    // totalPayable = parseInt(item.quantity) * item.price
+
+    // console.log({ totalPayable, number: +item.quantity });
+
+
+
     return (obj = {
       isINC: false,
       taxable: false,
@@ -61,7 +82,7 @@ const VAT_LEVY = vatRate/100
       nhil: 0,
       getf: 0,
       covid: 0,
-      otherLevies: 0,
+      otherLevies: item?.otherLevies,
       vatItemId: item.vatItemId,
       vatableAmt,
       vat,
@@ -74,11 +95,19 @@ const VAT_LEVY = vatRate/100
       //calculating itme with tax exclusive price
 
       //   totalPayable = 0
+      let netPrice = 0
 
-      let netPrice = item.quantity * item.price
+      if (item?.discountType === 'general') {
+        netPrice = item.quantity * (item.price - +item?.discount)
+      } else {
+        netPrice = item.quantity * item.price
+      }
+
+
       const nhil = NHIL_LEVY * netPrice
       const getf = GETFUND_LEVY * netPrice
       const covid = COVID_LEVY * netPrice
+
 
       if (item?.otherLevies === "NON") {
         // console.log({ lavyType: item?.otherLevies, discount })
@@ -90,7 +119,14 @@ const VAT_LEVY = vatRate/100
         csttourism = CST_LEVY * netPrice
         vatableAmt = netPrice + nhil + getf + covid + csttourism
         vat = VAT_LEVY * vatableAmt
-        totalPayable = vat + vatableAmt - discount
+
+
+        if (item?.discountType === 'general') {
+          // netPrice = item.quantity * (item.price - +item?.discount)
+          totalPayable = vat + vatableAmt - discount - +item?.discount
+        } else {
+          totalPayable = vat + vatableAmt - discount
+        }
 
         // console.log({ csttourism, vatableAmt, vat, totalPayable })
         // return
@@ -107,13 +143,6 @@ const VAT_LEVY = vatRate/100
         vat = VAT_LEVY * vatableAmt
         totalPayable = vat + vatableAmt
       }
-
-      // obj,
-      // vatableAmt,
-      // vat,
-      // totalPayable,
-      // isINC,
-      // isTaxable,
 
       return (obj = {
         isINC: false,
@@ -136,20 +165,7 @@ const VAT_LEVY = vatRate/100
         isTaxable,
       })
 
-      // vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
-      //   vat = VAT_LEVY * vatableAmt;
 
-      //   //   alert(vat);
-
-      //   //checking for cst conditions
-      //   if (csttourism > 0) {
-      //       cstTaxableAmount =
-      //       obj.nhil + obj.covid + obj.getf + obj.otherLevies + obj.taxableAmount;
-      //       vat = VAT_LEVY * cstTaxableAmount;
-      //       totalPayable = cstTaxableAmount + vat - obj.discount;
-      //   } else {
-      //       totalPayable = vatableAmt + vat + obj.otherLevies - obj.discount;
-      //   }
     } else if (item?.isTaxInclusive) {
       isINC = true
       let exclusivePrice = 0
@@ -169,7 +185,14 @@ const VAT_LEVY = vatRate/100
           ((1 + NHIL_LEVY + COVID_LEVY + GETFUND_LEVY) * (1 + VAT_LEVY))
       }
 
-      exclusivePrice = exclusivePrice * item?.quantity
+
+
+      if (item?.discountType === 'general') {
+
+        exclusivePrice = (exclusivePrice - +item?.discount) * item?.quantity
+      } else {
+        exclusivePrice = exclusivePrice * item?.quantity
+      }
 
       const nhil = NHIL_LEVY * exclusivePrice
       const getf = GETFUND_LEVY * exclusivePrice
@@ -366,7 +389,7 @@ export const moneyInTxt = (value, standard, dec = 0) => {
 }
 
 // export function getFormattedDate(dateObj) {
- 
+
 //   let month = dateObj.getUTCMonth() + 1; //months from 1-12
 //   let day = dateObj.getUTCDate();
 //   let year = dateObj.getUTCFullYear();
@@ -374,7 +397,7 @@ export const moneyInTxt = (value, standard, dec = 0) => {
 // }
 
 
-export  function getFormattedDate(date) {
+export function getFormattedDate(date) {
   // if (!(date instanceof Date)) {
   //   throw new Error('Invalid date object');
   // }
@@ -396,7 +419,7 @@ export const convertDate = (utcString) => {
 
     ? ''
 
-    : new Date(utcString).toUTCString('en-US', dateOptions).substring(5,16)
+    : new Date(utcString).toUTCString('en-US', dateOptions).substring(5, 16)
 
 }
 

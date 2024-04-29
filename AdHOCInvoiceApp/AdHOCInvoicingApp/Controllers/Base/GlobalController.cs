@@ -17,6 +17,7 @@ namespace AdHOCInvoicingApp.Controllers.Base
         public static string ReportServiceUrl = APISettings.Current.ReportServiceUrl;
         public static string ReportServerUrl = APISettings.Current.ReportServerUrl;
         public static string ReportPath = APISettings.Current.ReportPath;
+        public static string DashboardUrl = APISettings.Current.DashboardUrl;
         public GlobalController()
         {
 
@@ -42,13 +43,13 @@ namespace AdHOCInvoicingApp.Controllers.Base
             var sub = claims.FirstOrDefault(x => x.Type == "COMPANY_ID").Value;
             var tin = claims.FirstOrDefault(x => x.Type == "TIN").Value;
 
-            return new tokenData 
-            { 
-                CompanyName=companyName,
-                Sub=sub,
-                TIN= tin
+            return new tokenData
+            {
+                CompanyName = companyName,
+                Sub = sub,
+                TIN = tin
             };
-            
+
         }
         protected class tokenData
         {

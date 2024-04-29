@@ -54,7 +54,7 @@ const Admin = (props) => {
     transactions: [],
     setups: [],
     report: [],
-    dashboard:[],
+    dashboard: [],
   })
 
   const {
@@ -88,7 +88,7 @@ const Admin = (props) => {
         console.log({ po: result });
 
         const usemenus = routes.filter((route) => menus.includes(route.path));
-        
+
 
         console.log({ usemenus });
 
@@ -98,7 +98,7 @@ const Admin = (props) => {
       } catch (error) {
         console.log({ error });
 
-        toast.error("Could not fetch menus. Logging out..");
+        // toast.error("Could not fetch menus. Logging out..");
 
         setRoutes([]);
         window.location.href = `${process.env.REACT_APP_BASENAME}/login`;
@@ -107,7 +107,7 @@ const Admin = (props) => {
 
     menus();
 
-    return () => {};
+    return () => { };
   }, [role]);
 
   React.useLayoutEffect(() => {
@@ -121,24 +121,24 @@ const Admin = (props) => {
   }, []);
 
   const getRoutes = () => {
-      return routesData.map((prop, key) => {
-        
-          console.log({prop})
-        return (
-          <Route
-            path={"/admin" + prop.path}
-            component={prop.component}
-            key={key}
-          />
-        );
-    //   if (prop.layout === "/admin") {
-    //   } else {
-    //     return "";
-    //   }
+    return routesData.map((prop, key) => {
+
+      console.log({ prop })
+      return (
+        <Route
+          path={"/admin" + prop.path}
+          component={prop.component}
+          key={key}
+        />
+      );
+      //   if (prop.layout === "/admin") {
+      //   } else {
+      //     return "";
+      //   }
     });
   };
 
-  console.log({hey:selectedBranch});
+  console.log({ hey: selectedBranch });
 
   const getBrandText = (path) => {
     for (let i = 0; i < routes.length; i++) {
@@ -182,16 +182,16 @@ const Admin = (props) => {
     )
   }
 
-  if ( !selectedBranch?.code ) {
+  if (!selectedBranch?.code) {
 
-      return (
-          <SelectBranchComponent />
-      )
+    return (
+      <SelectBranchComponent />
+    )
   }
 
   return (
     <LoaderComponent>
-    
+
       <Sidebar
         {...props}
         routes={routes}

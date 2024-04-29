@@ -9,19 +9,19 @@ export const useAuth = () => useContext(AuthContext);
 //   process.env.REACT_APP_URL + "BRANCH_NAME"
 // ) || "";
 // let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || "";
-const branchInfo =  JSON.parse(sessionStorage.getItem("BRANCH_INFO")) || {}
+const branchInfo = JSON.parse(sessionStorage.getItem("BRANCH_INFO")) || {}
 
-console.log({branchInfo});
+console.log({ branchInfo });
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState({
     name: branchInfo?.name || null,
     code: branchInfo?.code || null,
-    taxScheme:branchInfo?.taxScheme || null
+    taxScheme: branchInfo?.taxScheme || null
   });
 
-  console.log({selectedBranch});
+  console.log({ selectedBranch });
 
 
   const [user, setUser] = useState();
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   const login = () => {
     //window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
     console.log("green", process.env.REACT_APP_BASENAME);
-    const temp = "/gra-invoicer";
+    // const temp = "/gra-invoicer";
     window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`;
     console.log(
       "Location",
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
     setUser((prev) => ({ ...prev, companyName: data + ", " }));
   };
   const onErrorResponse = (err) => {
-    console.log({onErrorResponse: err });
+    console.log({ onErrorResponse: err });
     setIsAuthenticated(false);
     window.location = `${process.env.REACT_APP_BASENAME}/login`;
   };

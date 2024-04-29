@@ -7,7 +7,7 @@ const CACHEURL = [
   "/gra-invoicer/static/js/chunk.js",
   "/index.html",
   "/gra-invoicer/auth/login",
-  "/gra-invoicer/signin-callback.html",
+  // "/gra-invoicer/signin-callback.html",
   "/gra-invoicer/manifest.json",
   "/gra-invoicer/favicon.ico",
   "/gra-invoicer/static/js/vendors~main.chunk.js",

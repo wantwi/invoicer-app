@@ -83,7 +83,7 @@ function InvoiceForm({ refetch }) {
     setShowNewInvoiceModal,
     comments,
     setComments,
-    vatAndLeviesScheme, 
+    vatAndLeviesScheme,
     setvatAndLeviesScheme
   } = useContext(FormContext);
 
@@ -103,8 +103,8 @@ function InvoiceForm({ refetch }) {
   const [forex, setForex] = useState(1);
   const [productsList, setProductsList] = useState([]);
   const [defaultProductsList, setDefaultProductsList] = useState([]);
-  const [poNumber, setPONumber] = useState("")
-  const [selectedItem, setSelectedItem] = useState([])
+  const [poTaxes, setPOTaxes] = useState(null)
+  const [showLoading, setShowLoading] = useState(false)
   // const [vatAndLeviesScheme, setvatAndLeviesScheme] = useState({
   //   covidRate: 0,
   //   cstRate: 0,
@@ -117,8 +117,7 @@ function InvoiceForm({ refetch }) {
   //   vatRate: 0,
   // });
   const [schemeDate, setSchemeDate] = useState(
-    `${new Date().getFullYear()}-${
-      new Date().getMonth() + 1
+    `${new Date().getFullYear()}-${new Date().getMonth() + 1
     }-${new Date().getDate()}`
   );
   // const [discount, setDiscount] = useState({
@@ -176,10 +175,10 @@ function InvoiceForm({ refetch }) {
       return;
     }
 
-    return () => {};
+    return () => { };
   }, [formData?.discountType, formData?.totalDiscount]);
 
-  const handleOnchangeOfDiscountAmt = () => {};
+  const handleOnchangeOfDiscountAmt = () => { };
 
 
   const requstCallback = (response) => {
@@ -229,23 +228,23 @@ function InvoiceForm({ refetch }) {
     requstCallback
   );
 
-//  const {refetch: refetchPOItems} = useCustomQueryById(`/api/GetPOItems/${formData?.pon}`,formData?.pon, (data) => {
-//   alert("This")
-//   console.log({refetchPOItems: data});
-//   // setProductsList(data)
-//   })
+  //  const {refetch: refetchPOItems} = useCustomQueryById(`/api/GetPOItems/${formData?.pon}`,formData?.pon, (data) => {
+  //   alert("This")
+  //   console.log({refetchPOItems: data});
+  //   // setProductsList(data)
+  //   })
 
   const refetchProductList = async () => {
-    
+
 
     try {
-        const request = await axios.get(`/api/GetProductList/${currency}`)
-        console.log({responseData: request})
-        
-         responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data)
-        
+      const request = await axios.get(`/api/GetProductList/${currency}`)
+      console.log({ responseData: request })
+
+      responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data)
+
     } catch (error) {
-      
+
     }
 
   }
@@ -270,20 +269,20 @@ function InvoiceForm({ refetch }) {
   useEffect(() => {
     refetchTaxScheme();
 
-    return () => {};
+    return () => { };
   }, [formData?.date]);
 
   const getPOItems = (e) => {
 
-    if(e.target.value.length > 0) {
+    if (e.target.value.length > 0) {
       refetchPOItems()
-    }else {
+    } else {
       refetchProductList()
     }
 
   }
 
-  console.log({productsList});
+  console.log({ defaultProductsList });
 
   // const fd = new Date(formData?.date)
 
@@ -310,8 +309,8 @@ function InvoiceForm({ refetch }) {
       if (error?.response?.status === 500) {
         toast.error(
           error?.response?.data ||
-            error?.response?.data ||
-            "Error creating invoice"
+          error?.response?.data ||
+          "Error creating invoice"
         );
         setLoading(false);
         return;
@@ -319,8 +318,8 @@ function InvoiceForm({ refetch }) {
       // console.log({ useMutationError: error });
       toast.error(
         error?.response?.data?.message ||
-          error?.message ||
-          "Invoice could not be saved."
+        error?.message ||
+        "Invoice could not be saved."
       );
       setLoading(false);
     },
@@ -341,7 +340,9 @@ function InvoiceForm({ refetch }) {
   const addRecordToData = (item) => {
     // setIsCurrencyDisbled(true)
 
-   
+    console.log({ item })
+
+
     let csttourism = 0;
     if (item.otherLevies === "NON") {
       csttourism = 0;
@@ -366,10 +367,11 @@ function InvoiceForm({ refetch }) {
         vatAndLeviesScheme
       );
 
-      setGridData((gridData) => [
+
+      setGridData((gridData) => ([
         ...gridData,
-        { ...gridItem, otherLeviesType: item.otherLevies },
-      ]);
+        { ...gridItem, discountTypeName: item?.discountTypeName, discountType: item?.discountType, discount: item?.discount, otherLeviesType: item.otherLevies },
+      ]));
       setFormData({ ...formData, itemName: "", quantity: 1, price: "" });
       setDiscount(0.0);
       setIsItemAdded(true);
@@ -378,9 +380,9 @@ function InvoiceForm({ refetch }) {
   };
 
   const saveInvoice = async () => {
-    console.log({gridData})
+    console.log({ gridData })
 
-    
+
     if (gridData?.length === 0) {
       toast.error("Please add invoice item(s)");
       return;
@@ -473,7 +475,7 @@ function InvoiceForm({ refetch }) {
       }
     }
 
- 
+
   };
 
   const handleCurrencySelect = (e) => {
@@ -513,14 +515,7 @@ function InvoiceForm({ refetch }) {
     }
   };
 
-  useEffect(() => {
-    // handleCustomerList()
-    //getCurrencies()
 
-    return () => {
-      //cleanup
-    };
-  }, [invoices]);
 
   useEffect(() => {
     //console.log('Currency', currency)
@@ -532,7 +527,7 @@ function InvoiceForm({ refetch }) {
     setFormData((prev) => ({ ...prev, currency: currency }));
   }, [currency]);
 
-  
+
 
   const [isCashCustomer, setIsCashCustomer] = useState(true);
 
@@ -547,137 +542,186 @@ function InvoiceForm({ refetch }) {
     //   setFormData((prev) => ({ ...prev, date: "" }));
     // }
 
-    return () => {};
+    return () => { };
   }, [isCashCustomer]);
 
 
+
   const refetchPOItems = async () => {
+    setShowLoading(true)
 
     try {
-        const request = await axios.get(`/api/GetPOItems/${formData?.pon}`)
+      const request = await axios.get(`/api/GetPOItems/${formData?.pon}/${formData?.identity}`)
 
-        console.log({request: request.data})
-       
-        if(request?.data){
-          setGridData([])
-            let arr=[], gridItem={}
-          for (let i = 0; i < request.data.items.length; i++) {
-            let obj={}
-            const item = request.data.items[i];
-            const getItem =  defaultProductsList.find(x => x?.code === item?.itemCode)
+      console.log({ request: request.data })
 
-            if(getItem){
-               
-                   obj = {
-                
-                price:item?.price,
-                stockQuantity:item?.quantity,
-                quantity: item?.quantity,
-                itemName: getItem.name,
-                price: item?.price,
-                vatItemId: getItem?.id,
-                itemCode: item?.itemCode,
-                otherLevies: getItem?.otherLevies,
-                isTaxInclusive: getItem?.isTaxInclusive
-              }
+      if (request?.data) {
 
-                 let csttourism = 0;
-                 if (getItem.otherLevies === "NON") {
-                  csttourism = 0;
-                } else if (getItem.otherLevies === "CST") {
-                  csttourism =
-                    (cstRate / 100) * obj.price * obj.quantity;
-                } else if (getItem.otherLevies === "TRSM") {
-                  csttourism =
-                    (tourismRate / 100) * obj.price * obj.quantity;
-                }
+        const { taxes } = request.data
 
-                 gridItem = getPayableAmount(
-                  { ...item, isTaxable },
-                  discount,
-                  vatAndLeviesScheme
-                );
-                setGridData((gridData) => ([...gridData,gridItem]));
+        const { levy1Rate = 0, levy2Rate = 0, levy3Rate = 0, levy4Rate = 0, spLevy1Rate = 0, vatRate = 15 } = taxes
 
-              console.log({refetchPOItemsfound: gridItem})
+        const vatObj = {
+          covidRate: levy3Rate,
+          cstRate: levy4Rate,
+          cstWithVat: 0,
+          getfundRate: levy2Rate,
+          nhilRate: levy1Rate,
+          regularLeviesWithVat: 0,
+          tourismRate: spLevy1Rate,
+          trsmWithVat: 0,
+          vatRate: vatRate
+        }
 
-              
+        setPOTaxes(vatObj)
 
-            }else {
-              console.log({refetchPOItemsfoundNot: getItem})
+        setFormData((prev) => ({ ...prev, ponTaxes: vatObj }))
+
+        setGridData([])
+        setProductsList([])
+        let arr = [], gridItem = {}
+        for (let i = 0; i < request.data.items.length; i++) {
+          let obj = {}
+          const item = request.data.items[i];
+          const getItem = defaultProductsList.find(x => x?.code === item?.itemCode)
+
+          console.log({ getItem })
+
+          if (getItem != undefined) {
+            obj = {
+              ...getItem,
+              price: item?.price,
+              stockQuantity: item?.quantity,
+              quantity: 1,
+              itemName: getItem.name,
+              price: item?.price,
+              vatItemId: getItem?.id,
+              itemCode: item?.itemCode,
+              otherLevies: getItem?.otherLevies,
+              isTaxInclusive: getItem?.isTaxInclusive,
+              discountType: getItem?.discountType,
+              discount: getItem?.discount,
+              // isTaxable: getItem?.taxable,
+              otherLeviesType: getItem?.otherLevies,
+              taxable: true,
+              isTaxable: true
             }
-            
 
-            // if(getItem){
-            //   obj = {
-            //     ...getItem,
-            //     price:item?.price,
-            //     stockQuantity:item?.quantity,
-            //     quantity: item?.quantity,
-            //     itemName: getItem.name,
-            //     price: getItem?.price,
-            //     vatItemId: getItem?.id,
-            //     itemCode: getItem?.code,
-            //     otherLevies: getItem?.otherLevies,
-            //     isTaxInclusive: getItem?.isTaxInclusive,
+            let csttourism = 0;
+            if (getItem.otherLevies === "NON") {
+              csttourism = 0;
+            } else if (getItem.otherLevies === "CST") {
+              csttourism =
+                (cstRate / 100) * obj.price * obj.quantity;
+            } else if (getItem.otherLevies === "TRSM") {
+              csttourism =
+                (tourismRate / 100) * obj.price * obj.quantity;
+            }
 
-            //   }
-            //   let csttourism = 0;
-            //   if (obj.otherLevies === "NON") {
-            //     csttourism = 0;
-            //   } else if (obj.otherLevies === "CST") {
-            //     csttourism =
-            //       (cstRate / 100) * obj.price * obj.quantity;
-            //   } else if (obj.otherLevies === "TRSM") {
-            //     csttourism =
-            //       (levy4Rate / 100) * obj.price * obj.quantity;
-            //   }
+            gridItem = getPayableAmount(
+              { ...obj },
+              discount,
+              poTaxes
+            );
+            setGridData((gridData) => ([...gridData, { ...gridItem, stockQuantity: obj?.stockQuantity, taxable: true, isTaxable: true }]));
 
-              
-            //      gridItem = getPayableAmount(
-            //       { ...item, isTaxable },
-            //       discount,
-            //       vatAndLeviesScheme
-            //     );
+            console.log({ refetchPOItemsfound: gridItem })
 
-              
-               
-             
+            setProductsList((prev) => ([...prev, obj]))
+            setShowAddItem(true)
+            setIsItemAdded(true)
 
-            //   arr.push(gridItem)
-              
-            // }
 
-            // setGridData((gridData) => [...gridData,{ ...gridItem, otherLeviesType: obj.otherLevies }]);
-          
+
+          } else {
+            console.log({ refetchPOItemsfoundNot: getItem })
           }
 
-          console.log({AddedArry: arr});
 
-          setShowAddItem(true)
-          setIsItemAdded(true)
-         
+          // if(getItem){
+          //   obj = {
+          //     ...getItem,
+          //     price:item?.price,
+          //     stockQuantity:item?.quantity,
+          //     quantity: item?.quantity,
+          //     itemName: getItem.name,
+          //     price: getItem?.price,
+          //     vatItemId: getItem?.id,
+          //     itemCode: getItem?.code,
+          //     otherLevies: getItem?.otherLevies,
+          //     isTaxInclusive: getItem?.isTaxInclusive,
 
+          //   }
+          //   let csttourism = 0;
+          //   if (obj.otherLevies === "NON") {
+          //     csttourism = 0;
+          //   } else if (obj.otherLevies === "CST") {
+          //     csttourism =
+          //       (cstRate / 100) * obj.price * obj.quantity;
+          //   } else if (obj.otherLevies === "TRSM") {
+          //     csttourism =
+          //       (levy4Rate / 100) * obj.price * obj.quantity;
+          //   }
+          //      gridItem = getPayableAmount(
+          //       { ...item, isTaxable },
+          //       discount,
+          //       vatAndLeviesScheme
+          //     );
+          //   arr.push(gridItem)
 
-          // const poItems = request.data.items.map(x => ({id:x?.itemCode,code:x?.itemCode, name:x?.itemName,price:x?.price,stockQuantity:x?.quantity, isTaxInclusive:false, taxable:false, otherLevies:"None"}))
-          
+          // }
+
+          // setGridData((gridData) => [...gridData,{ ...gridItem, otherLeviesType: obj.otherLevies }]);
+
         }
-        const responseData =  JSON.parse(request?.data)
-       
-        responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data)
-       
+
+        // console.log({ AddedArry: arr });
+
+        // setShowAddItem(true)
+        // setIsItemAdded(true)
+        // const poItems = request.data.items.map(x => ({id:x?.itemCode,code:x?.itemCode, name:x?.itemName,price:x?.price,stockQuantity:x?.quantity, isTaxInclusive:false, taxable:false, otherLevies:"None"}))
+
+      }
+
+      // const responseData = JSON.parse(request?.data)
+
+      responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data)
+
     } catch (error) {
-      
+
+    } finally {
+      setShowLoading(false)
     }
 
   }
 
+  useEffect(() => {
 
-console.log({defaultProductsList})
+    if (formData?.pon.length === 0) {
+      setGridData([])
+      setProductsList(defaultProductsList)
+    } else {
+      refetchPOItems()
+    }
+
+    return () => {
+      //cleanup
+    };
+  }, [formData?.pon]);
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      refetchPOItems()
+    }
+  };
+
+
+  console.log({ defaultProductsList })
 
   return (
     <>
       {loading ? <Loader /> : null}
+      {showLoading ? <Loader /> : null}
       <Card
         className="bg-secondary shadow"
         style={{ width: "40%", height: "550px" }}
@@ -881,10 +925,11 @@ console.log({defaultProductsList})
                   className="form-control font-sm"
                   value={formData.discountType}
                   onChange={handleDiscountTypeOnchange}
-                  disabled={!isCashCustomer}
+                  // disabled={!isCashCustomer}
                   style={{ height: 29, padding: "0px 5px" }}
                 >
                   <option value={""}>No discount</option>
+                  <option value={"general"}>General</option>
                   <option value={"selective"}>Selective</option>
                 </select>{" "}
               </Col>
@@ -916,30 +961,33 @@ console.log({defaultProductsList})
                 </Col>
               )}
               <Col lg="6" hidden={isCashCustomer} >
-                  <label
-                    className="form-control-label label-mb-0"
-                    htmlFor="discountAmt"
-                  >
-                    Purchase Order Number
-                  </label>
-                  <Input
-                    type="text"
-                    className="form-control"
-                    placeholder="Purchase order number"
-                    id="pon"
-                    name="pon"
-                    onBlur={getPOItems}
-                    value={formData?.pon || ""}
-                   
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        pon: e.target.value,
-                      })
-                    }
-                    bsSize="sm"
-                  />
-                </Col>
+                <label
+                  className="form-control-label label-mb-0"
+                  htmlFor="discountAmt"
+                >
+                  Purchase Order Number
+                </label>
+                <Input
+                  type="text"
+                  title="Enter Purchase Order Number and press enter"
+                  className="form-control"
+                  placeholder="Purchase order number"
+                  id="pon"
+                  name="pon"
+                  onBlur={getPOItems}
+                  onKeyPress={handleKeyPress}
+
+                  value={formData?.pon || ""}
+
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      pon: e.target.value,
+                    })
+                  }
+                  bsSize="sm"
+                />
+              </Col>
             </Row>
             <Row>
               <Col lg="6">
@@ -995,22 +1043,22 @@ console.log({defaultProductsList})
                       <p>Please wait, loading items ...</p>
                     ) : (
                       <>
-                      <div hidden={formData?.pon.length > 0 ? false: true}>
-                        <input disabled className="form-control" style={{height:30}}/>
-                      </div>
-                      <div hidden={formData?.pon.length > 0 ? true: false}>
-                      <AutocompleteItems
-                        gridData={gridData}
-                        suggestions={productsList}
-                        formData={formData}
-                        setFormData={setFormData}
-                        setDisabled={setDisabled}
-                        setIsTaxable={setIsTaxable}
+                        {/* <div hidden={formData?.pon.length > 0 ? false : true}>
+                          <input disabled className="form-control" style={{ height: 30 }} />
+                        </div>
+                        <div hidden={formData?.pon.length > 0 ? true : false}> */}
+                        <AutocompleteItems
+                          gridData={gridData}
+                          suggestions={productsList}
+                          formData={formData}
+                          setFormData={setFormData}
+                          setDisabled={setDisabled}
+                          setIsTaxable={setIsTaxable}
                         // setSelectedItem={setSelectedItem}
-                      />
-                      </div>
+                        />
+                        {/* </div> */}
                       </>
-                      
+
                     )}
                   </Col>
                   <Col
@@ -1084,7 +1132,7 @@ console.log({defaultProductsList})
                           quantity: Number(formData?.quantity).toFixed(4),
                         }));
                       }}
-                      // onKeyUp={validateInput(formData.quantity)}
+                    // onKeyUp={validateInput(formData.quantity)}
                     />
                   </Col>
                   <Col lg="6">
@@ -1097,7 +1145,7 @@ console.log({defaultProductsList})
                         (formData.isTaxInclusive ? "-Tax Incl." : "-Tax Excl.")}
                     </label>
                     <Input
-                       disabled={formData?.pon.length > 0 ? true: false}
+                      disabled={formData?.pon.length > 0 ? true : false}
                       className="form-control-alternative"
                       id="price"
                       placeholder="Price"
@@ -1116,7 +1164,7 @@ console.log({defaultProductsList})
                           price: Number(formData?.price).toFixed(4),
                         }));
                       }}
-                      // onKeyDown={validateInput(formData.price)}
+                    // onKeyDown={validateInput(formData.price)}
                     />
                   </Col>
                 </Row>
@@ -1133,7 +1181,7 @@ console.log({defaultProductsList})
                       id="isTaxable"
                       type="checkbox"
                       checked={isTaxable}
-                      // disabled
+                    // disabled
                     />
                     &nbsp; &nbsp;
                     <label className="form-control-label" htmlFor="isTaxable">

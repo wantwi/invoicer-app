@@ -11,6 +11,8 @@ import {
   Card,
   CardBody,
   Modal,
+  Alert,
+  Badge,
 } from "reactstrap"
 import { getPayableAmount } from "utils/util"
 import { FormContext } from "./NewInvoice"
@@ -25,16 +27,27 @@ function EditInvoiceItem({
   gridData,
   setGridData,
   showDiscountField,
+  isPO = false, formData
 }) {
   const {
     vatAndLeviesScheme
   } = useContext(FormContext);
   const handleUpdate = () => {
-    // console.log(gridData)
+    console.log(gridData)
 
     const { itemName, isInclusive } = updateItemData
 
-    // console.log({ updateItemData })
+    console.log({ updateItemData, formData })
+
+    if (formData?.pon) {
+      if (updateItemData?.stockQuantity - +updateItemData?.quantity < 0) {
+        toast.info("Sorry, you have entered more than the purchase order quantity.")
+
+        return
+
+      }
+    }
+
 
     // return;
     let index = gridData.findIndex((item, i) => i == updateItemData.index)
@@ -59,12 +72,12 @@ function EditInvoiceItem({
     if (itemName === "CST Item" || itemName.trim() === "CST Inclusive Item") {
       csttourism = isInclusive
         ? 0.05 *
-          ((updateItemData.quantity * updateItemData.price * 100) / 127.65)
+        ((updateItemData.quantity * updateItemData.price * 100) / 127.65)
         : 0.05 * updateItemData.price * updateItemData.quantity
     } else if (itemName === "TRSM Item") {
       csttourism = isInclusive
         ? 0.01 *
-          ((updateItemData.quantity * updateItemData.price * 100) / 127.65)
+        ((updateItemData.quantity * updateItemData.price * 100) / 127.65)
         : 0.01 * updateItemData.price * updateItemData.quantity
     }
     // else {
@@ -158,17 +171,40 @@ function EditInvoiceItem({
       // data[index]["totalPayable"] = inclusiveAmt - updateItemData.discount;
       // data[index]["otherLevies"] = csttourism;
     }
+    let result = {}
+    if (formData?.pon) {
+      result = getPayableAmount(
+        {
+          ...updateItemData,
+          otherLevies: rowData?.otherLeviesType,
+          isTaxable: rowData?.isTaxable,
+          isTaxInclusive: rowData?.isTaxInclusive,
+          discountType: rowData?.discountType,
+          discountTypeName: rowData?.discountTypeName,
+          discount: updateItemData?.discount
 
-    const result = getPayableAmount(
-      {
-        ...updateItemData,
-        otherLevies: rowData?.otherLeviesType,
-        isTaxable: rowData?.isTaxable,
-        isTaxInclusive: rowData?.isTaxInclusive,
-      },
-      updateItemData?.discount,
-      vatAndLeviesScheme
-    )
+        },
+        0,
+        formData?.ponTaxes
+      )
+
+    } else {
+      result = getPayableAmount(
+        {
+          ...updateItemData,
+          otherLevies: rowData?.otherLeviesType,
+          isTaxable: rowData?.isTaxable,
+          isTaxInclusive: rowData?.isTaxInclusive,
+          discountType: rowData?.discountType,
+          discountTypeName: rowData?.discountTypeName,
+          discount: updateItemData?.discount
+
+        },
+        0,
+        vatAndLeviesScheme
+      )
+    }
+
     let obj = {
       ...updateItemData,
       ...result,
@@ -188,6 +224,14 @@ function EditInvoiceItem({
     data[index]["vat"] = obj?.vat
     data[index]["otherLeviesType"] = rowData?.otherLeviesType
     data[index]["isTaxable"] = rowData?.isTaxable
+    data[index]["discount"] = updateItemData?.discount
+    data[index]["discountTypeName"] = rowData?.discountTypeName
+    data[index]["discountType"] = rowData?.discountType
+    data[index]["taxable"] = rowData?.taxable
+    data[index]["isINC"] = rowData?.isINC
+    data[index]["isTaxInclusive"] = rowData?.isTaxInclusive
+    data[index]["vatItemId"] = rowData?.vatItemId
+    data[index]["discountType"] = rowData?.discountType
 
     // console.log({ result, data, obj })
 
@@ -253,7 +297,7 @@ function EditInvoiceItem({
                   </Col>
                 </Row>
                 <Row style={{ marginTop: -20 }}>
-                  <Col lg="4">
+                  <Col lg="6">
                     <FormGroup>
                       <label className="form-control-label">Quantity</label>
                       <Input
@@ -268,10 +312,13 @@ function EditInvoiceItem({
                           })
                         }
                         bsSize="sm"
+
                       />
+                      {formData?.pon ? <Badge color={(updateItemData?.stockQuantity - +updateItemData?.quantity) < 0 ? "danger" : "info"} className="m-0">Order quanity left {updateItemData?.stockQuantity - +updateItemData?.quantity}</Badge> : null}
                     </FormGroup>{" "}
+
                   </Col>
-                  <Col lg="4">
+                  <Col lg="6">
                     <FormGroup>
                       <label className="form-control-label">Price</label>
                       <Input
@@ -280,6 +327,7 @@ function EditInvoiceItem({
                         type="number"
                         disabled
                         value={updateItemData.price}
+                        style={{ textAlign: "right" }}
                         // onChange={(e) =>
                         //   setUpdateItemData({
                         //     ...updateItemData,
@@ -295,6 +343,7 @@ function EditInvoiceItem({
                       <FormGroup>
                         <label className="form-control-label">Discount</label>
                         <Input
+                          disabled
                           className="form-control font-sm"
                           placeholder="Discount"
                           type="number"

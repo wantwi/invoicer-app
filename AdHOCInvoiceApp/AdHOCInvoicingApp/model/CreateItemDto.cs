@@ -14,6 +14,9 @@ namespace AdHOCInvoicingApp.model
         public decimal? Price { get; set; }
         public string? CompanyId { get; set; }
         public string? BranchCode { get; set; }
+        public int? discountType { get; set; } = null;
+        public double? discount { get; set; } = 0.00;
+
     }
 
     public class UpdateItemDto
@@ -29,6 +32,9 @@ namespace AdHOCInvoicingApp.model
         public string? currencyCode { get; set; }
         public string? otherLevies { get; set; }
         public bool? isTaxInclusive { get; set; }
+        public int? discountType { get; set; } = null;
+        public double? discount { get; set; } = 0.00;
+
     }
 
     public class ExchangeRateDto

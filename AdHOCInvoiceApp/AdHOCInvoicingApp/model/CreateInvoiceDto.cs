@@ -48,8 +48,8 @@ namespace AdHOCInvoicingApp.model
     public class RefundItems
     {
         public string vatItemId { get; set; }
-        public decimal refundAmount { get; set; }  
-        public int refundQuantity { get; set; }  
+        public decimal refundAmount { get; set; }
+        public int refundQuantity { get; set; }
     }
 
     public class CancelRefundDTO
@@ -76,7 +76,7 @@ namespace AdHOCInvoicingApp.model
         public List<PurchaseReturnItem> purchaseReturnItems { get; set; }
     }
 
-  
+
 
     public class NoteLine
     {
