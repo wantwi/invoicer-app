@@ -20,7 +20,7 @@ const init = {
   totalDiscount: "",
   date: "",
   dueDate: "",
-  pon:""
+  pon: ""
 }
 
 export const FormContext = createContext(null)
@@ -44,6 +44,8 @@ function NewInvoice({ setShowNewInvoiceModal, refetch }) {
     trsmWithVat: 0,
     vatRate: 0,
   })
+
+  console.log({ vatAndLeviesScheme });
 
   return (
     <>
@@ -87,7 +89,7 @@ function NewInvoice({ setShowNewInvoiceModal, refetch }) {
             resize: "both",
             overflow: "auto",
             justifyContent: "center",
-            maxWidth:"max-content"
+            maxWidth: "max-content"
           }}
         >
           <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>

@@ -18,7 +18,7 @@
 export const getPayableAmount = (item, discount = 0, vatScheme) => {
   const { covidRate, cstRate, cstWithVat, getfundRate, nhilRate, regularLeviesWithVat, tourismRate, trsmWithVat, vatRate } = vatScheme
 
-
+  // covidRate
   console.log({ getPayableAmountBefore: item, vatScheme });
   const NHIL_LEVY = nhilRate / 100
   const GETFUND_LEVY = getfundRate / 100
@@ -175,14 +175,12 @@ export const getPayableAmount = (item, discount = 0, vatScheme) => {
           ((1 + NHIL_LEVY + COVID_LEVY + CST_LEVY + GETFUND_LEVY) *
             (1 + VAT_LEVY))
       } else if (item?.otherLevies === "TRSM") {
-        exclusivePrice =
-          item?.price /
-          ((1 + NHIL_LEVY + COVID_LEVY + TOUR_LEVY + GETFUND_LEVY) *
-            (1 + VAT_LEVY))
+
+        const trsmWithVat = (((nhilRate + getfundRate + covidRate + 100) / 100 * (vatRate / 100)) + (nhilRate + getfundRate + covidRate + tourismRate + 100) / 100);
+        exclusivePrice = item?.price / trsmWithVat
+
       } else {
-        exclusivePrice =
-          item?.price /
-          ((1 + NHIL_LEVY + COVID_LEVY + GETFUND_LEVY) * (1 + VAT_LEVY))
+        exclusivePrice = item?.price / ((1 + NHIL_LEVY + COVID_LEVY + GETFUND_LEVY) * (1 + VAT_LEVY))
       }
 
 
@@ -216,6 +214,8 @@ export const getPayableAmount = (item, discount = 0, vatScheme) => {
         vat = VAT_LEVY * vatableAmt
 
         totalPayable = vatableAmt + vat + csttourism - discount
+
+        console.log({ exclusivePrice, totalPayable })
       }
 
       return (obj = {

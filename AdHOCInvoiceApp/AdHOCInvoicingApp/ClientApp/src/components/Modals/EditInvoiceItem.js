@@ -27,13 +27,20 @@ function EditInvoiceItem({
   gridData,
   setGridData,
   showDiscountField,
-  isPO = false, formData
+  isPO = false, formData,
+  // vatAndLeviesScheme
 }) {
   const {
-    vatAndLeviesScheme
+    vatAndLeviesScheme,
+    setvatAndLeviesScheme
   } = useContext(FormContext);
+
+
+
   const handleUpdate = () => {
-    console.log(gridData)
+    // console.log({ gridData })
+
+    // return
 
     const { itemName, isInclusive } = updateItemData
 
@@ -189,6 +196,10 @@ function EditInvoiceItem({
       )
 
     } else {
+
+      // console.log({ vatAndLeviesScheme })
+
+      // return
       result = getPayableAmount(
         {
           ...updateItemData,

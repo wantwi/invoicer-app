@@ -122,11 +122,14 @@ function InvoicePreview() {
           >
             <thead className="thead">
               <tr style={{ lineHeight: "10px" }}>
+                <th scope="col" style={{ width: "5%", textAlign: "left" }}>
+                  #
+                </th>
                 <th scope="col" style={{ width: "30%" }}>
                   Item
                 </th>
                 <th scope="col" style={{ width: "10%", textAlign: "right" }}>
-                  Quantity
+                  Qty
                 </th>
                 <th scope="col" style={{ width: "20%", textAlign: "right" }}>
                   Price
@@ -142,7 +145,7 @@ function InvoicePreview() {
             <tbody>
               {gridData.map((item, index) => (
                 <tr style={{ lineHeight: "1px" }} key={index}>
-                  {/* <td style={{ fontSize: '10px' }}>{item.itemCode}</td> */}
+                  <td style={{ fontSize: '10px' }}>{index + 1}</td>
                   <td
                     style={{ fontSize: "10px", cursor: "pointer" }}
                     title={item.itemName}
@@ -196,16 +199,16 @@ function InvoicePreview() {
                 gridData.reduce((total, item) => total + item.taxableAmount, 0)
               )}
             </h6>
-            {/* <h6 style={{ padding: 0, margin: 0 }}>
+            <h6 style={{ padding: 0, margin: 0 }}>
               DISCOUNT : {"   "}
               {formData?.discountType
-                ? formData?.discountType === "general...."
+                ? formData?.discountType === "general"
                   ? moneyInTxt(
-                    gridData.reduce((total, item) => total + item.discount, 0)
+                    gridData.reduce((total, item) => total + (item.discount * item?.quantity), 0)
                   )
                   : moneyInTxt(formData?.totalDiscount)
-                : "0.00"}
-            </h6> */}
+                : 0}
+            </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
               NHIL ({formData?.pon ? formData?.ponTaxes?.nhilRate : vatAndLeviesScheme.nhilRate}%): {"   "}
               {moneyInTxt(

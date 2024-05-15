@@ -21,20 +21,23 @@ const BoldReportViewer = ({
   setShowReport,
   reportParam,
   reportPath,
+  reportURL
 }) => {
   //<bold-report-viewer id="reportviewer1" report-service-url="../SyncReport" report-path="~/WHT/AllTransactionsReport" report-server-url="http://psl-dbserver-vm/Reports_SSRS/" processing-mode="Remote" ajax-before-load="ajaxBeforeLoad" />
   const reportviewrinstance = useRef(null);
   const auth = useAuth();
   const axios = useCustomAxios()
   const [params, setparams] = useState([]);
-  const [reportURL, setReportURL] = useState({})
 
-  console.log({ reportParam });
+  console.log({ auth });
 
-  const getReportURLs = async () => {
-    const { data } = await axios.get(`/api/ReportURL`)
-    setReportURL(data)
-  }
+
+
+
+  // const getReportURLs = async () => {
+  //   const { data } = await axios.get(`/api/ReportURL`)
+  //   setReportURL(data)
+  // }
 
   // var parameters = [{
   //   name: 'SalesOrderNumber',
@@ -60,13 +63,13 @@ const BoldReportViewer = ({
     return arr;
   };
 
-  console.log({ auth })
+  // console.log({ auth })
 
-  useEffect(() => {
-    getReportURLs()
+  // useEffect(() => {
+  //   getReportURLs()
 
-    return () => { };
-  }, []);
+  //   return () => { };
+  // }, []);
 
   useEffect(() => {
     // dReportDateFrom
@@ -92,26 +95,27 @@ const BoldReportViewer = ({
     event.cancel = true;
   }
   const onAjaxRequest = (args) => {
-    localStorage.removeItem("fromBold")
-    localStorage.setItem("fromBold", JSON.stringify(args))
+    // localStorage.removeItem("fromBold")
+    // localStorage.setItem("fromBold", JSON.stringify(args))
     console.log({ args });
 
     args?.headerReq.push({
       key: "Authorization",
-      value: `Bearer ${auth?.access_token}`,
+      value: `Bearer ${reportURL?.access}`,
     });
 
   };
-  console.log({ reportURL, reportPath })
+
+  console.log({ reportviewrinstance: reportURL });
 
   return (
 
     <BoldReportViewerComponent
       id="reportviewer-container"
 
-      reportServerUrl={process.env.REACT_APP_REPORTSERVERURL}
-      reportServiceUrl={process.env.REACT_APP_REPORTSERVICEURL}
-      reportPath={`${REACT_APP_REPORTSERVERPath}${reportPath}`}
+      reportServerUrl={reportURL?.reportServerUrl}
+      reportServiceUrl={reportURL?.reportServiceUrl}
+      reportPath={`${reportURL?.reportPath}${reportPath}`}
       onShowError={onShowError}
       // ajaxBeforeLoad={onAjaxRequest}
 
@@ -141,17 +145,4 @@ const BoldReportViewer = ({
   );
 };
 
-// REACT_APP_REPORTSERVERURL="http://172.16.0.61/ReportServer"
-// REACT_APP_REPORTSERVERPath="/eVAT_Report/"
-// REACT_APP_REPORTSERVICEURL="https://api-test.cimsgh.com/api/v1/ReportViewer"
-
-// https://api-test.cimsgh.com/api/v1/ReportViewer/PostReportAction
-
-// REACT_APP_REPORTSERVERURL="http://172.16.0.61/ReportServer"
-// REACT_APP_REPORTSERVERPath="/eVAT_Report/"
-// REACT_APP_REPORTSERVICEURL="https://api-test.cimsgh.com/api/v1/ReportViewer"
-// REACT_APP_REPORT_URL="https://api-test.cimsgh.com/api/v1/Reports"
-
-//https://api.e-vatgh.com/evatapi/api/ReportViewer
-//http://npa-dbserv-mo/ReportServer
 export default BoldReportViewer;

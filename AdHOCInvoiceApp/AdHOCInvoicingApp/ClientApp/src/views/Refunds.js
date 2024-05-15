@@ -143,7 +143,7 @@ const Refunds = () => {
         accessor: "status",
         className: "text-left",
         Cell: (data) => {
-          console.log({success: data?.row});
+          console.log({ success: data?.row });
           return (
             data?.row?.original?.status === "ACTIVE" ? <Badge color="primary">{data?.row?.original?.status}</Badge> : <Badge color="danger">{data?.row?.original?.status}</Badge>
           );
@@ -190,7 +190,7 @@ const Refunds = () => {
       );
       if (request) {
         const { data } = request;
-        base64 = `data:application/pdf;base64,` + data;
+        base64 = `data:application/pdf;base64,` + JSON.parse(data?.data);
         const pdfContentType = "application/pdf";
 
         setPdfData(base64);
@@ -240,9 +240,9 @@ const Refunds = () => {
       if (data?.invoices?.items?.length === 0) {
         const msg = !value
           ? "No Invoice Available For " +
-            dayOfWeekSelRef?.current?.options[
-              dayOfWeekSelRef?.current?.selectedIndex
-            ]?.innerText
+          dayOfWeekSelRef?.current?.options[
+            dayOfWeekSelRef?.current?.selectedIndex
+          ]?.innerText
           : "No invoice matched your search: " + value;
         toast.info(msg);
         setMessage(msg);
@@ -301,24 +301,24 @@ const Refunds = () => {
       setPageNumber(1);
     }
     refetch();
-    return () => {};
+    return () => { };
   }, [period, pageNumber]);
 
   useEffect(() => {
     if (value.length > 1) {
       refetch();
     }
-    return () => {};
+    return () => { };
   }, [value]);
 
   useEffect(() => {
     if (selectedRow.length > 0) {
       refetchGetById();
     }
-    return () => {};
+    return () => { };
   }, [selectedRow]);
 
-   console.log({refunds})
+  console.log({ refunds })
 
   return (
     <>
@@ -340,7 +340,7 @@ const Refunds = () => {
                   <div className="col">
                     <Form
                       className="navbar-search navbar-search-light form-inline "
-                      onSubmit={(e) => {}}
+                      onSubmit={(e) => { }}
                     >
                       <FormGroup className="mb-0">
                         {" "}

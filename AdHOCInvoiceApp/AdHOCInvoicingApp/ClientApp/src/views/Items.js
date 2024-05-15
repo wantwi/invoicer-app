@@ -121,25 +121,48 @@ const Items = () => {
     { isEnabled: false, queryTag: "DONT_USE_QUERY_BECAUSE_OF_BFF" }
   );
 
-  const postSuccess = (data) => {
-    toast.success("Item successfully saved");
-    setLoading(false);
-    setSearchText(formData?.productName);
+  const handleClear = () => {
+    setitemSelected(false);
+    setHasTourismLevy(false);
+    setIstaxable(false);
+    setIsTaxInclusive(false);
     setFormData({
       id: "",
       productName: "",
       description: "",
-      taxable: false,
+      taxable: true,
       code: "",
       taxRate: "",
       price: "",
-      discountType: 2001,
-      discount: 0
+      discount: 0,
+      discountType: ""
+
     });
-    setOtherLevies("");
     setCurrencyCode("");
-    setIstaxable(false);
-    setIsTaxInclusive(false);
+    setOtherLevies("");
+    setHasDiscount(false)
+  }
+
+  const postSuccess = (data) => {
+    toast.success("Item successfully saved");
+    setLoading(false);
+    handleClear()
+    setSearchText(formData?.productName);
+    // setFormData({
+    //   id: "",
+    //   productName: "",
+    //   description: "",
+    //   taxable: false,
+    //   code: "",
+    //   taxRate: "",
+    //   price: "",
+    //   discountType: 2001,
+    //   discount: 0
+    // });
+    // setOtherLevies("");
+    // setCurrencyCode("");
+    // setIstaxable(false);
+    // setIsTaxInclusive(false);
   };
   const postError = (err) => {
     toast.error(
@@ -151,21 +174,22 @@ const Items = () => {
   const putSuccess = (data) => {
     toast.success("Successfully Updated");
     setLoading(false);
+    handleClear()
     setSearchText(formData?.productName);
     getItemsList();
-    setFormData({
-      id: "",
-      productName: "",
-      description: "",
-      taxable: true,
-      code: "",
-      taxRate: "",
-      price: "",
-    });
-    setOtherLevies("");
-    setCurrencyCode("");
-    setIstaxable(false);
-    setIsTaxInclusive(false);
+    // setFormData({
+    //   id: "",
+    //   productName: "",
+    //   description: "",
+    //   taxable: true,
+    //   code: "",
+    //   taxRate: "",
+    //   price: "",
+    // });
+    // setOtherLevies("");
+    // setCurrencyCode("");
+    // setIstaxable(false);
+    // setIsTaxInclusive(false);
   };
 
   const { mutate, isLoading: isPostLoading } = useCustomPost(
@@ -253,6 +277,12 @@ const Items = () => {
   const handleEditItem = (item) => {
 
     console.log({ handleEditItem: item });
+
+    if (item?.discountType === 2001 || item?.discountType === 2002) {
+      setHasDiscount(true)
+    } else {
+      setHasDiscount(false)
+    }
 
     setIstaxable(item.istaxable);
     setHasTourismLevy(item.hasTourismLevy);
@@ -395,6 +425,7 @@ const Items = () => {
       setFormData((pre) => ({ ...pre, discountType: "" }))
     }
   }, [hasDiscount]);
+
 
 
 
@@ -1130,23 +1161,7 @@ const Items = () => {
                       style={{ marginRight: 10 }}
                       color="secondary"
                       disabled={loading}
-                      onClick={() => {
-                        setitemSelected(false);
-                        setHasTourismLevy(false);
-                        setIstaxable(false);
-                        setIsTaxInclusive(false);
-                        setFormData({
-                          id: "",
-                          productName: "",
-                          description: "",
-                          taxable: true,
-                          code: "",
-                          taxRate: "",
-                          price: "",
-                        });
-                        setCurrencyCode("");
-                        setOtherLevies("");
-                      }}
+                      onClick={handleClear}
                       size="sm"
                     >
                       Clear

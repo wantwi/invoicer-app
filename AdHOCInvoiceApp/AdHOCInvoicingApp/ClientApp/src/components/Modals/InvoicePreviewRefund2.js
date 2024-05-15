@@ -308,7 +308,7 @@ function InvoicePreviewRefund({
                 setIsFocus(false);
                 setShowToggle(false);
               }}
-           
+
             >
               <span aria-hidden={true}>{"x"}</span>
             </Button>
@@ -324,7 +324,7 @@ function InvoicePreviewRefund({
               className="navbar-search navbar-search-light form-inline "
               onSubmit={(e) => handleSearchInvoice(e)}
               hidden={hideSearch}
-              
+
             >
               <FormGroup className="mb-0">
                 <InputGroup className="input-group-alternative">
@@ -374,7 +374,7 @@ function InvoicePreviewRefund({
             // height: "750px",
             marginLeft: "10px",
             padding: "30px",
-            marginTop:-40
+            marginTop: -40
           }}
         >
           <div style={styles.header}>
@@ -448,7 +448,7 @@ function InvoicePreviewRefund({
               borderRadius: 10,
             }}
           >
-            Invoice already refunded
+            Invoice already return
           </p>
         ) : (
           <div hidden={!showInvoice} style={{ margin: "5px", float: "right" }}>

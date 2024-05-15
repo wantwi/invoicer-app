@@ -8,7 +8,7 @@ namespace AdHOCInvoicingApp.model
         public string? itemCode { get; set; }
         public string? itemDescription { get; set; }
         public decimal? unitPrice { get; set; }
-        public decimal? itemDiscount { get; set; }
+        public decimal? itemDiscount { get; set; } = 0;
         public string? taxCode { get; set; }
         public decimal? quantity { get; set; }
         public string? vatItemId { get; set; }

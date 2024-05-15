@@ -67,7 +67,7 @@ const Purchases = () => {
   const dayOfWeekSelRef = useRef();
   const [value] = useDebounce(invoiceQuery, 100);
   const [selectedRow, setSelectedRow] = useState(null);
-    const { selectedBranch, user } = useAuth();
+  const { selectedBranch, user } = useAuth();
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -170,7 +170,7 @@ const Purchases = () => {
   const getInvoiceById = async (id) => {
     setIsReportDownloading(true);
     const res = await axios.post(
-        `/api/GenerateVAPurchaseInvoiceReportAsync`,id
+      `/api/GenerateVAPurchaseInvoiceReportAsync`, id
     );
     return res?.data;
 
@@ -185,7 +185,7 @@ const Purchases = () => {
     queryFn: () => getInvoiceById(selectedRow?.id),
     enabled: Boolean(selectedRow?.id),
     onSuccess: (data) => {
-      let base64 = `data:application/pdf;base64,` + data
+      let base64 = `data:application/pdf;base64,` + JSON.parse(data?.data)
       const pdfContentType = "application/pdf"
 
       setIsReportDownloading(false);
@@ -212,17 +212,17 @@ const Purchases = () => {
     if (searchText.length > 1) {
       url = `/api/GetPurchaseSearch/${period}/${pageNumber}/${pageSize}/${searchText}`;
     } else {
-        url = `/api/GetPurchase/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`;
+      url = `/api/GetPurchase/${period}/${pageNumber}/${pageSize}/${selectedBranch?.code}`;
     }
 
     const request = await axios.get(url);
-    if(typeof request?.data == 'string'){
+    if (typeof request?.data == 'string') {
       setShowLoader(false)
 
 
-      return 
+      return
     }
-    console.log({request: typeof request?.data})
+    console.log({ request: typeof request?.data })
     setShowLoader(false)
 
     if (searchText.length > 1) {
@@ -265,10 +265,10 @@ const Purchases = () => {
         totalNoSalesInvoices: data.totalNoSalesInvoices,
       });
       setMessage(null);
-      },
-      onError: (err) => {
-          console.log({"treat":err})
-      }
+    },
+    onError: (err) => {
+      console.log({ "treat": err })
+    }
 
     //  placeholderData: true
   });

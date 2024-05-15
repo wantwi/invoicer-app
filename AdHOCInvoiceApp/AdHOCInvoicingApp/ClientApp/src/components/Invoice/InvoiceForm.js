@@ -408,7 +408,7 @@ function InvoiceForm({ refetch }) {
           itemCode: item.itemCode,
           itemDescription: item.itemName,
           unitPrice: item.price,
-          itemDiscount: item.discount,
+          itemDiscount: item?.discount || 0,
           taxCode: "",
           quantity: item.quantity,
           vatItemId: item.vatItemId,

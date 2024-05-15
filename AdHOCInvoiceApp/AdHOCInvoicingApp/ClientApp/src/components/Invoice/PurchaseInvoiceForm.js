@@ -31,7 +31,7 @@ import DatePicker from "react-datepicker";
 import { useCustomQueryById } from "hooks/useCustomQueryById";
 import { useHistory } from "react-router-dom";
 
-function PurchaseInvoiceForm() {
+function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   const queryClient = useQueryClient();
   const axios = useCustomAxios();
   const { selectedBranch, user } = useAuth();
@@ -45,8 +45,8 @@ function PurchaseInvoiceForm() {
     gridData,
     setGridData,
     setShowNewInvoiceModal,
-    vatAndLeviesScheme, 
-    setvatAndLeviesScheme
+    // vatAndLeviesScheme, 
+    // setvatAndLeviesScheme
   } = useContext(FormContext);
 
   const {
@@ -78,8 +78,7 @@ function PurchaseInvoiceForm() {
   const [vatType, setVatType] = useState(0);
 
   const [schemeDate, setSchemeDate] = useState(
-    `${new Date().getFullYear()}-${
-      new Date().getMonth() + 1
+    `${new Date().getFullYear()}-${new Date().getMonth() + 1
     }-${new Date().getDate()}`
   );
 
@@ -154,9 +153,9 @@ function PurchaseInvoiceForm() {
     if (item.trsmCst === "NON") {
       csttourism = 0;
     } else if (item.trsmCst === "CST") {
-      csttourism = (cstRate/100) * item.price * item.quantity;
+      csttourism = (cstRate / 100) * item.price * item.quantity;
     } else if (item.trsmCst === "TRSM") {
-      csttourism =  (tourismRate/100) * item.price * item.quantity;
+      csttourism = (tourismRate / 100) * item.price * item.quantity;
     }
 
     if (item.itemName === "") {
@@ -185,16 +184,16 @@ function PurchaseInvoiceForm() {
           quantity: Number(item.quantity),
           price: Number(item.price),
           taxableAmount: item.quantity * item.price,
-          nhil: (nhilRate/100) * item.quantity * item.price,
-          getf: (getfundRate/100) * item.quantity * item.price,
-          covid: (covidRate/100) * item.quantity * item.price,
+          nhil: (nhilRate / 100) * item.quantity * item.price,
+          getf: (getfundRate / 100) * item.quantity * item.price,
+          covid: (covidRate / 100) * item.quantity * item.price,
           otherLevies: csttourism,
           vatItemId: item.vatItemId,
         };
 
         if (isTaxable) {
           vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
-          vat = (vatRate/100) * vatableAmt;
+          vat = (vatRate / 100) * vatableAmt;
         } else {
           obj.nhil = 0;
           obj.getf = 0;
@@ -211,9 +210,9 @@ function PurchaseInvoiceForm() {
           itemName: item.itemName,
           quantity: Number(item.quantity),
           price: Number(item.price),
-          nhil: (nhilRate/100) * ((item.quantity * item.price * 100) / 121.9),
-          getf: (getfundRate/100) * ((item.quantity * item.price * 100) / 121.9),
-          covid: (covidRate/100) * ((item.quantity * item.price * 100) / 121.9),
+          nhil: (nhilRate / 100) * ((item.quantity * item.price * 100) / 121.9),
+          getf: (getfundRate / 100) * ((item.quantity * item.price * 100) / 121.9),
+          covid: (covidRate / 100) * ((item.quantity * item.price * 100) / 121.9),
           otherLevies: csttourism,
           vatItemId: item.vatItemId,
           taxableAmount: (item.quantity * item.price * 100) / 121.9,
@@ -346,7 +345,7 @@ function PurchaseInvoiceForm() {
     if (request) {
       const { data } = request;
       if (data.length > 0) {
-        console.log({now: data})
+        console.log({ now: data })
         setForex(data[0].exchangeRate);
         setExchangeRate(
           "at GHS" + data[0]?.exchangeRate + " per " + data[0]?.currencyCode
@@ -376,7 +375,7 @@ function PurchaseInvoiceForm() {
     return res;
   };
 
-  const res= useQueries({
+  const res = useQueries({
     queries: [
       {
         queryKey: ["purchase-products"],
@@ -487,10 +486,10 @@ function PurchaseInvoiceForm() {
   useEffect(() => {
     refetchTaxScheme();
 
-    return () => {};
+    return () => { };
   }, [vatType]);
 
-  const handleVatTypeChange = (e)=> {
+  const handleVatTypeChange = (e) => {
     setVatType(+e.target.value)
   }
 
@@ -552,7 +551,7 @@ function PurchaseInvoiceForm() {
                   className="form-control font-sm"
                   value={vatType}
                   onChange={handleVatTypeChange}
-                 
+
                   style={{ height: 29, padding: "0px 5px" }}
                 >
                   <option value={0}>Standard Rate</option>
@@ -791,7 +790,7 @@ function PurchaseInvoiceForm() {
                           })
                         }
                         value={formData?.isTaxable}
-                        // disabled
+                      // disabled
                       />
                       &nbsp; &nbsp;
                       <label htmlFor="isTaxable" className="form-control-label">
@@ -811,7 +810,7 @@ function PurchaseInvoiceForm() {
                           })
                         }
                         value={formData?.isTaxInclusive}
-                        // disabled
+                      // disabled
                       />
                       &nbsp; &nbsp;
                       <label

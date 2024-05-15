@@ -16,8 +16,8 @@ export const moneyInTxt = (value, standard, dec = 2) => {
   return nf.format(Number(value) ? value : 0.0);
 };
 
-export default function PurchaseInvoicePreview() {
-  const { formData, gridData, setGridData, vatAndLeviesScheme } = useContext(FormContext);
+export default function PurchaseInvoicePreview({ vatAndLeviesScheme }) {
+  const { formData, gridData, setGridData } = useContext(FormContext);
   const [isVATinclusive, setIsvatinclusive] = useState(true);
   const [updateItemData, setUpdateItemData] = useState({
     itemName: "",
@@ -33,6 +33,8 @@ export default function PurchaseInvoicePreview() {
 
 
   const handleEditItem = (item, index) => {
+
+    console.log({ item });
     setUpdateItemData({
       index: index,
       itemName: item.itemName,
@@ -129,7 +131,7 @@ export default function PurchaseInvoicePreview() {
                       onClick={() => {
                         setGridData(
                           gridData.filter(
-                            (i, index) => i.itemCode !== item.itemCode
+                            (i, index) => i.vatItemId !== item.vatItemId
                           )
                         );
                       }}
@@ -141,7 +143,7 @@ export default function PurchaseInvoicePreview() {
           </Table>
         </div>
         <div style={styles.footer}>
-        <div style={styles.total}>
+          <div style={styles.total}>
             <h6 style={{ padding: 0, margin: 0 }}>
               SUBTOTAL (EXCL) :{"   "}
               {moneyInTxt(
@@ -153,8 +155,8 @@ export default function PurchaseInvoicePreview() {
               {formData?.discountType
                 ? formData?.discountType === "general"
                   ? moneyInTxt(
-                      gridData.reduce((total, item) => total + item.discount, 0)
-                    )
+                    gridData.reduce((total, item) => total + item.discount, 0)
+                  )
                   : moneyInTxt(formData?.totalDiscount)
                 : "0"}
             </h6>
@@ -177,7 +179,7 @@ export default function PurchaseInvoicePreview() {
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-               (CST: {vatAndLeviesScheme?.cstRate}%) / (TOURISM: {vatAndLeviesScheme?.tourismRate}%):{" "}
+              (CST: {vatAndLeviesScheme?.cstRate}%) / (TOURISM: {vatAndLeviesScheme?.tourismRate}%):{" "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.otherLevies, 0)
               )}{" "}
@@ -204,18 +206,18 @@ export default function PurchaseInvoicePreview() {
               {formData?.discountType
                 ? formData?.discountType === "selective"
                   ? moneyInTxt(
-                      gridData.reduce(
-                        (total, item) => total + item.totalPayable,
-                        0
-                      ) - formData?.totalDiscount
-                    )
-                  : moneyInTxt(formData?.totalDiscount)
-                : moneyInTxt(
                     gridData.reduce(
                       (total, item) => total + item.totalPayable,
                       0
-                    )
-                  )}
+                    ) - formData?.totalDiscount
+                  )
+                  : moneyInTxt(formData?.totalDiscount)
+                : moneyInTxt(
+                  gridData.reduce(
+                    (total, item) => total + item.totalPayable,
+                    0
+                  )
+                )}
             </h6>
           </div>
         </div>
@@ -228,6 +230,7 @@ export default function PurchaseInvoicePreview() {
           setShowUpdate={setShowUpdate}
           gridData={gridData}
           setGridData={setGridData}
+          vatAndLeviesScheme={vatAndLeviesScheme}
         />
       )}
     </>

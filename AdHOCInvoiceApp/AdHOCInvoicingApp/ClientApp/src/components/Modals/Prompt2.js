@@ -25,22 +25,22 @@ export default function Prompt({
 
   const submitRefund = async ({ postData, refundType }) => {
     setLoading(true);
-   
+
     const request = await axios.post(
       `/api/PurchaseReturn`,
       postData
     );
-console.log({request});
-    if(request?.data.status >=400){
+    console.log({ request });
+    if (request?.data.status >= 400) {
       const error = new Error(JSON.parse(request?.data?.data)?.message)
 
-      error.code = request?.data?.status 
+      error.code = request?.data?.status
       //error.message = 
 
       throw error;
     }
 
-    console.log({submitRefund: request});
+    console.log({ submitRefund: request });
 
     return request.data;
   };
@@ -50,7 +50,7 @@ console.log({request});
     mutationFn: submitRefund,
     onSuccess: (data) => {
 
-      console.log({PurchaseReturn: data});
+      console.log({ PurchaseReturn: data });
 
       toast.success("Purchase Return successful");
       setLoading(false);
@@ -65,7 +65,7 @@ console.log({request});
     onError: (error) => {
       console.log({ useMutationError: error });
       toast.error(
-        error?.message|| "Could not return invoice. Please contact support."
+        error?.message || "Could not return invoice. Please contact support."
       );
       setLoading(false);
       setshowPrompt(false);
@@ -77,31 +77,19 @@ console.log({request});
     // const isFullRefund = invoice?.invoiceItemsToPost.every((item) => item.quantity == 0)
     let postData = {};
     let refundTypeVal = "";
-    // console.log({ refundTypeForPost })
-    // return
+    let temp = invoice?.invoiceItemsToPost.filter((item) =>
+      Boolean(item.refundQuantity)
+    );
     if (refundInvoice?.refundType === "NO REFUNDS") {
       if (refundTypeForPost == "Full") {
         postData = {
-          id: invoice.id,
-          invoiceNumber: invoice.invoiceNo,
-          customerTinghcard: invoice.customerTinghcard,
-          nameOfUser: user?.name,
-         
-        };
-        refundTypeVal = "Full";
-      } else {
-        //get all items whose refundQty have been updated
-        let temp = invoice?.invoiceItemsToPost.filter((item) =>
-          Boolean(item.refundQuantity)
-        );
-        postData = {
-         
+
           purchaseId: invoice.id,
           invoiceNumber: invoice.invoiceNo,
           customerTinghcard: invoice.customerTinghcard,
           nameOfUser: user?.name,
-          branchCode:selectedBranch?.code,
-          companyId:"",
+          branchCode: selectedBranch?.code,
+          companyId: "",
           purchaseReturnItems: temp.map((item, idx) => {
             return {
               returnQuantity: item.refundQuantity,
@@ -109,7 +97,39 @@ console.log({request});
                 (item.refundQuantity *
                   invoice?.invoiceItems[idx]?.payablePrice) /
                 invoice?.invoiceItems[idx]?.quantity,
-                vatItemId: item.id,
+              vatItemId: item.id,
+            };
+          }),
+        };
+        // postData = {
+        //   id: invoice.id,
+        //   invoiceNumber: invoice.invoiceNo,
+        //   customerTinghcard: invoice.customerTinghcard,
+        //   nameOfUser: user?.name,
+
+        // };
+        refundTypeVal = "Full";
+      } else {
+        //get all items whose refundQty have been updated
+        let temp = invoice?.invoiceItemsToPost.filter((item) =>
+          Boolean(item.refundQuantity)
+        );
+        postData = {
+
+          purchaseId: invoice.id,
+          invoiceNumber: invoice.invoiceNo,
+          customerTinghcard: invoice.customerTinghcard,
+          nameOfUser: user?.name,
+          branchCode: selectedBranch?.code,
+          companyId: "",
+          purchaseReturnItems: temp.map((item, idx) => {
+            return {
+              returnQuantity: item.refundQuantity,
+              returnAmount:
+                (item.refundQuantity *
+                  invoice?.invoiceItems[idx]?.payablePrice) /
+                invoice?.invoiceItems[idx]?.quantity,
+              vatItemId: item.id,
             };
           }),
         };
@@ -121,21 +141,21 @@ console.log({request});
       );
       postData = {
         purchaseId: invoice.id,
-          invoiceNumber: invoice.invoiceNo,
-          customerTinghcard: invoice.customerTinghcard,
-          nameOfUser: user?.name,
-          branchCode:selectedBranch?.code,
-          companyId:"",
-          purchaseReturnItems: temp.map((item, idx) => {
-            return {
-              returnQuantity: item.refundQuantity,
-              returnAmount:
-                (item.refundQuantity *
-                  invoice?.invoiceItems[idx]?.payablePrice) /
-                invoice?.invoiceItems[idx]?.quantity,
-                vatItemId: item.id,
-            };
-          }),
+        invoiceNumber: invoice.invoiceNo,
+        customerTinghcard: invoice.customerTinghcard,
+        nameOfUser: user?.name,
+        branchCode: selectedBranch?.code,
+        companyId: "",
+        purchaseReturnItems: temp.map((item, idx) => {
+          return {
+            returnQuantity: item.refundQuantity,
+            returnAmount:
+              (item.refundQuantity *
+                invoice?.invoiceItems[idx]?.payablePrice) /
+              invoice?.invoiceItems[idx]?.quantity,
+            vatItemId: item.id,
+          };
+        }),
         // id: invoice.id,
         // itemId: invoice.invoiceNo,
         // customerTinghcard: invoice.customerTinghcard,

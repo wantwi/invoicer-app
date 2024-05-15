@@ -181,8 +181,8 @@ const Index = () => {
         Header: () => <div align="center">View</div>,
         disableSortBy: true,
         className: " text-center table-action",
-        Cell: ({row}) => {
-          console.log({ row, gh:row?.original?.signatureStatus?.toUpperCase() });
+        Cell: ({ row }) => {
+          console.log({ row, gh: row?.original?.signatureStatus?.toUpperCase() });
           return (
             <Button
               style={{ padding: "2px 8px" }}
@@ -195,7 +195,7 @@ const Index = () => {
                 }
                 // loadPreview(value);
                 setSelectedRow(row.original.id);
-                  getPrintPDF(row.original.id)
+                getPrintPDF(row.original.id)
                 // signatureStatus:"SUCCESS"
               }}
               title="Preview"
@@ -236,8 +236,10 @@ const Index = () => {
         invoiceNo
       );
       if (request) {
+        console.log({ request })
         const { data } = request;
-        base64 = `data:application/pdf;base64,` + data;
+
+        base64 = `data:application/pdf;base64,` + JSON.parse(data?.data);
         const pdfContentType = "application/pdf";
 
         setPdfData(base64);
@@ -276,7 +278,7 @@ const Index = () => {
     }
   };
 
-  const handleSearchInvoice = (e) => {};
+  const handleSearchInvoice = (e) => { };
 
   console.log({ pageNumber, pageInfo });
 
@@ -332,9 +334,9 @@ const Index = () => {
       if (data?.invoices?.items.length === 0) {
         const msg = !value
           ? "No Invoice Available For " +
-            dayOfWeekSelRef?.current?.options[
-              dayOfWeekSelRef?.current?.selectedIndex
-            ]?.innerText
+          dayOfWeekSelRef?.current?.options[
+            dayOfWeekSelRef?.current?.selectedIndex
+          ]?.innerText
           : "No invoice matched your search: " + value;
         toast.info(msg);
         setMessage(msg);
@@ -342,7 +344,7 @@ const Index = () => {
       }
       setMessage(null);
     },
-    (err) => {},
+    (err) => { },
     {
       filterUrl: `/api/GetSalesInvoicesByCompanyId/${value}`,
     }
@@ -358,14 +360,14 @@ const Index = () => {
       setPageNumber(1);
     }
     refetch();
-    return () => {};
+    return () => { };
   }, [period, pageNumber]);
 
   useEffect(() => {
     if (value.length > 1) {
       refetch();
     }
-    return () => {};
+    return () => { };
   }, [value]);
 
   console.log({ use: data });

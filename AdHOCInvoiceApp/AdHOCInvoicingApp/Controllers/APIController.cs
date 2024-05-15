@@ -15,6 +15,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using System.Reflection.Metadata;
 
 namespace AdHOCInvoicingApp.Controllers
 {
@@ -169,6 +170,7 @@ namespace AdHOCInvoicingApp.Controllers
             var user = await UserInfo();
             data.companyId = user.Sub;
             data.branchId = branchId;
+
             var client = _httpClientFactory.CreateClient();
             //client.DefaultRequestHeaders.Add("usr", user.CompanyName);
             //client.DefaultRequestHeaders.Add("usr", $"{user.CompanyName}");
@@ -180,23 +182,38 @@ namespace AdHOCInvoicingApp.Controllers
 
             //    httpContent.Headers.Add("usr", user.CompanyName);
 
-            var response = await client.PostAsJsonAsync(url, data);
-            if (response.StatusCode.ToString() == "BadRequest")
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+
+            // var response = await client.PostAsJsonAsync(url, data);
+            var response = await client.PostAsync(url, content);
+            var dataObj = string.Empty;
+
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception("Error Occurred");
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new { result });
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
             else
             {
-                var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { data = dataObj, response = response });
             }
+            //if (response.StatusCode.ToString() == "BadRequest")
+            //{
+            //    throw new Exception("Error Occurred");
+            //}
+            //else if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    return new JsonResult(new { result });
+            //}
+            //else
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    //return new JsonResult(new { result });
+            //    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+            //    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+            //}
         }
 
         [HttpPost("GenerateVATInvoiceReportAsync")]
@@ -205,25 +222,41 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
             string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateVATInvoiceReportAsync?Id={invoiceNo}";
-            var response = await client.PostAsJsonAsync(url, invoiceNo);
+            // var response = await client.PostAsJsonAsync(url, invoiceNo);
 
-            if (response.StatusCode.ToString() == "BadRequest")
+            var content = new StringContent(JsonConvert.SerializeObject(invoiceNo), System.Text.Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(url, content);
+            var dataObj = string.Empty;
+
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception("Error Occurred");
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                var secResult = JsonConvert.DeserializeObject<string>(result);
-                return Ok(secResult);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
             else
             {
-                var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { data = dataObj, response = response });
             }
+
+            //if (response.StatusCode.ToString() == "BadRequest")
+            //{
+            //    throw new Exception("Error Occurred");
+            //}
+            //else if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    var secResult = JsonConvert.DeserializeObject<string>(result);
+            //    return Ok(secResult);
+            //}
+            //else
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    //return new JsonResult(new { result });
+            //    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+            //    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+            //}
         }
 
         // Items section
@@ -760,24 +793,42 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
             string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateRefundReportAsync?Id={id}";
-            var response = await client.PostAsJsonAsync(url, id);
+            // var response = await client.PostAsJsonAsync(url, id);
 
-            if (response.StatusCode.ToString() == "BadRequest")
+            var content = new StringContent(JsonConvert.SerializeObject(id), System.Text.Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(url, content);
+            var dataObj = string.Empty;
+
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception("Error Occurred");
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                var secResult = JsonConvert.DeserializeObject<string>(result);
-                return Ok(secResult);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
             else
             {
-                var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { data = dataObj, response = response });
             }
+
+
+
+            //if (response.StatusCode.ToString() == "BadRequest")
+            //{
+            //    throw new Exception("Error Occurred");
+            //}
+            //else if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    var secResult = JsonConvert.DeserializeObject<string>(result);
+            //    return Ok(secResult);
+            //}
+            //else
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    //return new JsonResult(new { result });
+            //    return StatusCode(StatusCodes.Status500InternalServerError, result);
+            //}
         }
 
         [HttpPost("GeneratePurchaseReturnInvoice")]
@@ -923,24 +974,44 @@ namespace AdHOCInvoicingApp.Controllers
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
             string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={invoiceNo}";
-            var response = await client.PostAsJsonAsync(url, invoiceNo);
 
-            if (response.StatusCode.ToString() == "BadRequest")
+            var content = new StringContent(JsonConvert.SerializeObject(invoiceNo), System.Text.Encoding.UTF8, "application/json");
+
+
+            var response = await client.PostAsync(url, content);
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception("Error Occurred");
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                var secResult = JsonConvert.DeserializeObject<string>(result);
-                return Ok(secResult);
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
             }
             else
             {
-                var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                return StatusCode(StatusCodes.Status500InternalServerError, result);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
+            //var response = await client.PostAsJsonAsync(url, invoiceNo);
+
+            //if (response.StatusCode.ToString() == "BadRequest")
+            //{
+            //    throw new Exception("Error Occurred");
+            //}
+            //else if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    var secResult = JsonConvert.DeserializeObject<string>(result);
+            //    return Ok(secResult);
+            //}
+            //else
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    //return new JsonResult(new { result });
+            //    return StatusCode(StatusCodes.Status500InternalServerError, result);
+            //}
         }
 
         [HttpPost("GenerateCreditReportAsync")]
@@ -1192,26 +1263,21 @@ namespace AdHOCInvoicingApp.Controllers
             string url = $"{EvatAdHOCBaseUrl}v4/Notes/GetNotes?CompanyId={user.Sub}&PageNumber={pgNumber}&PageSize={pgSz}&BranchId={branchId}&transFilter={filter}&type={type}";
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
-            //GetNotes?CompanyId=9e6688a9-00de-4be9-8ce2-155d1dc79bbf&PageNumber=1&PageSize=1&BranchId=003&transFilter=0&type=CREDIT
-
         }
 
         [HttpGet("ReportURL")]
         public async Task<IActionResult> GetReportURLs()
         {
-            return new JsonResult(new { ReportPath, ReportServerUrl, ReportServiceUrl });
+            var access = await AccessToken();
+            return new JsonResult(new { ReportPath, ReportServerUrl, ReportServiceUrl, access });
         }
 
         [HttpGet("UserInfo")]
         public async Task<IActionResult> UserDetail()
         {
             var user = await UserInfo();
-            return new JsonResult(new { user, path = DashboardUrl });
-
+            return new JsonResult(new { user, path = DashboardUrl, AuthURL });
         }
-
-
-
     }
 
 }

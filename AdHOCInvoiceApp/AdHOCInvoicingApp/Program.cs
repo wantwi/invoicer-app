@@ -8,12 +8,14 @@ using AdHOCInvoicingApp.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOptions();
+//builder.Services.AddOptions();
 
 
 
 var identityData = new IdentitySettings();
 var apiSettingsData = new APISettings();
+
+builder.Services.AddWindowsService();
 
 builder.Configuration.Bind("IdentitySettings", identityData);
 builder.Configuration.Bind("APISettings", apiSettingsData);
@@ -28,6 +30,8 @@ builder.Services.AddControllers();
 builder.Services.AddBff()
     .AddRemoteApis();
 //.AddServerSideSessions();
+
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -49,6 +53,8 @@ builder.Services.AddAuthentication(options =>
     options.GetClaimsFromUserInfoEndpoint = true;
     options.MapInboundClaims = false;
     options.SaveTokens = true;
+
+
 
 
     options.Scope.Clear();

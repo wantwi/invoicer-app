@@ -1,8 +1,10 @@
 import PurchaseInvoiceForm from "../Invoice/PurchaseInvoiceForm";
 import PurchaseInvoicePreview from "../Invoice/PurchaseInvoicePreview";
-import React, { useState, createContext } from "react";
+import React, { useState, createContext, useEffect } from "react";
 import { Modal, Button } from "reactstrap";
 import moment from "moment";
+import useAuth from "hooks/useAuth";
+import { useCustomQueryById } from "hooks/useCustomQueryById";
 
 const init = {
   customer: "",
@@ -32,9 +34,14 @@ const init = {
 export const FormContext = createContext(null);
 
 export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
+  const { selectedBranch, user } = useAuth();
   const [formData, setFormData] = useState(init);
   const [gridData, setGridData] = useState([]);
   const [comments, setComments] = useState("");
+  const [schemeDate, setSchemeDate] = useState(
+    `${new Date().getFullYear()}-${new Date().getMonth() + 1
+    }-${new Date().getDate()}`
+  );
   const [vatAndLeviesScheme, setvatAndLeviesScheme] = useState({
     covidRate: 0,
     cstRate: 0,
@@ -47,10 +54,28 @@ export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
     vatRate: 0,
   })
 
+  const onSuccess = (data) => {
+    console.log({ GetVatAndLeviesByScheme: data });
+    setvatAndLeviesScheme(data);
+  };
+
+  const { refetch: refetchTaxScheme } = useCustomQueryById(
+    `/api/GetVatAndLeviesByScheme/${schemeDate}/${selectedBranch?.taxScheme || 0}`,
+    "taxScheme",
+    formData?.date,
+    onSuccess
+  );
+
+  useEffect(() => {
+    refetchTaxScheme();
+
+    return () => { };
+  }, [formData?.date]);
+
   return (
     <>
       <Modal
-        style={{ minWidth: "45vw", maxWidth:"max-content"}}
+        style={{ minWidth: "45vw", maxWidth: "max-content" }}
         className="modal-dialog-top modal-xl"
         isOpen={true}
         toggle={() => console.log("toggled")}
@@ -89,12 +114,12 @@ export default function NewPurchaseInvoice({ setShowNewInvoiceModal }) {
               init,
               comments,
               setComments,
-              vatAndLeviesScheme, 
+              vatAndLeviesScheme,
               setvatAndLeviesScheme
             }}
           >
-            <PurchaseInvoiceForm />
-            <PurchaseInvoicePreview />
+            <PurchaseInvoiceForm setvatAndLeviesScheme={setvatAndLeviesScheme} vatAndLeviesScheme={vatAndLeviesScheme} />
+            <PurchaseInvoicePreview vatAndLeviesScheme={vatAndLeviesScheme} />
           </FormContext.Provider>
         </div>
       </Modal>

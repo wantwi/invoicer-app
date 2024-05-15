@@ -18,6 +18,7 @@ namespace AdHOCInvoicingApp.Controllers.Base
         public static string ReportServerUrl = APISettings.Current.ReportServerUrl;
         public static string ReportPath = APISettings.Current.ReportPath;
         public static string DashboardUrl = APISettings.Current.DashboardUrl;
+        public static string AuthURL = IdentitySettings.Current.Authority;
         public GlobalController()
         {
 

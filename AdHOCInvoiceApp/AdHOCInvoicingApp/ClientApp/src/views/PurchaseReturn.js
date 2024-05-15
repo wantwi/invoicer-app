@@ -142,7 +142,7 @@ const PurchaseReturn = () => {
         accessor: "status",
         className: "text-left",
         Cell: (data) => {
-          console.log({success: data?.row});
+          console.log({ success: data?.row });
           return (
             data?.row?.original?.status === "ACTIVE" ? <Badge color="primary">{data?.row?.original?.status}</Badge> : <Badge color="danger">{data?.row?.original?.status}</Badge>
           );
@@ -156,7 +156,7 @@ const PurchaseReturn = () => {
         accessor: "action",
         width: 140,
         Cell: (data) => {
-          
+
           // data?.row?.original?.status === "ACTIVE" ? setIsActive(true) : setIsActive(false)
           return (
             <Button
@@ -241,9 +241,9 @@ const PurchaseReturn = () => {
       if (data?.invoices?.items?.length === 0) {
         const msg = !value
           ? "No Invoice Available For " +
-            dayOfWeekSelRef?.current?.options[
-              dayOfWeekSelRef?.current?.selectedIndex
-            ]?.innerText
+          dayOfWeekSelRef?.current?.options[
+            dayOfWeekSelRef?.current?.selectedIndex
+          ]?.innerText
           : "No invoice matched your search: " + value;
         toast.info(msg);
         setMessage(msg);
@@ -302,21 +302,21 @@ const PurchaseReturn = () => {
       setPageNumber(1);
     }
     refetch();
-    return () => {};
+    return () => { };
   }, [period, pageNumber]);
 
   useEffect(() => {
     if (value.length > 1) {
       refetch();
     }
-    return () => {};
+    return () => { };
   }, [value]);
 
   useEffect(() => {
     if (selectedRow.length > 0) {
       refetchGetById();
     }
-    return () => {};
+    return () => { };
   }, [selectedRow]);
 
   return (
@@ -339,7 +339,7 @@ const PurchaseReturn = () => {
                   <div className="col">
                     <Form
                       className="navbar-search navbar-search-light form-inline "
-                      onSubmit={(e) => {}}
+                      onSubmit={(e) => { }}
                     >
                       <FormGroup className="mb-0">
                         {" "}
