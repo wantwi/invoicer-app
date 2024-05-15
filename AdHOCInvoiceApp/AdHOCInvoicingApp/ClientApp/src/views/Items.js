@@ -1034,7 +1034,7 @@ const Items = () => {
                       </Col>
                     </Row>
                   </div>
-                  <div className="pl-lg-4">
+                  <div className="pl-lg-4" hidden>
                     <Row>
                       <Col lg="5" className="pt-4">
                         <Input
