@@ -7,6 +7,15 @@
       "sslPort": 44339
     }
   },
+  "http": {
+    "commandName": "Project",
+    "dotnetRunMessages": true,
+    "launchBrowser": true,
+    "launchUrl": "",
+    "environmentVariables": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    }
+  },
   "profiles": {
     "AdHOCInvoicingApp": {
       "commandName": "Project",

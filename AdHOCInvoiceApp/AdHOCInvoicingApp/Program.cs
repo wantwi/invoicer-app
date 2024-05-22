@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using AdHOCInvoicingApp.Helpers;
 using AdHOCInvoicingApp.Service;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.Services.AddOptions();
 
-
+builder.Host.UseWindowsService();
 
 var identityData = new IdentitySettings();
 var apiSettingsData = new APISettings();
@@ -77,6 +79,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddOpenIdConnectAccessTokenManagement();
 
 var app = builder.Build();
+
+
+
+
+
 
 app.UseStaticFiles();
 app.UseRouting();
