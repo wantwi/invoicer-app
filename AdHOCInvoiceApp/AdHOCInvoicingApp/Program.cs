@@ -1,10 +1,7 @@
 using AdHOCInvoicingApp.Helpers;
 using AdHOCInvoicingApp.Service;
 using Duende.Bff.Yarp;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using AdHOCInvoicingApp.Helpers;
-using AdHOCInvoicingApp.Service;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +24,21 @@ builder.Services.AddSingleton(builder.Configuration);
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<HTTPClientInterface, HTTPREQUEST>();
 builder.Services.AddControllers();
-builder.Services.AddBff()
-    .AddRemoteApis();
+
+builder.Services.AddBff(option =>
+{
+    option.EnableSessionCleanup = true;
+    option.SessionCleanupInterval = TimeSpan.FromMinutes(5);
+    option.RevokeRefreshTokenOnLogout = true;
+
+})
+.AddEntityFrameworkServerSideSessions(options =>
+{
+    
+    options.UseSqlServer(apiSettingsData.ConfigrationEndpoint);
+    options.EnableDetailedErrors(true);
+})
+.AddRemoteApis();
 //.AddServerSideSessions();
 
 
