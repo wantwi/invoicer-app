@@ -34,14 +34,14 @@ export const AuthProvider = ({ children }) => {
   };
   const login = () => {
     //window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
-    console.log("green", process.env.REACT_APP_BASENAME);
+    // console.log("green", process.env.REACT_APP_BASENAME);
     // const temp = "/gra-invoicer";
     window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`;
-    console.log(
-      "Location",
-      process.env.REACT_APP_BASENAME,
-      window.location.href
-    );
+    // console.log(
+    //   "Location",
+    //   process.env.REACT_APP_BASENAME,
+    //   window.location.href
+    // );
   };
 
   const logout = () => {

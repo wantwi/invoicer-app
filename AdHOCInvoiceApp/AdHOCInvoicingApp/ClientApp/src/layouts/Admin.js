@@ -101,7 +101,7 @@ const Admin = (props) => {
         // toast.error("Could not fetch menus. Logging out..");
 
         setRoutes([]);
-        window.location.href = `${process.env.REACT_APP_BASENAME}/login`;
+        // window.location.href = `${process.env.REACT_APP_BASENAME}/login`;
       }
     };
 

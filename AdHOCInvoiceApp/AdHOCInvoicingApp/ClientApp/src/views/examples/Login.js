@@ -8,7 +8,7 @@ const Login = () => {
   useEffect(() => {
 
     sessionStorage.removeItem("BRANCH_INFO")
-    loginRef?.current.click()
+    // loginRef?.current.click()
 
   }, []);
 
@@ -23,7 +23,7 @@ const Login = () => {
             autoFocus
             className="login-button"
             style={styles.buttonWrap}
-            ref={loginRef}
+            // ref={loginRef}
             disabled={show}
             onClick={() => {
               setshow(true);
@@ -37,7 +37,7 @@ const Login = () => {
             autoFocus
             className="login-button"
             style={styles.buttonWrap}
-            ref={loginRef}
+            // ref={loginRef}
             disabled={show}
             onClick={() => {
               setshow(true);
