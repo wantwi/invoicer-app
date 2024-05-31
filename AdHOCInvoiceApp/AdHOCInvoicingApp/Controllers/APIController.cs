@@ -1278,6 +1278,26 @@ namespace AdHOCInvoicingApp.Controllers
             var user = await UserInfo();
             return new JsonResult(new { user, path = DashboardUrl, AuthURL });
         }
+
+
+        [HttpGet("Reports")]
+        public async Task<IActionResult> GetReports()
+        {
+            string url = $"{EvatAdHOCBaseUrl}v4/FrReports/Get";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
+        [HttpGet("Reports/{id}/{DateFrom}/{DateTo}")]
+        public async Task<IActionResult> GetReports(string id, string DateFrom, string DateTo)
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v4/FrReports/Get/{id}?DateFrom={DateFrom}&DateTo={DateTo}&UserId={user.Sub}";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
     }
 
 }
