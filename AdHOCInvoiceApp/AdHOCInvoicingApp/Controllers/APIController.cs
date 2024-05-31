@@ -124,7 +124,6 @@ namespace AdHOCInvoicingApp.Controllers
 
             var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
             return Ok(response);
-
         }
 
 

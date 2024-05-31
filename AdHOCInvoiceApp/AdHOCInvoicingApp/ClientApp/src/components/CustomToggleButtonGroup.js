@@ -33,10 +33,10 @@ const CustomToggleButtonGroup = ({ settogglePartialRefund, canFullRefund = false
         onChange={handleChange}
         aria-label='Platform'
       >
-        <ToggleButton color='warning' value='partial'>
+              <ToggleButton color='warning' value='partial' style={{ height: 25 }}>
           Partial Refund
         </ToggleButton>
-        <ToggleButton color='success' value='full'>
+              <ToggleButton color='success' value='full' style={{ height: 25 }}>
           <span data-tip
             data-for="discount-type" id="discount-type">
             Full Refund
