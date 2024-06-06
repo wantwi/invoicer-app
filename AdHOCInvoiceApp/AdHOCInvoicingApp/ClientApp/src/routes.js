@@ -1,4 +1,4 @@
-import {lazy} from"react"
+import { lazy } from "react"
 
 import Index from "views/Index.js";
 // import Customers from "views/Customers";
@@ -11,16 +11,16 @@ import Index from "views/Index.js";
 // import Dashboard from "views/Dashboard";
 import Profile from "views/examples/Profile";
 
-const Customers = lazy(()=>import("views/Customers.js"))
-const Items = lazy(()=>import("views/Items.js"))
-const Refunds = lazy(()=>import("views/Refunds.js"))
-const Purchases = lazy(()=>import("views/Purchases.js"))
-const Accounts = lazy(()=>import("views/Accounts.js"))
-const Currency = lazy(()=>import("views/Currency.js"))
-const Dashboard = lazy(()=>import("views/Dashboard.js"))
-const Reports = lazy(()=>import("views/Reports.js"))
-const PurchaseReturn = lazy(()=>import("views/PurchaseReturn"))
-const DebitAndCredit = lazy(()=>import("views/DebitAndCredit"))
+const Customers = lazy(() => import("views/Customers.js"))
+const Items = lazy(() => import("views/Items.js"))
+const Refunds = lazy(() => import("views/Refunds.js"))
+const Purchases = lazy(() => import("views/Purchases.js"))
+const Accounts = lazy(() => import("views/Accounts.js"))
+const Currency = lazy(() => import("views/Currency.js"))
+const Dashboard = lazy(() => import("views/Dashboard.js"))
+const Reports = lazy(() => import("views/Reports.js"))
+const PurchaseReturn = lazy(() => import("views/PurchaseReturn"))
+const DebitAndCredit = lazy(() => import("views/DebitAndCredit"))
 
 var routes = [
   {
@@ -67,7 +67,7 @@ var routes = [
     layout: "/admin",
   },
 
-  
+
   {
     path: "/customers",
     name: "Business Partner Setup",

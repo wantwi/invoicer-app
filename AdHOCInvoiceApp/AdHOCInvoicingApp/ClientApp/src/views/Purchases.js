@@ -299,161 +299,161 @@ const Purchases = () => {
         dayOfWeekSelRef={dayOfWeekSelRef}
         pageName="Purchase Invoice"
       />
-      <ErrorBoundary FallbackComponent={FcCallback} onError={errorHandler}>
-        {/* Page content */}
-        <Container className="mt--7" fluid>
-          <ToastContainer />
-          <Row className="my-5">
-            <Col className="mb-5 mb-xl-0" xl="12">
-              <Card className="shadow">
-                <CardHeader className="border-0">
-                  <Row className="align-items-center">
-                    <div className="col">
-                      <Form
-                        className="navbar-search navbar-search-light form-inline "
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          // handleSearchInvoice(e)
-                        }}
-                      >
-                        <FormGroup className="mb-0">
-                          {" "}
-                          <InputGroup className="input-group-alternative">
-                            <InputGroupAddon
-                              addonType="prepend"
-                              style={{ marginTop: 7 }}
+
+      {/* Page content */}
+      <Container className="mt--7" fluid>
+        {/* <ToastContainer /> */}
+        <Row className="my-5">
+          <Col className="mb-5 mb-xl-0" xl="12">
+            <Card className="shadow">
+              <CardHeader className="border-0">
+                <Row className="align-items-center">
+                  <div className="col">
+                    <Form
+                      className="navbar-search navbar-search-light form-inline "
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        // handleSearchInvoice(e)
+                      }}
+                    >
+                      <FormGroup className="mb-0">
+                        {" "}
+                        <InputGroup className="input-group-alternative">
+                          <InputGroupAddon
+                            addonType="prepend"
+                            style={{ marginTop: 7 }}
+                          >
+                            <InputGroupText>
+                              <i className="fas fa-search" />
+                            </InputGroupText>
+                          </InputGroupAddon>
+                          <Input
+                            placeholder="Search Transactions by Invoice No or Customer name"
+                            type="text"
+                            value={invoiceQuery}
+                            onChange={(e) => {
+                              setinvoiceQuery(e.target.value);
+                              //handleSearchInvoice(e.target.value)
+                            }}
+                            style={{ width: 400 }}
+                          />
+                          <InputGroupAddon addonType="append">
+                            <InputGroupText
+                              onClick={() => setinvoiceQuery("")}
                             >
-                              <InputGroupText>
-                                <i className="fas fa-search" />
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            <Input
-                              placeholder="Search Transactions by Invoice No or Customer name"
-                              type="text"
-                              value={invoiceQuery}
-                              onChange={(e) => {
-                                setinvoiceQuery(e.target.value);
-                                //handleSearchInvoice(e.target.value)
-                              }}
-                              style={{ width: 400 }}
-                            />
-                            <InputGroupAddon addonType="append">
-                              <InputGroupText
-                                onClick={() => setinvoiceQuery("")}
-                              >
-                                {/* {isFocus && <i className='fas fa-times' />} */}
-                              </InputGroupText>
-                            </InputGroupAddon>
-                          </InputGroup>
-                        </FormGroup>
-                      </Form>
-                    </div>
-                    <div className="col text-right mt-0">
-                      <Button
-                        color="primary"
-                        onClick={(e) =>
-                          setShowNewInvoiceModal(!showNewInvoiceModal)
-                        }
-                        size="md"
-                      >
-                        <FaEdit /> Record Invoice
-                      </Button>
-                    </div>
-                  </Row>
-                </CardHeader>
-                <div style={styles.body}>
-                  <EvatTable
-                    isLoading={(showLoader || isReportDownloading)}
-                    columns={columns}
-                    data={invoices || []}
-                    getPrintPDF={() => null}
-                    message={message}
-                    sortKey="date"
-                  />
+                              {/* {isFocus && <i className='fas fa-times' />} */}
+                            </InputGroupText>
+                          </InputGroupAddon>
+                        </InputGroup>
+                      </FormGroup>
+                    </Form>
+                  </div>
+                  <div className="col text-right mt-0">
+                    <Button
+                      color="primary"
+                      onClick={(e) =>
+                        setShowNewInvoiceModal(!showNewInvoiceModal)
+                      }
+                      size="md"
+                    >
+                      <FaEdit /> Record Invoice
+                    </Button>
+                  </div>
+                </Row>
+              </CardHeader>
+              <div style={styles.body}>
+                <EvatTable
+                  isLoading={(showLoader || isReportDownloading)}
+                  columns={columns}
+                  data={invoices || []}
+                  getPrintPDF={() => null}
+                  message={message}
+                  sortKey="date"
+                />
 
-                </div>
+              </div>
 
-                {pageInfo?.totalItems > 0 && (
-                  <CardFooter className="py-4">
-                    <nav aria-label="...">
-                      <Pagination
-                        className="pagination justify-content-center mb-0"
-                        listClassName="justify-content-center mb-0"
-                      >
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              if (pageInfo?.pageNumber > 1) {
-                                setPageNumber((prev) => Number(prev) - 1);
-                              } else {
-                                return;
-                              }
-                            }}
-                          >
-                            <i className="fas fa-angle-left" />
-                            <span className="sr-only">Previous</span>
-                          </PaginationLink>
-                        </PaginationItem>
+              {pageInfo?.totalItems > 0 && (
+                <CardFooter className="py-4">
+                  <nav aria-label="...">
+                    <Pagination
+                      className="pagination justify-content-center mb-0"
+                      listClassName="justify-content-center mb-0"
+                    >
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={(e) => {
+                            if (pageInfo?.pageNumber > 1) {
+                              setPageNumber((prev) => Number(prev) - 1);
+                            } else {
+                              return;
+                            }
+                          }}
+                        >
+                          <i className="fas fa-angle-left" />
+                          <span className="sr-only">Previous</span>
+                        </PaginationLink>
+                      </PaginationItem>
 
-                        <PaginationItem>
-                          <PaginationLink onClick={(e) => setPageNumber(1)}>
-                            1
-                          </PaginationLink>
-                        </PaginationItem>
+                      <PaginationItem>
+                        <PaginationLink onClick={(e) => setPageNumber(1)}>
+                          1
+                        </PaginationLink>
+                      </PaginationItem>
 
-                        <PaginationItem className="active">
-                          <PaginationLink onClick={(e) => e.preventDefault()}>
-                            {pageInfo?.pageNumber}
-                          </PaginationLink>
-                        </PaginationItem>
+                      <PaginationItem className="active">
+                        <PaginationLink onClick={(e) => e.preventDefault()}>
+                          {pageInfo?.pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
 
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => setPageNumber(pageInfo.totalPages)}
-                          >
-                            {pageInfo?.totalPages}
-                          </PaginationLink>
-                        </PaginationItem>
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={(e) => setPageNumber(pageInfo.totalPages)}
+                        >
+                          {pageInfo?.totalPages}
+                        </PaginationLink>
+                      </PaginationItem>
 
-                        <PaginationItem>
-                          <PaginationLink
-                            onClick={(e) => {
-                              if (pageInfo.pageNumber < pageInfo.totalPages) {
-                                setPageNumber((prev) => Number(prev) + 1);
-                              } else {
-                                return;
-                              }
-                            }}
-                          >
-                            <i className="fas fa-angle-right" />
-                            <span className="sr-only">Next</span>
-                          </PaginationLink>
-                        </PaginationItem>
-                      </Pagination>
-                    </nav>
-                  </CardFooter>
-                )}
-              </Card>
-            </Col>
-          </Row>
-          {showNewInvoiceModal ? (
-            <NewPurchaseInvoice
-              setShowNewInvoiceModal={setShowNewInvoiceModal}
-            />
-          ) : null}
-          {showReport && (
-            <PrintPreview
-              setShowReport={setShowReport}
-              pdfData={formData}
-              getPrintPDF={() => null}
-              salesType={salesType}
-              showSignature={false}
-              selectedInvoiceNo={selectedRow?.invoiceNo}
-              bottom={0}
-            />
-          )}
-        </Container>
-      </ErrorBoundary>
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={(e) => {
+                            if (pageInfo.pageNumber < pageInfo.totalPages) {
+                              setPageNumber((prev) => Number(prev) + 1);
+                            } else {
+                              return;
+                            }
+                          }}
+                        >
+                          <i className="fas fa-angle-right" />
+                          <span className="sr-only">Next</span>
+                        </PaginationLink>
+                      </PaginationItem>
+                    </Pagination>
+                  </nav>
+                </CardFooter>
+              )}
+            </Card>
+          </Col>
+        </Row>
+        {showNewInvoiceModal ? (
+          <NewPurchaseInvoice
+            setShowNewInvoiceModal={setShowNewInvoiceModal}
+          />
+        ) : null}
+        {showReport && (
+          <PrintPreview
+            setShowReport={setShowReport}
+            pdfData={formData}
+            getPrintPDF={() => null}
+            salesType={salesType}
+            showSignature={false}
+            selectedInvoiceNo={selectedRow?.invoiceNo}
+            bottom={0}
+          />
+        )}
+      </Container>
+
     </PurchaseContext.Provider>
   );
 };

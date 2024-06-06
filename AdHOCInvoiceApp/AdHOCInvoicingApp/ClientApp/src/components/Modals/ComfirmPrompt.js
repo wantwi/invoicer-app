@@ -3,10 +3,10 @@ import { Modal, Button } from "reactstrap";
 
 import Loader from "components/Modals/Loader";
 
-export default function ComfirmPrompt({confirmHandeler, title="", message, showPrompt, setShowPrompt }) {
+export default function ComfirmPrompt({ confirmHandeler, title = "", message, showPrompt, setShowPrompt }) {
   return (
     <>
-      
+
       <Modal
         className="modal-dialog-centered modal-danger"
         contentClassName="bg-gradient-danger"
@@ -14,7 +14,7 @@ export default function ComfirmPrompt({confirmHandeler, title="", message, showP
       >
         <div className="modal-header">
           <h6 className="modal-title" id="modal-title-notification">
-           {title}
+            {title}
           </h6>
           <button
             aria-label="Close"

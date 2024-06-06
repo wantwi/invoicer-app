@@ -805,7 +805,7 @@ const Items = () => {
                                                     </label>{" "}
                                                     <code style={{ color: "darkred" }}>*</code>
                                                     <CurrencyInput
-                                                       
+
                                                         id="input-example2"
                                                         name="price"
                                                         className={`form-control form-control-sm text-right`}
@@ -1012,7 +1012,7 @@ const Items = () => {
                                     </h6>
                                     <div className="pl-lg-4">
                                         <Row>
-                                            <Col lg="5" className="pt-4">
+                                            <Col lg="4" className="pt-4">
                                                 <Input
                                                     className="form-control-checkbox "
                                                     type="checkbox"
@@ -1029,7 +1029,7 @@ const Items = () => {
                                                     </label>
                                                 </FormGroup>
                                             </Col>
-                                            <Col lg="7">
+                                            <Col lg="8">
                                                 <label
                                                     className="form-control-label"
                                                     htmlFor="input-first-name"
@@ -1051,7 +1051,7 @@ const Items = () => {
                                     </div>
                                     <div className="pl-lg-4">
                                         <Row>
-                                            <Col lg="5" className="pt-4">
+                                            <Col lg="4" className="pt-4">
                                                 <Input
                                                     className="form-control-checkbox "
                                                     type="checkbox"
@@ -1089,7 +1089,7 @@ const Items = () => {
                                                 </select>
                                             </Col>
                                             <Col>
-                                                <FormGroup>
+                                                <FormGroup >
                                                     <label
                                                         className="form-control-label"
                                                         htmlFor="input-first-name"
@@ -1098,6 +1098,7 @@ const Items = () => {
                                                     </label>{" "}
                                                     <code style={{ color: "darkred" }}>*</code>
                                                     <CurrencyInput
+                                                        style={{ marginTop: -6 }}
                                                         disabled={!hasDiscount}
                                                         id="input-example"
                                                         name="input-name"

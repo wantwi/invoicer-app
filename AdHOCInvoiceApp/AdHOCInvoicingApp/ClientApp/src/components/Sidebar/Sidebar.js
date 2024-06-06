@@ -1,20 +1,4 @@
-/*!
 
-=========================================================
-* Argon Dashboard React - v1.2.1
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 /*eslint-disable*/
 import { useLayoutEffect, useState } from "react";
 import { NavLink as NavLinkRRD, Link } from "react-router-dom";
@@ -97,7 +81,7 @@ const Sidebar = (props) => {
     path = "",
     sub = "",
     open = false,
-    iconPath=""
+    iconPath = ""
   }) => {
     const [isOpen, setIsOpen] = useState(open);
     const [isActive, setIsActive] = useState(false);
@@ -114,7 +98,7 @@ const Sidebar = (props) => {
 
       }
 
-      return () => {};
+      return () => { };
     }, [location]);
 
     const toggle = () => setIsOpen(!isOpen);
@@ -127,13 +111,13 @@ const Sidebar = (props) => {
           <div className="py-2 ">
             <Link to={layout + sub + path}>
               <span
-                className={isActive ? "isActive "+iconPath : "isPending "+iconPath}
+                className={isActive ? "isActive " + iconPath : "isPending " + iconPath}
                 onClick={toggle}
                 style={{ marginBottom: "0.5rem" }}
               >
-                <span className="pl-1" style={{display:"inline-block"}}>
+                <span className="pl-1" style={{ display: "inline-block" }}>
 
-                {name}
+                  {name}
                 </span>
               </span>
             </Link>
@@ -146,7 +130,7 @@ const Sidebar = (props) => {
         <span
           // color="primary"
           onClick={toggle}
-          style={{ marginBottom: "0.5rem", display:"flex", justifyContent:"space-between", width:"95%", cursor:"pointer" }}
+          style={{ marginBottom: "0.5rem", display: "flex", justifyContent: "space-between", width: "95%", cursor: "pointer" }}
         >
           <span>{name}</span>
           {isOpen ? <FaChevronDown /> : <FaChevronUp />}
@@ -158,8 +142,8 @@ const Sidebar = (props) => {
                 to={layout + sub + items[key]?.navicationPath}
                 tag={NavLinkRRD}
                 onClick={closeCollapse}
-                //activeStyle={{ color: "red" }}
-                // activeClassName="active"
+              //activeStyle={{ color: "red" }}
+              // activeClassName="active"
               >
                 <i className={items[key]?.icon} />
                 {prop.name}
@@ -168,7 +152,7 @@ const Sidebar = (props) => {
           ))}
           <div
             className="d-flex"
-            style={{ flexDirection: "column", paddingLeft: "10px", background:"#eff0f3", width:"95%" }}
+            style={{ flexDirection: "column", paddingLeft: "10px", background: "#eff0f3", width: "95%" }}
           >
             {children}
           </div>
@@ -251,7 +235,7 @@ const Sidebar = (props) => {
               iconPath={routes[transactionsIdx].menus[3]?.iconPath}
               name="Purchase Return"
             />
-             <MenuItem
+            <MenuItem
               path={routes[transactionsIdx].menus[0]?.navicationPath}
               iconPath={routes[transactionsIdx].menus[3]?.iconPath}
               name="Credit & Debit Note"

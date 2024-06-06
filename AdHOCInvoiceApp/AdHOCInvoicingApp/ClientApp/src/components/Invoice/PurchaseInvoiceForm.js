@@ -95,7 +95,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
     "products",
     "",
     (data) => {
-      let options = data.map((item, index) => {
+      let options = data?.map((item, index) => {
         return {
           name: item.name,
           key: index,
@@ -512,7 +512,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
               position: "absolute",
             }}
           ></div>
-          <ToastContainer />
+          {/* <ToastContainer /> */}
           <Form>
             <Row style={{ marginBottom: 10 }}>
               <Col lg="12">
@@ -611,7 +611,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
                   disabled={isCurrencyDisabled}
                   style={{ height: 29, padding: "0px 5px" }}
                 >
-                  {currencies.map((currency, index) => (
+                  {currencies && currencies?.map((currency, index) => (
                     <option
                       key={index}
                       name={currency.name}

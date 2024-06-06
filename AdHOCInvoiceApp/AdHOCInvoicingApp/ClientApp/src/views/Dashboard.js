@@ -19,28 +19,29 @@ import { ErrorBoundary } from "react-error-boundary"
 import useCustomAxios from "hooks/useCustomAxios";
 import Loader from "components/Modals/Loader";
 import { useAuth } from "context/AuthContext";
+import DashboardListing from "../components/DashboardListing/DashboardListing";
 
 function getCurrentMonthDates() {
-    // Get current date
-    var currentDate = new Date();
+  // Get current date
+  var currentDate = new Date();
 
-    // Get year and month
-    var year = currentDate.getFullYear();
-    var month = currentDate.getMonth() + 1; // Months are zero indexed
+  // Get year and month
+  var year = currentDate.getFullYear();
+  var month = currentDate.getMonth() + 1; // Months are zero indexed
 
-    // Format month and day to have leading zeros if necessary
-    var formattedMonth = month < 10 ? '0' + month : month;
+  // Format month and day to have leading zeros if necessary
+  var formattedMonth = month < 10 ? '0' + month : month;
 
-    // Get the first day of the current month
-    var firstDay = year + '-' + formattedMonth + '-01';
+  // Get the first day of the current month
+  var firstDay = year + '-' + formattedMonth + '-01';
 
-    // Get the last day of the current month
-    var lastDay = new Date(year, month, 0).toISOString().split('T')[0];
+  // Get the last day of the current month
+  var lastDay = new Date(year, month, 0).toISOString().split('T')[0];
 
-    return {
-        firstDay: firstDay,
-        lastDay: lastDay
-    };
+  return {
+    firstDay: firstDay,
+    lastDay: lastDay
+  };
 }
 
 const BRANCH_INFO = JSON.parse(sessionStorage.getItem("BRANCH_INFO"))
@@ -119,47 +120,48 @@ const Dashboard = () => {
   }, [])
 
 
-    console.log({ user, userAccount });
+  console.log({ user, userAccount });
 
 
 
   return (
     <>
       {isLoading ? <Loader /> : null}
-      <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
-        <UserHeader message={"Dashboard"} />
-        {isCustom && (
-          <CustomDateFormModal
-            handleSubmit={handleSubmit}
-            setIsCustom={setIsCustom}
-          />
-        )}
-        <Container className="mt--7" fluid>
-          <Row className="mt-5">
-            <Col className="mb-5 mb-xl-0" xl="12">
-              <Card className="shadow">
-                <CardHeader className="border-0">
-                  <div
-                    calssname="filterCard"
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: "19px",
-                      height: "43px",
-                      paddingRight: "20px",
-                    }}
-                  >
-                    <span>Business&nbsp;Insights</span>
 
-                  </div>
-                </CardHeader>
-                              {data && <EmbededDashboard url={url} from={getCurrentMonthDates()?.firstDay} to={getCurrentMonthDates()?.lastDay} companyId={userAccount?.sub} />}
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </ErrorBoundary >
+      <UserHeader message={"Dashboard"} />
+      {isCustom && (
+        <CustomDateFormModal
+          handleSubmit={handleSubmit}
+          setIsCustom={setIsCustom}
+        />
+      )}
+      <Container className="mt--7" fluid>
+        <Row className="mt-5">
+          <DashboardListing />
+          {/*<Col className="mb-5 mb-xl-0" xl="12">*/}
+          {/*  <Card className="shadow">*/}
+          {/*    <CardHeader className="border-0">*/}
+          {/*      <div*/}
+          {/*        calssname="filterCard"*/}
+          {/*        style={{*/}
+          {/*          display: "flex",*/}
+          {/*          justifyContent: "space-between",*/}
+          {/*          alignItems: "center",*/}
+          {/*          gap: "19px",*/}
+          {/*          height: "43px",*/}
+          {/*          paddingRight: "20px",*/}
+          {/*        }}*/}
+          {/*      >*/}
+          {/*        <span>Business&nbsp;Insights</span>*/}
+
+          {/*      </div>*/}
+          {/*    </CardHeader>*/}
+          {/*                  {data && <EmbededDashboard url={url} from={getCurrentMonthDates()?.firstDay} to={getCurrentMonthDates()?.lastDay} companyId={userAccount?.sub} />}*/}
+          {/*  </Card>*/}
+          {/*</Col>*/}
+        </Row>
+      </Container>
+
     </>
   );
 };

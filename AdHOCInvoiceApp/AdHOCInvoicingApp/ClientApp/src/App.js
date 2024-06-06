@@ -30,39 +30,39 @@ const App = () => {
           render={(props) => <BranchCompo loggingOut={true} />}
         />
         <Route
-          path="/admin"
+          path="/"
           render={(props) => <AdminLayoutWrapper {...props} />}
         />
         <Route
-          path="/admin/customers"
+          path="/customers"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
-          path="/admin/items"
+          path="/items"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
-          path="/admin/refunds"
+          path="/refunds"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
-          path="/admin/reports"
+          path="/reports"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
-          path="/admin/user-accounts"
+          path="/user-accounts"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
-          path="/admin/currency"
+          path="/currency"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
-          path="/admin/dashboard"
+          path="/dashboard"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
-          path="/admin/profile"
+          path="/profile"
           render={(props) => <AdminLayout {...props} />}
         />
         <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
@@ -76,4 +76,4 @@ const App = () => {
 
 export default App;
 
-//console.log = console.warn = console.error = () => { }
+// console.log = console.warn = console.error = () => { }

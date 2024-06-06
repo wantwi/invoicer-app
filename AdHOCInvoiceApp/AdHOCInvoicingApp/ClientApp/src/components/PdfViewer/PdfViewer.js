@@ -8,9 +8,10 @@ import {
   Print,
   Inject,
 } from "@syncfusion/ej2-react-pdfviewer";
+
 function PdfViewer({ pdfData, invoiceNo }) {
   let refView;
-  const downloadStart = (args) => {};
+  const downloadStart = (args) => { };
 
   //   OpenOption
   // PageNavigationTool
@@ -27,6 +28,7 @@ function PdfViewer({ pdfData, invoiceNo }) {
   // SubmitForm
   return (
     <embed
+      onContextMenu={(e) => e.preventDefault()}
       title="Invoice"
       autoSave="true"
       src={`${pdfData}`}

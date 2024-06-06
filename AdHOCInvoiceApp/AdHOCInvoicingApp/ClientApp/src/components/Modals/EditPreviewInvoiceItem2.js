@@ -95,7 +95,7 @@ function EditPreviewInvoiceItem2({
       data[index]["availableQty"] = updateItemData.availableQty - updateItemData.qtyToRefund;
       data[index]["price"] = data[index]["unitPrice"] * data[index]["availableQty"];
       data[index]["taxableAmount"] =
-      updateItemData.price * updateItemData.availableQty;
+        updateItemData.price * updateItemData.availableQty;
       setInvoicesPrePost(data);
 
       setShowUpdate(false);
@@ -156,7 +156,7 @@ function EditPreviewInvoiceItem2({
           </button>
         </div>
         <div className="modal-body" style={{ display: "flex" }}>
-          <Card className=" shadow" style={{ width: "100%", height: "max-content", marginTop:-35 }}>
+          <Card className=" shadow" style={{ width: "100%", height: "max-content", marginTop: -35 }}>
             <CardBody>
               <div
                 style={{
@@ -168,7 +168,7 @@ function EditPreviewInvoiceItem2({
                   position: "absolute",
                 }}
               ></div>
-              <ToastContainer />
+              {/* <ToastContainer /> */}
               <Form onSubmit={(e) => e.preventDefault()}>
                 <Row>
                   <Col lg="12">
@@ -234,7 +234,7 @@ function EditPreviewInvoiceItem2({
                   <Col lg="6">
                     <FormGroup>
                       <label className="form-control-label">
-                      Return Amount
+                        Return Amount
                       </label>
                       <Input
                         className="form-control"
@@ -249,7 +249,7 @@ function EditPreviewInvoiceItem2({
                 </Row>
               </Form>
             </CardBody>
-            <div className="modal-footer" style={{marginTop:-40}}>
+            <div className="modal-footer" style={{ marginTop: -40 }}>
               <Button
                 color="warning"
                 type="button"
@@ -258,7 +258,7 @@ function EditPreviewInvoiceItem2({
               >
                 Cancel
               </Button>
-              <Button color="success"  size={"sm"} type="button" onClick={handleUpdate}>
+              <Button color="success" size={"sm"} type="button" onClick={handleUpdate}>
                 Update
               </Button>
             </div>

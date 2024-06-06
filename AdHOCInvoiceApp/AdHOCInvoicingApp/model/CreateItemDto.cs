@@ -84,6 +84,13 @@ namespace AdHOCInvoicingApp.model
         public List<InvoiceItemPurchase> invoiceItems { get; set; }
     }
 
+    public class InvoiceIRetry
+    {
+        public string? Id { get; set; }
+        public string? companyId { get; set; }
+        public string? invoiceNumber { get; set; }
+    }
+
 
 }
 

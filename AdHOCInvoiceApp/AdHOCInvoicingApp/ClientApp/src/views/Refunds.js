@@ -330,7 +330,7 @@ const Refunds = () => {
         setPeriod={setPeriod}
         pageName="Refunds"
       />
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <Container className="mt--7" fluid>
         <Row className="mt-5">
           <Col className="mb-5 mb-xl-0" xl="12">

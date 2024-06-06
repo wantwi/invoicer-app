@@ -248,7 +248,7 @@ function InvoicePreviewRefund({
 
     return (
         <>
-            <ToastContainer />
+            {/* <ToastContainer /> */}
             {isLoading && <Loader />}
             <Modal
                 className="modal-dialog-centered modal-lg refund-modal-wrapper"
@@ -306,7 +306,7 @@ function InvoicePreviewRefund({
                                 setIsFocus(false);
                                 setShowToggle(false);
                             }}
-                         
+
                         >
                             <span aria-hidden={true}>{"x"}</span>
                         </Button>
@@ -409,7 +409,7 @@ function InvoicePreviewRefund({
                     <div style={styles.footer}>
                         <div style={styles.total}>
                             <h5>
-                                Total Paid ({searchResults?.currency}):&nbsp;&nbsp; 
+                                Total Paid ({searchResults?.currency}):&nbsp;&nbsp;
                                 {/* {moneyInTxt(searchResults.totalAmount)} */}
                                 {moneyInTxt(searchResults.totalAmountToRefund)}
                             </h5>

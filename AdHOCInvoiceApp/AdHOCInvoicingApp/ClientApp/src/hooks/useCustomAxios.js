@@ -10,7 +10,7 @@ import React from "react";
 import { login } from "services/AuthService";
 import useAuth from "hooks/useAuth";
 
-const CustomAxios = axios.create({
+export const CustomAxios = axios.create({
     baseURL: process.env.REACT_APP_BASENAME,
 
     headers: {

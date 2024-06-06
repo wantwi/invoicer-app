@@ -92,26 +92,24 @@ function NewInvoice({ setShowNewInvoiceModal, refetch }) {
             maxWidth: "max-content"
           }}
         >
-          <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
-            {" "}
-            <FormContext.Provider
-              value={{
-                formData,
-                gridData,
-                setFormData,
-                setGridData,
-                setShowNewInvoiceModal,
-                init,
-                comments,
-                setComments,
-                vatAndLeviesScheme,
-                setvatAndLeviesScheme
-              }}
-            >
-              <InvoiceForm refetch={refetch} />
-              <InvoicePreview />
-            </FormContext.Provider>
-          </ErrorBoundary>
+          <FormContext.Provider
+            value={{
+              formData,
+              gridData,
+              setFormData,
+              setGridData,
+              setShowNewInvoiceModal,
+              init,
+              comments,
+              setComments,
+              vatAndLeviesScheme,
+              setvatAndLeviesScheme
+            }}
+          >
+            <InvoiceForm refetch={refetch} />
+            <InvoicePreview />
+          </FormContext.Provider>
+
         </div>
       </Modal>
     </>

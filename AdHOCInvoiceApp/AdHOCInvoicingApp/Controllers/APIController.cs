@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
 
 namespace AdHOCInvoicingApp.Controllers
 {
@@ -195,24 +196,9 @@ namespace AdHOCInvoicingApp.Controllers
             else
             {
                 dataObj = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new { data = dataObj, response = response });
+                return new JsonResult(new { data = dataObj, status = response.StatusCode });
             }
-            //if (response.StatusCode.ToString() == "BadRequest")
-            //{
-            //    throw new Exception("Error Occurred");
-            //}
-            //else if (response.IsSuccessStatusCode)
-            //{
-            //    var result = await response.Content.ReadAsStringAsync();
-            //    return new JsonResult(new { result });
-            //}
-            //else
-            //{
-            //    var result = await response.Content.ReadAsStringAsync();
-            //    //return new JsonResult(new { result });
-            //    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-            //    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
-            //}
+
         }
 
         [HttpPost("GenerateVATInvoiceReportAsync")]
@@ -297,22 +283,37 @@ namespace AdHOCInvoicingApp.Controllers
             string url = $"{EvatAdHOCBaseUrl}v4/VatItems";
 
             var response = await client.PostAsync(url, content);
-            if (response.StatusCode.ToString() == "BadRequest")
+            var dataObj = string.Empty;
+
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception("Error Occurred");
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new { result });
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
             else
             {
-                var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { data = dataObj, status = response.StatusCode });
             }
+
+
+            // var response = await client.PostAsync(url, content);
+            // if (response.StatusCode.ToString() == "BadRequest")
+            // {
+            //     throw new Exception("Error Occurred");
+            // }
+            // else if (response.IsSuccessStatusCode)
+            // {
+            //     var result = await response.Content.ReadAsStringAsync();
+            //     return new JsonResult(new { result });
+            // }
+            // else
+            // {
+            //     var result = await response.Content.ReadAsStringAsync();
+            //     //return new JsonResult(new { result });
+            //     var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+            //     return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+            // }
         }
 
         [HttpPost("AddExchangeRate/{branchCode}")]
@@ -807,7 +808,7 @@ namespace AdHOCInvoicingApp.Controllers
             else
             {
                 dataObj = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new { data = dataObj, response = response });
+                return new JsonResult(new { data = dataObj, status = response.StatusCode });
             }
 
 
@@ -872,22 +873,36 @@ namespace AdHOCInvoicingApp.Controllers
 
             var response = await client.PostAsync(url, content);
 
-            if (response.StatusCode.ToString() == "BadRequest")
+          
+            var dataObj = string.Empty;
+
+            if (response.IsSuccessStatusCode)
             {
-                throw new Exception("Error Occurred");
-            }
-            else if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadAsStringAsync();
-                return new JsonResult(new { result });
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
             else
             {
-                var result = await response.Content.ReadAsStringAsync();
-                //return new JsonResult(new { result });
-                var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-                return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { data = dataObj, status = response.StatusCode });
             }
+
+            //if (response.StatusCode.ToString() == "BadRequest")
+            //{
+            //    throw new Exception("Error Occurred");
+            //}
+            //else if (response.IsSuccessStatusCode)
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    return new JsonResult(new { result });
+            //}
+            //else
+            //{
+            //    var result = await response.Content.ReadAsStringAsync();
+            //    //return new JsonResult(new { result });
+            //    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
+            //    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+            //}
         }
 
         [HttpPost("PurchaseReturn")]
@@ -1222,6 +1237,71 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
+        [HttpPost("RetryInvoice")]
+        public async Task<IActionResult> RetryInvoice([FromBody] InvoiceIRetry data)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.companyId = user.Sub;
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/RetrySales";
+
+            var response = await client.PostAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
+
+        [HttpPost("RemoveInvoice")]
+        public async Task<IActionResult> RemoveInvoice([FromBody] InvoiceIRetry data)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.companyId = user.Sub;
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Invoices/RemoveSale";
+
+            var response = await client.PostAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
+
+
         [HttpPost("Note")]
         public async Task<IActionResult> DebitAndCredit([FromBody] DebitCreditNote data)
         {
@@ -1276,6 +1356,68 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var user = await UserInfo();
             return new JsonResult(new { user, path = DashboardUrl, AuthURL });
+        }
+
+        [HttpGet("GetData")]
+        public async Task<IActionResult> GetData()
+        {
+            var user = await UserInfo();
+            return new JsonResult(new
+            {
+                DashboardId = GlobalAppSettings.EmbedDetails.DashboardId,
+                ServerUrl = GlobalAppSettings.EmbedDetails.ServerUrl,
+                EmbedType = GlobalAppSettings.EmbedDetails.EmbedType,
+                Environment = GlobalAppSettings.EmbedDetails.Environment,
+                SiteIdentifier = GlobalAppSettings.EmbedDetails.SiteIdentifier,
+                companyId = user.Sub
+            });
+        }
+
+
+        [HttpPost("AuthorizationServer")]
+        public async Task<string> AuthorizationServer([FromBody] object embedQuerString)
+        {
+            var user = await UserInfo();
+            var embedClass = Newtonsoft.Json.JsonConvert.DeserializeObject<EmbedClass>(embedQuerString.ToString());
+
+            var embedQuery = embedClass.embedQuerString;
+
+            //+ "&embed_datasource_filter=" + "[{&&CompanyId=654B6C19-3DA9-40C2-865F-827711F0C2B1&&FromDate=2022-01-01&&ToDate=2024-12-12&&Br_ch=003}]";
+
+
+            // User your user-email as embed_user_email
+            embedQuery += "&embed_user_email=" + GlobalAppSettings.EmbedDetails.UserEmail;
+            //To set embed_server_timestamp to overcome the EmbedCodeValidation failing while different timezone using at client application.
+            double timeStamp = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+            embedQuery += "&embed_server_timestamp=" + timeStamp;
+            var embedDetailsUrl = "/embed/authorize?" + embedQuery + "&embed_signature=" + GetSignatureUrl(embedQuery);
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(embedClass.dashboardServerApiUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+
+                var result = client.GetAsync(embedClass.dashboardServerApiUrl + embedDetailsUrl).Result;
+                string resultContent = result.Content.ReadAsStringAsync().Result;
+                return resultContent;
+            }
+
+        }
+
+        public string GetSignatureUrl(string queryString)
+        {
+            if (queryString != null)
+            {
+                var encoding = new System.Text.UTF8Encoding();
+                var keyBytes = encoding.GetBytes(GlobalAppSettings.EmbedDetails.EmbedSecret);
+                var messageBytes = encoding.GetBytes(queryString);
+                using (var hmacsha1 = new HMACSHA256(keyBytes))
+                {
+                    var hashMessage = hmacsha1.ComputeHash(messageBytes);
+                    return Convert.ToBase64String(hashMessage);
+                }
+            }
+            return string.Empty;
         }
     }
 

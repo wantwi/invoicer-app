@@ -36,16 +36,25 @@ export default function Prompt({
 
   const { mutate } = useMutation({
     mutationFn: submitRefund,
-    onSuccess: () => {
-      toast.success("Invoice successfully refunded");
-      setLoading(false);
-      setshowPrompt(false);
-      setOpen(false);
-      queryClient.invalidateQueries(
-        "invoice-preview-refund",
-        refundInvoice?.invoiceNumber
-      );
-      reset(uuid());
+    onSuccess: (data) => {
+      console.log({ onSuccess: data })
+      if (data?.status === 201) {
+        toast.success("Invoice successfully refunded");
+        setLoading(false);
+        setshowPrompt(false);
+        setOpen(false);
+        queryClient.invalidateQueries(
+          "invoice-preview-refund",
+          refundInvoice?.invoiceNumber
+        );
+        reset(uuid());
+
+      } else {
+        toast.success("Could not refund invoice. Please contact support.");
+        setLoading(false);
+        setshowPrompt(false);
+      }
+
     },
     onError: (error) => {
       // console.log({ useMutationError: error });

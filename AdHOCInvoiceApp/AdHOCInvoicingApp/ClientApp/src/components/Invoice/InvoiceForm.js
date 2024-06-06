@@ -37,6 +37,7 @@ import useAuth from "hooks/useAuth";
 import { useCustomQueryById } from "hooks/useCustomQueryById";
 import { getFormattedDate } from "utils/util";
 import { moneyInTxt } from "./InvoicePreview";
+import CurrencyInput from "react-currency-input-field";
 
 // import 'react-tooltip/dist/react-tooltip.css'
 
@@ -197,7 +198,7 @@ function InvoiceForm({ refetch }) {
             console.log({ requstCallback2: currencyResponse?.value.data });
 
             if (currencyResponse?.value.data.length > 0) {
-                setCurrencies(currencyResponse?.value.data);
+                setCurrencies(currencyResponse?.value.data || []);
             } else {
                 setCurrencies(currenciesInit);
             }
@@ -243,7 +244,7 @@ function InvoiceForm({ refetch }) {
             const request = await axios.get(`/api/GetProductList/${currency}`)
             console.log({ responseData: request })
 
-            responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data)
+            responseData?.data.length === 0 ? setProductsList([]) : setProductsList(responseData?.data || [])
 
         } catch (error) {
 
@@ -297,15 +298,29 @@ function InvoiceForm({ refetch }) {
             postData
         );
     };
+    // `/api/PostInvoice/${selectedBranch?.code}`,
 
     const { mutate } = useMutation({
         mutationFn: postInvoice,
-        onSuccess: () => {
-            toast.success("Invoice successfully saved");
-            refetch();
-            //queryClient.invalidateQueries({ queryKey: ["invoices", 1, 1, ""] });
-            setShowNewInvoiceModal(false);
-            setLoading(false);
+        onSuccess: (data) => {
+
+            const res = JSON.parse(data?.data?.data)
+            console.log({ onSuccess: res });
+            if (res?.status >= 400) {
+                const error = new Error(res?.message)
+                error.code = res?.status
+                throw error
+            } else {
+                toast.success("Invoice successfully saved");
+                refetch();
+                //queryClient.invalidateQueries({ queryKey: ["invoices", 1, 1, ""] });
+                setShowNewInvoiceModal(false);
+                setLoading(false);
+            }
+
+
+
+
         },
         onError: (error) => {
             if (error?.response?.status === 500) {
@@ -317,11 +332,11 @@ function InvoiceForm({ refetch }) {
                 setLoading(false);
                 return;
             }
-            // console.log({ useMutationError: error });
+            console.log({ useMutationError: error });
             toast.error(
-                error?.response?.data?.message ||
+
                 error?.message ||
-                "Invoice could not be saved."
+                "Invoice could not be saved. Please contact support."
             );
             setLoading(false);
         },
@@ -335,7 +350,7 @@ function InvoiceForm({ refetch }) {
 
         if ((value != "" && value < 0.00001) || value == "e") {
             // setFormData({ ...formData, quantity: 1 })
-            toast.info("Please make sure quantity is at greater than 0");
+            toast.info("Please make sure quantity is greater than 0");
         }
     };
 
@@ -344,6 +359,10 @@ function InvoiceForm({ refetch }) {
 
         console.log({ item })
 
+        if (item?.price < 1) {
+            toast.error("Invalid price value");
+            return
+        }
 
         let csttourism = 0;
         if (item.otherLevies === "NON") {
@@ -382,9 +401,6 @@ function InvoiceForm({ refetch }) {
     };
 
     const saveInvoice = async () => {
-        console.log({ gridData })
-
-
         if (gridData?.length === 0) {
             toast.error("Please add invoice item(s)");
             return;
@@ -404,7 +420,7 @@ function InvoiceForm({ refetch }) {
             amount: gridData.reduce((total, item) => total + item.totalPayable, 0),
             pon: formData?.pon,
 
-            invoiceItems: gridData.map((item) => {
+            invoiceItems: gridData?.map((item) => {
                 return {
                     price: item.taxableAmount,
                     itemCode: item.itemCode,
@@ -456,7 +472,7 @@ function InvoiceForm({ refetch }) {
     const checkIfRatesExist = async (currency, date) => {
         let today = new Date(formData.date).toISOString();
         const request = await axios.get(
-            `/api/checkIfRatesExist/${selectedBranch?.code}/${currency}/${new Date(date).toISOString().split("T")[0] }`
+            `/api/checkIfRatesExist/${selectedBranch?.code}/${currency}/${new Date(date).toISOString().split("T")[0]}`
         );
         // "(GHS" + data[0].exchangeRate + " / " + data[0].currencyCode
         if (request) {
@@ -469,7 +485,7 @@ function InvoiceForm({ refetch }) {
                 );
             } else {
                 toast.warning(
-                    `There are no exchange rates set for ${new Date(new Date(formData.date).toISOString().split("T")[0]).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }) }. Redirecting you to currency set up to add exchange rates`
+                    `There are no exchange rates set for ${new Date(new Date(formData.date).toISOString().split("T")[0]).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}. Redirecting you to currency set up to add exchange rates`
                 );
                 setTimeout(() => {
                     history.push("/admin/currency");
@@ -529,13 +545,13 @@ function InvoiceForm({ refetch }) {
     }, [currency]);
 
     useEffect(() => {
-       
+
         if (currency && formData.date) {
             if (currency !== "GHS") {
                 checkIfRatesExist(currency, formData.date);
             }
         }
-        
+
 
     }, [currency, formData.date]);
 
@@ -643,56 +659,10 @@ function InvoiceForm({ refetch }) {
                         setShowAddItem(true)
                         setIsItemAdded(true)
 
-
-
                     } else {
                         console.log({ refetchPOItemsfoundNot: getItem })
                     }
-
-
-                    // if(getItem){
-                    //   obj = {
-                    //     ...getItem,
-                    //     price:item?.price,
-                    //     stockQuantity:item?.quantity,
-                    //     quantity: item?.quantity,
-                    //     itemName: getItem.name,
-                    //     price: getItem?.price,
-                    //     vatItemId: getItem?.id,
-                    //     itemCode: getItem?.code,
-                    //     otherLevies: getItem?.otherLevies,
-                    //     isTaxInclusive: getItem?.isTaxInclusive,
-
-                    //   }
-                    //   let csttourism = 0;
-                    //   if (obj.otherLevies === "NON") {
-                    //     csttourism = 0;
-                    //   } else if (obj.otherLevies === "CST") {
-                    //     csttourism =
-                    //       (cstRate / 100) * obj.price * obj.quantity;
-                    //   } else if (obj.otherLevies === "TRSM") {
-                    //     csttourism =
-                    //       (levy4Rate / 100) * obj.price * obj.quantity;
-                    //   }
-                    //      gridItem = getPayableAmount(
-                    //       { ...item, isTaxable },
-                    //       discount,
-                    //       vatAndLeviesScheme
-                    //     );
-                    //   arr.push(gridItem)
-
-                    // }
-
-                    // setGridData((gridData) => [...gridData,{ ...gridItem, otherLeviesType: obj.otherLevies }]);
-
                 }
-
-                // console.log({ AddedArry: arr });
-
-                // setShowAddItem(true)
-                // setIsItemAdded(true)
-                // const poItems = request.data.items.map(x => ({id:x?.itemCode,code:x?.itemCode, name:x?.itemName,price:x?.price,stockQuantity:x?.quantity, isTaxInclusive:false, taxable:false, otherLevies:"None"}))
-
             }
 
             // const responseData = JSON.parse(request?.data)
@@ -728,8 +698,6 @@ function InvoiceForm({ refetch }) {
     };
 
 
-    console.log({ defaultProductsList })
-
     return (
         <>
             {loading ? <Loader /> : null}
@@ -751,7 +719,7 @@ function InvoiceForm({ refetch }) {
                     >
                         {" "}
                     </div>
-                    <ToastContainer />
+                    {/* <ToastContainer /> */}
                     {/* to show tooltip after item has been added and discount type input disabled */}
 
                     <Form>
@@ -842,14 +810,14 @@ function InvoiceForm({ refetch }) {
                                     disabled={Boolean(gridData.length)}
                                     style={{ height: 29, padding: "0px 5px" }}
                                 >
-                                    {currencies.map((currency, index) => (
+                                    {currencies && currencies?.map((currency, index) => (
                                         <option
                                             key={index}
-                                            name={currency.name}
-                                            id={currency.code}
-                                            value={currency.code}
+                                            name={currency?.name || ""}
+                                            id={currency?.code || ""}
+                                            value={currency?.code || ""}
                                         >
-                                            {currency.code}
+                                            {currency?.code || ""}
                                         </option>
                                     ))}
                                 </select>{" "}
@@ -877,7 +845,7 @@ function InvoiceForm({ refetch }) {
                                     onChange={(e) => {
                                         //set invoice date and reset due date when invoice date changes
                                         setFormData({ ...formData, date: e, dueDate: null });
-                                       
+
                                     }}
                                     style={{ height: 29, padding: "0px 5px" }}
                                 />
@@ -1157,7 +1125,30 @@ function InvoiceForm({ refetch }) {
                                             {isTaxable &&
                                                 (formData.isTaxInclusive ? "-Tax Incl." : "-Tax Excl.")}
                                         </label>
+                                        <CurrencyInput
+                                            min={1}
+                                            id="price"
+                                            name="price"
+                                            className={`form-control form-control-alternative form-control-sm text-right`}
+                                            placeholder="0.00"
+                                            defaultValue={formData.price}
+                                            value={formData.price}
+                                            decimalsLimit={3}
+                                            onValueChange={(value, name) => {
+
+                                                value < 1 ? setFormData({
+                                                    ...formData,
+                                                    price: 0,
+                                                }) :
+
+                                                    setFormData({
+                                                        ...formData,
+                                                        price: value,
+                                                    })
+                                            }}
+                                        />
                                         <Input
+                                            hidden
                                             disabled={formData?.pon.length > 0 ? true : false}
                                             className="form-control-alternative"
                                             id="price"
@@ -1181,9 +1172,9 @@ function InvoiceForm({ refetch }) {
                                         // onKeyDown={validateInput(formData.price)}
                                         />
                                         {
-                                            formData.discountType === "general" ? <Badge style={{ fontSize: 9, float: "right" }} className="mt-1" color='primary' >Discount Amount: {moneyInTxt(formData?.discount,'en',2) || 0}</Badge> : null
+                                            formData.discountType === "general" ? <Badge style={{ fontSize: 9, float: "right" }} className="mt-1" color='primary' >Discount Amount: {moneyInTxt(formData?.discount, 'en', 2) || 0}</Badge> : null
                                         }
-                                        
+
 
                                     </Col>
                                 </Row>
@@ -1254,7 +1245,7 @@ function InvoiceForm({ refetch }) {
                                 <Row>
                                     <Col lg="6">
                                         <Button
-                                            disabled={formData.quantity > 0 || loading ? false : true}
+                                            disabled={formData.quantity > 0 || formData?.price > 0 || loading ? false : true}
                                             color="primary"
                                             onClick={() => addRecordToData(formData)}
                                             type="button"

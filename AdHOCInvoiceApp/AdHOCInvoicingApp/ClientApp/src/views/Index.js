@@ -43,6 +43,8 @@ import { useCustomPaginationQuery } from "hooks/useCustomPaginationQuery";
 import { useCustomQueryById } from "hooks/useCustomQueryById";
 import useCustomAxios from "hooks/useCustomAxios";
 import { string } from "prop-types";
+import RetryPrompt from "components/Modals/RetryPrompt";
+import { useCustomPost } from "hooks/useCustomPost";
 
 export const AppContext = createContext(null);
 
@@ -61,7 +63,7 @@ const Index = () => {
     totalPages: 5,
   });
   const [open, setOpen] = useState(false);
-  const [showPrompt, setshowPrompt] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
   const [refundInvoice, setrefundInvoice] = useState({});
   const [isFocus, setIsFocus] = useState(false);
   const [invoiceQuery, setinvoiceQuery] = useState("");
@@ -77,13 +79,15 @@ const Index = () => {
   const [period, setPeriod] = useState(0);
   const [currencyFilter, setCurrencyFilter] = useState("");
   const [showRetryLoader, setShowRetryLoader] = useState(false);
-  const [isFiltered, setIsFiltered] = useState(false);
+  const [isPostLoading, setIsPostLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const dayOfWeekSelRef = useRef();
   const [value] = useDebounce(invoiceQuery, 500);
   const [selectedRow, setSelectedRow] = useState("");
+  const [rowData, setRowData] = useState(null)
   const [refundTypeForPost, setRefundTypeForPost] = useState("");
   const [isReportLoading, setReportIsLoading] = useState(false);
+
   const [
     resetInvoicePreviewRefundComponent,
     setResetInvoicePreviewRefundComponent,
@@ -188,14 +192,16 @@ const Index = () => {
               style={{ padding: "2px 8px" }}
               className="badge-success"
               onClick={(e) => {
-                if (row?.original?.signatureStatus?.toUpperCase() !== "SUCCESS") {
-                  e.stopPropagation()
-                  toast.info("Invoice cannot be previewed because it has no signature")
-                  return
-                }
+                // if (row?.original?.signatureStatus?.toUpperCase() !== "SUCCESS") {
+                //   e.stopPropagation()
+                //   setShowPrompt(true)
+                //   // toast.info("Invoice cannot be previewed because it has no signature")
+                //   return
+                // }
                 // loadPreview(value);
+                setRowData(row.original)
                 setSelectedRow(row.original.id);
-                getPrintPDF(row.original.id)
+                getPrintPDF(row.original.id, row?.original?.signatureStatus?.toUpperCase())
                 // signatureStatus:"SUCCESS"
               }}
               title="Preview"
@@ -219,7 +225,7 @@ const Index = () => {
   );
   const controller = new AbortController();
 
-  const getPrintPDF = async (invoiceNo) => {
+  const getPrintPDF = async (invoiceNo, isSuccess) => {
     setSelectedInvoiceNo(invoiceNo);
     // toast.info('PDF document not available for invoice ' + invoiceNo + ' yet')
     setIsReportDownloading(true);
@@ -242,8 +248,18 @@ const Index = () => {
         base64 = `data:application/pdf;base64,` + JSON.parse(data?.data);
         const pdfContentType = "application/pdf";
 
-        setPdfData(base64);
-        setShowReport(true);
+        if (isSuccess != "SUCCESS") {
+          setPdfData(base64 + "#toolbar=0");
+          setShowReport(true);
+          setTimeout(() => {
+            setShowPrompt(true)
+          }, 300);
+        } else {
+          setPdfData(base64);
+          setShowReport(true);
+          //
+        }
+
         const base64toBlob = (data) => {
           // Cut the prefix `data:application/pdf;base64` from the raw base 64
           const base64WithoutPrefix = data.substr(
@@ -370,223 +386,305 @@ const Index = () => {
     return () => { };
   }, [value]);
 
-  console.log({ use: data });
+
+  // const retrySuccess = () => {
+  //   if (data?.data?.signatureStatus !== "SUCCESS") {
+  //     toast.error("Sorry, your invoice could not be signed.")
+  //   } else {
+  //     toast.success("Invoice Signed Successfully.")
+  //     setShowPrompt(false)
+  //     set
+  //     getPrintPDF(data?.data?.id)
+  //   }
+
+  // }
+  // const postError = (error) => {
+  //   const errData = JSON.parse(error?.data)
+  //   console.log({ errData });
+  //   toast.error(errData?.message || "Sorry, your invoice could not be signed. Please contact support.")
+  // }
+  // const { mutate, isLoading: isPostLoading } = useCustomPost("/api/RemoveInvoice", postSuccess, postError)
+  // const { mutate: retryMutate, isLoading: isRetryLoading } = useCustomPost("/api/RetryInvoice", retrySuccess, postError)
+
+  const removeIvoice = async () => {
+    try {
+      setIsPostLoading(true)
+      const response = await axios.post("/api/RemoveInvoice", { id: rowData?.id, invoiceNumber: rowData?.invoiceNo })
+      console.log({ response });
+      if (response.data?.status === "OK") {
+        toast.success("Invoice Removed.")
+
+      } else {
+        toast.error("Invoice not removed. Please contact support.")
+      }
+
+    } catch (error) {
+      toast.error("Invoice not removed. Please contact support.")
+    } finally {
+      refetch()
+      setShowPrompt(false)
+      setShowReport(false);
+      setIsPostLoading(false)
+
+    }
+  }
+  const retryIvoice = async () => {
+    try {
+      setIsPostLoading(true)
+      const response = await axios.post("/api/RetryInvoice", { id: rowData?.id, invoiceNumber: rowData?.invoiceNo })
+      console.log({ response });
+      // if (response.data?.status === "OK") {
+      //   toast.success("Invoice Removed.")
+
+      // } else {
+      //   toast.error("Invoice not removed. Please contact support.")
+      // }
+
+    } catch (error) {
+      toast.error("Invoice not removed. Please contact support.")
+    } finally {
+      refetch()
+      setShowPrompt(false)
+      setShowReport(false);
+      setIsPostLoading(false)
+
+    }
+  }
+  const cancelHandeler = () => removeIvoice()
+  const confirmHandeler = () => retryIvoice()
+
+  const handleClosePrompt = () => {
+    setShowPrompt(false)
+    setShowReport(false);
+  }
+
+  useEffect(() => {
+    const handleContextmenu = e => {
+      e.preventDefault()
+    }
+    document.addEventListener('contextmenu', handleContextmenu)
+    return function cleanup() {
+      document.removeEventListener('contextmenu', handleContextmenu)
+    }
+  }, [])
 
   return (
     <>
+      {isPostLoading ? <Loader /> : null}
       {/* {showRetryLoader || isFetching && <Loader />} */}
+      <RetryPrompt isRetryLoading={isPostLoading} isRemoveLoading={isPostLoading} handleClose={handleClosePrompt} confirmHandeler={confirmHandeler} cancelHandeler={cancelHandeler} title="No Signature Invoice" showPrompt={showPrompt} setShowPrompt={setShowPrompt} message="Sorry, this invoice does not have a signature. Would you like to retry obtaining the signature or remove the invoice?" />
       <AppContext.Provider value={{ invoices, setInvoices }}>
-        <ErrorBoundary>
-          <Header
-            summary={summary}
-            currencyFilter={currencyFilter}
-            setCurrencyFilter={setCurrencyFilter}
-            period={period}
-            setPeriod={setPeriod}
-            dayOfWeekSelRef={dayOfWeekSelRef}
-            pageName="Sales Invoice"
-          />
-          {/* Page content */}
-          <Container className="mt--7" fluid>
-            <ToastContainer />
-            <Row className="my-5">
-              <Col className="mb-5 mb-xl-0" xl="12">
-                <Card className="shadow">
-                  <CardHeader className="border-0">
-                    <Row className="align-items-center">
-                      <div className="col">
-                        {/* <h3 className='mb-2'>Transactions</h3> */}
 
-                        {/* <h5 className='mb-0'>List of all invoices</h5> */}
-                        <Form
-                          className="navbar-search navbar-search-light form-inline "
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            handleSearchInvoice(e);
-                          }}
-                        >
-                          <FormGroup className="mb-0">
-                            {" "}
-                            <InputGroup className="input-group-alternative">
-                              <InputGroupAddon
-                                addonType="prepend"
-                                style={{ marginTop: 7 }}
-                              >
-                                <InputGroupText>
-                                  <i className="fas fa-search" />
-                                </InputGroupText>
-                              </InputGroupAddon>
-                              <Input
-                                placeholder="Search Transactions by Invoice No or Customer name"
-                                type="text"
-                                value={invoiceQuery}
-                                onChange={(e) => {
-                                  if (invoiceQuery?.length > 25) {
-                                    setinvoiceQuery((prev) =>
-                                      prev.substring(0, 16)
-                                    );
-                                    setMessage("Your search query is too long");
-                                    return;
-                                  }
-                                  setinvoiceQuery(e.target.value);
-                                }}
-                                style={{ width: 400 }}
-                              />
-                              <InputGroupAddon addonType="append">
-                                <InputGroupText
-                                  onClick={() => setinvoiceQuery("")}
-                                >
-                                  {isFocus && <i className="fas fa-times" />}
-                                </InputGroupText>
-                              </InputGroupAddon>
-                            </InputGroup>
-                            {invoiceQuery.length > 0 && (
-                              <button
-                                onClick={() => {
-                                  // loadInvoices(1, 6);
-                                  setPageNumber(1);
-                                  setinvoiceQuery("");
-                                  refetch();
-                                }}
-                                className="ml-4 btn btn-secondary"
-                              >
-                                Reset
-                              </button>
-                            )}
-                          </FormGroup>
-                        </Form>
-                      </div>
-                      <div className="col text-right mt-0">
-                        <Button
-                          color="primary"
-                          //href='#pablo'
-                          onClick={(e) =>
-                            setShowNewInvoiceModal(!showNewInvoiceModal)
-                          }
-                          size="md"
-                        >
-                          <FaPlus /> Create Invoice
-                        </Button>
-                      </div>
-                    </Row>
-                  </CardHeader>
-                  <div style={styles.body}>
-                    <EvatTable
-                      isLoading={isLoading || isReportLoading}
-                      columns={columns}
-                      data={data?.invoices?.items || []}
-                      data2={invoices}
-                      setSelectedRow={setSelectedRow}
-                      getPrintPDF={getPrintPDF}
-                      pdfData={pdfData}
-                      message={message}
-                      sortKey="date"
-                    />
-                  </div>
-                  <CardFooter className="py-1">
-                    {!isLoading && data?.invoices?.items.length > 0 && (
-                      <nav aria-label="...">
-                        {pageInfo?.pageNumber ? (
-                          <Pagination
-                            className="pagination justify-content-center mb-0"
-                            listClassName="justify-content-center mb-0"
-                          >
-                            <PaginationItem>
-                              <PaginationLink
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  if (pageInfo.pageNumber > 1) {
-                                    if (pageNumber < 1) {
-                                      return;
-                                    }
+        <Header
+          summary={summary}
+          currencyFilter={currencyFilter}
+          setCurrencyFilter={setCurrencyFilter}
+          period={period}
+          setPeriod={setPeriod}
+          dayOfWeekSelRef={dayOfWeekSelRef}
+          pageName="Sales Invoice"
+        />
+        {/* Page content */}
+        <Container className="mt--7" fluid>
+          {/* <ToastContainer /> */}
+          <Row className="my-5">
+            <Col className="mb-5 mb-xl-0" xl="12">
+              <Card className="shadow">
+                <CardHeader className="border-0">
+                  <Row className="align-items-center">
+                    <div className="col">
+                      {/* <h3 className='mb-2'>Transactions</h3> */}
 
-                                    setPageNumber((prev) => Number(prev) - 1);
-                                  } else {
-                                    return;
-                                  }
-                                }}
-                              >
-                                <i className="fas fa-angle-left" />
-                                <span className="sr-only">Previous</span>
-                              </PaginationLink>
-                            </PaginationItem>
-
-                            <PaginationItem>
-                              <PaginationLink onClick={(e) => setPageNumber(1)}>
-                                1
-                              </PaginationLink>
-                            </PaginationItem>
-
-                            <PaginationItem className="active">
-                              <PaginationLink
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                {pageInfo.pageNumber}
-                              </PaginationLink>
-                            </PaginationItem>
-
-                            <PaginationItem>
-                              <PaginationLink
-                                onClick={(e) =>
-                                  setPageNumber(pageInfo.totalPages)
+                      {/* <h5 className='mb-0'>List of all invoices</h5> */}
+                      <Form
+                        className="navbar-search navbar-search-light form-inline "
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleSearchInvoice(e);
+                        }}
+                      >
+                        <FormGroup className="mb-0">
+                          {" "}
+                          <InputGroup className="input-group-alternative">
+                            <InputGroupAddon
+                              addonType="prepend"
+                              style={{ marginTop: 7 }}
+                            >
+                              <InputGroupText>
+                                <i className="fas fa-search" />
+                              </InputGroupText>
+                            </InputGroupAddon>
+                            <Input
+                              placeholder="Search Transactions by Invoice No or Customer name"
+                              type="text"
+                              value={invoiceQuery}
+                              onChange={(e) => {
+                                if (invoiceQuery?.length > 25) {
+                                  setinvoiceQuery((prev) =>
+                                    prev.substring(0, 16)
+                                  );
+                                  setMessage("Your search query is too long");
+                                  return;
                                 }
+                                setinvoiceQuery(e.target.value);
+                              }}
+                              style={{ width: 400 }}
+                            />
+                            <InputGroupAddon addonType="append">
+                              <InputGroupText
+                                onClick={() => setinvoiceQuery("")}
                               >
-                                {pageInfo.totalPages}
-                              </PaginationLink>
-                            </PaginationItem>
-
-                            <PaginationItem>
-                              <PaginationLink
-                                onClick={(e) => {
-                                  if (
-                                    pageInfo.pageNumber < pageInfo.totalPages
-                                  ) {
-                                    if (pageNumber === pageInfo.totalPages) {
-                                      return;
-                                    } else {
-                                      setPageNumber((prev) => Number(prev) + 1);
-                                    }
-                                  } else {
+                                {isFocus && <i className="fas fa-times" />}
+                              </InputGroupText>
+                            </InputGroupAddon>
+                          </InputGroup>
+                          {invoiceQuery.length > 0 && (
+                            <button
+                              onClick={() => {
+                                // loadInvoices(1, 6);
+                                setPageNumber(1);
+                                setinvoiceQuery("");
+                                refetch();
+                              }}
+                              className="ml-4 btn btn-secondary"
+                            >
+                              Reset
+                            </button>
+                          )}
+                        </FormGroup>
+                      </Form>
+                    </div>
+                    <div className="col text-right mt-0">
+                      <Button
+                        color="primary"
+                        //href='#pablo'
+                        onClick={(e) =>
+                          setShowNewInvoiceModal(!showNewInvoiceModal)
+                        }
+                        size="md"
+                      >
+                        <FaPlus /> Create Invoice
+                      </Button>
+                    </div>
+                  </Row>
+                </CardHeader>
+                <div style={styles.body}>
+                  <EvatTable
+                    isLoading={isLoading || isReportLoading}
+                    columns={columns}
+                    data={data?.invoices?.items || []}
+                    data2={invoices}
+                    setSelectedRow={setSelectedRow}
+                    getPrintPDF={getPrintPDF}
+                    pdfData={pdfData}
+                    message={message}
+                    sortKey="date"
+                  />
+                </div>
+                <CardFooter className="py-1">
+                  {!isLoading && data?.invoices?.items.length > 0 && (
+                    <nav aria-label="...">
+                      {pageInfo?.pageNumber ? (
+                        <Pagination
+                          className="pagination justify-content-center mb-0"
+                          listClassName="justify-content-center mb-0"
+                        >
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (pageInfo.pageNumber > 1) {
+                                  if (pageNumber < 1) {
                                     return;
                                   }
-                                }}
-                              >
-                                <i className="fas fa-angle-right" />
-                                <span className="sr-only">Next</span>
-                              </PaginationLink>
-                            </PaginationItem>
-                          </Pagination>
-                        ) : null}
-                      </nav>
-                    )}
-                  </CardFooter>
-                </Card>
-              </Col>
-            </Row>
-            {showNewInvoiceModal ? (
-              <NewInvoice
-                refetch={refetch}
-                setShowNewInvoiceModal={setShowNewInvoiceModal}
-              />
-            ) : null}
 
-            {showReport && (
-              <PrintPreview
-                setShowReport={setShowReport}
-                formData={formData}
-                getPrintPDF={getPrintPDF}
-                pdfData={pdfData}
-                selectedInvoiceNo={selectedInvoiceNo}
-              />
-            )}
-            <NoInvoiceSignaturePopup
-              handleClose={handleClose}
-              open={errorOpen}
-              selectedInvoiceNo={selectedInvoiceNo}
-              setShowRetryLoader={setShowRetryLoader}
+                                  setPageNumber((prev) => Number(prev) - 1);
+                                } else {
+                                  return;
+                                }
+                              }}
+                            >
+                              <i className="fas fa-angle-left" />
+                              <span className="sr-only">Previous</span>
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink onClick={(e) => setPageNumber(1)}>
+                              1
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem className="active">
+                            <PaginationLink
+                              onClick={(e) => e.preventDefault()}
+                            >
+                              {pageInfo.pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) =>
+                                setPageNumber(pageInfo.totalPages)
+                              }
+                            >
+                              {pageInfo.totalPages}
+                            </PaginationLink>
+                          </PaginationItem>
+
+                          <PaginationItem>
+                            <PaginationLink
+                              onClick={(e) => {
+                                if (
+                                  pageInfo.pageNumber < pageInfo.totalPages
+                                ) {
+                                  if (pageNumber === pageInfo.totalPages) {
+                                    return;
+                                  } else {
+                                    setPageNumber((prev) => Number(prev) + 1);
+                                  }
+                                } else {
+                                  return;
+                                }
+                              }}
+                            >
+                              <i className="fas fa-angle-right" />
+                              <span className="sr-only">Next</span>
+                            </PaginationLink>
+                          </PaginationItem>
+                        </Pagination>
+                      ) : null}
+                    </nav>
+                  )}
+                </CardFooter>
+              </Card>
+            </Col>
+          </Row>
+          {showNewInvoiceModal ? (
+            <NewInvoice
+              refetch={refetch}
+              setShowNewInvoiceModal={setShowNewInvoiceModal}
             />
-          </Container>
-        </ErrorBoundary>
+          ) : null}
+
+          {showReport && (
+            <PrintPreview
+              setShowReport={setShowReport}
+              formData={formData}
+              getPrintPDF={getPrintPDF}
+              pdfData={pdfData}
+              selectedInvoiceNo={selectedInvoiceNo}
+            />
+          )}
+          <NoInvoiceSignaturePopup
+            handleClose={handleClose}
+            open={errorOpen}
+            selectedInvoiceNo={selectedInvoiceNo}
+            setShowRetryLoader={setShowRetryLoader}
+          />
+        </Container>
+
       </AppContext.Provider>
     </>
   );

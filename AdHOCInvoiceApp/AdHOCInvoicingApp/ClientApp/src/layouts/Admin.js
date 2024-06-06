@@ -42,6 +42,7 @@ import { useLayoutEffect } from "react";
 import { toast } from "react-toastify";
 import useCustomAxios from "hooks/useCustomAxios";
 import LoaderComponent from "components/LoadingOverlay/LoaderComponent";
+import SidebarComponent from "components/Sidebar/SidebarComponent";
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
@@ -101,7 +102,7 @@ const Admin = (props) => {
         // toast.error("Could not fetch menus. Logging out..");
 
         setRoutes([]);
-        window.location.href = `${process.env.REACT_APP_BASENAME}/login`;
+        window.location.href = `${process.env.REACT_APP_BASENAME}/auth/login`;
       }
     };
 
@@ -126,11 +127,16 @@ const Admin = (props) => {
       console.log({ prop })
       return (
         <Route
-          path={"/admin" + prop.path}
+          path={prop.path}
           component={prop.component}
           key={key}
         />
       );
+      //   <Route
+      //   path={"/admin" + prop.path}
+      //   component={prop.component}
+      //   key={key}
+      // />
       //   if (prop.layout === "/admin") {
       //   } else {
       //     return "";
@@ -192,7 +198,7 @@ const Admin = (props) => {
   return (
     <LoaderComponent>
 
-      <Sidebar
+      {/* <Sidebar
         {...props}
         routes={routes}
         logo={{
@@ -202,7 +208,16 @@ const Admin = (props) => {
 
           imgAlt: "...",
         }}
-      />
+      /> */}
+      <SidebarComponent {...props}
+        routes={routes}
+        logo={{
+          innerLink: "/index",
+
+          imgSrc: graLogo,
+
+          imgAlt: "...",
+        }} />
 
       <Suspense fallback={<Loader />}>
         <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
@@ -215,7 +230,7 @@ const Admin = (props) => {
             <Switch>
               {getRoutes()}
 
-              <Redirect from="*" to="/admin/index" />
+              <Redirect from="*" to="/index" />
             </Switch>
 
             <Container fluid>

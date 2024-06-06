@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     //window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
     console.log("green", process.env.REACT_APP_BASENAME);
     // const temp = "/gra-invoicer";
-    window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`;
+    window.location.href = `${process.env.REACT_APP_BASENAME}/bff/login?returnUrl=${process.env.REACT_APP_BASENAME}/index`;
     console.log(
       "Location",
       process.env.REACT_APP_BASENAME,

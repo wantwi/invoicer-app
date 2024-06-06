@@ -2,6 +2,7 @@ using AdHOCInvoicingApp.Helpers;
 using AdHOCInvoicingApp.Service;
 using Duende.Bff.Yarp;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,9 @@ builder.Services.AddBff(option =>
 .AddRemoteApis();
 //.AddServerSideSessions();
 
+string basePath = AppDomain.CurrentDomain.BaseDirectory;
+string jsonString = System.IO.File.ReadAllText(Path.Combine(basePath, "embedConfig.json"));
+GlobalAppSettings.EmbedDetails = JsonConvert.DeserializeObject<EmbedDetails>(jsonString);
 
 
 builder.Services.AddAuthentication(options =>
