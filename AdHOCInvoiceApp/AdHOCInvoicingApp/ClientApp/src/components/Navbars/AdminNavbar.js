@@ -22,6 +22,7 @@ import {
 import { toast } from "react-toastify";
 import useCustomAxios from "hooks/useCustomAxios"
 import { BsFillGridFill } from "react-icons/bs";
+import { FaFaceDizzy } from "react-icons/fa6";
 
 const AdminNavbar = (props) => {
   const { getUser, user, logout, setSelectedBranch, selectedBranch } = useAuth();
@@ -104,14 +105,15 @@ const AdminNavbar = (props) => {
                   </Media>
                 </Media>
               </DropdownToggle>
-              <DropdownMenu className="dropdown-menu-arrow" right>
+              <DropdownMenu className="dropdown-menu-arrow" right style={{ padding: 20, display: "grid", placeContent: "center" }}>
                 {userApps?.map(app => {
                   return (
-                    <>
-                      <DropdownItem className="noti-title" header tag="div">
-                        <a href={app?.appPath} target="_blank" className="text-overflow m-0" style={{ color: "#8898aa !important" }}>{app?.name}</a>
-                      </DropdownItem>
-                    </>
+                    <div style={{ width: 70, height: 50, padding: 5, boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px", borderRadius: 10, textAlign: "center", display: "flex", flexDirection: "column" }}>
+                      {/* <DropdownItem className="noti-title" header tag="div"> */}
+
+                      <a title={app?.name} href={app?.appPath} target="_blank" className="text-overflow m-0" style={{ color: "blue", fontSize: 12, fontWeight: "800" }}>{app?.name}</a>
+                      {/* </DropdownItem> */}
+                    </div>
                   )
                 })}
               </DropdownMenu>
