@@ -997,7 +997,7 @@ const Items = () => {
                   </h6>
                   <div className="pl-lg-4">
                     <Row>
-                      <Col lg="5" className="pt-4">
+                      <Col lg="4" className="pt-4">
                         <Input
                           className="form-control-checkbox "
                           type="checkbox"
@@ -1014,7 +1014,7 @@ const Items = () => {
                           </label>
                         </FormGroup>
                       </Col>
-                      <Col lg="7">
+                      <Col lg="8">
                         <label
                           className="form-control-label"
                           htmlFor="input-first-name"
@@ -1034,9 +1034,9 @@ const Items = () => {
                       </Col>
                     </Row>
                   </div>
-                  <div className="pl-lg-4" hidden>
+                  <div className="pl-lg-4">
                     <Row>
-                      <Col lg="5" className="pt-4">
+                      <Col lg="4" className="pt-4">
                         <Input
                           className="form-control-checkbox "
                           type="checkbox"
