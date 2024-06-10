@@ -357,9 +357,7 @@ function InvoiceForm({ refetch }) {
     const addRecordToData = (item) => {
         // setIsCurrencyDisbled(true)
 
-        console.log({ item })
-
-        if (item?.price < 1) {
+        if (item?.price < 1 || item?.price === "" || item?.price === undefined) {
             toast.error("Invalid price value");
             return
         }

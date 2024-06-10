@@ -432,16 +432,18 @@ const Index = () => {
     try {
       setIsPostLoading(true)
       const response = await axios.post("/api/RetryInvoice", { id: rowData?.id, invoiceNumber: rowData?.invoiceNo })
-      console.log({ response });
-      // if (response.data?.status === "OK") {
-      //   toast.success("Invoice Removed.")
+       
+        const resData = JSON.parse(response?.data?.data)
+        console.log({ resData });
+        if (resData.signatureStatus === "SUCCESS") {
+         toast.success("Invoice Retry Successful")
 
-      // } else {
-      //   toast.error("Invoice not removed. Please contact support.")
-      // }
+       } else {
+            toast.error("Invoice denied signature. Please contact support.")
+       }
 
     } catch (error) {
-      toast.error("Invoice not removed. Please contact support.")
+        toast.error("Invoice denied signature. Please contact support.")
     } finally {
       refetch()
       setShowPrompt(false)
@@ -472,7 +474,7 @@ const Index = () => {
     <>
       {isPostLoading ? <Loader /> : null}
       {/* {showRetryLoader || isFetching && <Loader />} */}
-      <RetryPrompt isRetryLoading={isPostLoading} isRemoveLoading={isPostLoading} handleClose={handleClosePrompt} confirmHandeler={confirmHandeler} cancelHandeler={cancelHandeler} title="No Signature Invoice" showPrompt={showPrompt} setShowPrompt={setShowPrompt} message="Sorry, this invoice does not have a signature. Would you like to retry obtaining the signature or remove the invoice?" />
+          <RetryPrompt isRetryLoading={isPostLoading} isRemoveLoading={isPostLoading} handleClose={handleClosePrompt} confirmHandeler={confirmHandeler} cancelHandeler={cancelHandeler} title="No Signature Invoice" showPrompt={showPrompt} setShowPrompt={setShowPrompt} message="Sorry, this invoice is denied signature. Would you like to retry obtaining the signature or remove the invoice?" />
       <AppContext.Provider value={{ invoices, setInvoices }}>
 
         <Header

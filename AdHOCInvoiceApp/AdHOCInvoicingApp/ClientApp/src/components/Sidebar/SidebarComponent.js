@@ -191,10 +191,19 @@ const SidebarComponent = (props) => {
   //   });
 
   // }
-  function sortByOrderKey(arr) {
-    console.log({ sortByOrderKey: arr, sortted: arr.sort((a, b) => +a.orderKey - +b.orderKey) });
-    return arr.sort((a, b) => a.orderKey - b.orderKey);
-  }
+  //function sortByOrderKey(arr) {
+  //  console.log({ sortByOrderKey: arr, sortted: arr.sort((a, b) => +a.orderKey - +b.orderKey) });
+  //  return arr.sort((a, b) => a.orderKey - b.orderKey);
+  //  }
+
+    const sortByOrderKey = (menus) => {
+        return menus.map(menu => {
+            if (menu.menus && menu.menus.length > 0) {
+                menu.menus = sortByOrderKey(menu.menus);
+            }
+            return menu;
+        }).sort((a, b) => a.orderKey.localeCompare(b.orderKey));
+    };
 
   const renderMenuItem = (menuItem) => {
     const active = isActive(menuItem.navicationPath);
