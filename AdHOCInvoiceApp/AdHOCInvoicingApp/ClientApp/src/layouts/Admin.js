@@ -41,8 +41,9 @@ import { useLayoutEffect } from "react";
 
 import { toast } from "react-toastify";
 import useCustomAxios from "hooks/useCustomAxios";
-import LoaderComponent from "components/LoadingOverlay/LoaderComponent";
+
 import SidebarComponent from "components/Sidebar/SidebarComponent";
+import LoaderComponent from "components/Invoice/LoadingOverlay/LoaderComponent";
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
@@ -229,6 +230,11 @@ const Admin = (props) => {
 
             <Switch>
               {getRoutes()}
+              {/* <Route
+                path={"/stockloading"}
+                component={<Stockloading />}
+                key={key}
+              /> */}
 
               <Redirect from="*" to="/index" />
             </Switch>

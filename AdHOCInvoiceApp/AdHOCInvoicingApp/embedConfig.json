@@ -1,18 +1,8 @@
-//{
-//  "DashboardId": "58fb7385-8845-449c-9c90-41e41b63d5a8",
-//  "ServerUrl": "https://reports.cimsgh.com/bi",
-//  "UserEmail": "paul.kodjo@persol.net",
-//  "EmbedSecret": "X0DIV6vKTzrxWzkEh2XIlxNL5GXvm5jx",
-//  "EmbedType": "component",
-//  "Environment": "onpremise",
-//  "ExpirationTime": "10000",
-//  "SiteIdentifier": "site/site1"
-//}
 {
-  "DashboardId": "42a655bd-0949-4890-ba6b-29de3c1d8087",
-  "ServerUrl": "http://psl-webapps-vm3:56165/bi",
+  "DashboardId": "58fb7385-8845-449c-9c90-41e41b63d5a8",
+  "ServerUrl": "https://reports.cimsgh.com/bi",
   "UserEmail": "paul.kodjo@persol.net",
-  "EmbedSecret": "33hAP8gzmX7WXrksozEPtUW2hkbpgbRk",
+  "EmbedSecret": "X0DIV6vKTzrxWzkEh2XIlxNL5GXvm5jx",
   "EmbedType": "component",
   "Environment": "onpremise",
   "ExpirationTime": "10000",

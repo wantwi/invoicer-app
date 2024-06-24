@@ -21,6 +21,7 @@ const Dashboard = lazy(() => import("views/Dashboard.js"))
 const Reports = lazy(() => import("views/Reports.js"))
 const PurchaseReturn = lazy(() => import("views/PurchaseReturn"))
 const DebitAndCredit = lazy(() => import("views/DebitAndCredit"))
+const Stockloading = lazy(() => import("views/Stockloading"))
 
 var routes = [
   {
@@ -43,6 +44,13 @@ var routes = [
     name: "Purchase Invoices",
     icon: "ni ni-archive-2 text-primary",
     component: Purchases,
+    layout: "/admin",
+  },
+  {
+    path: "/stockloading",
+    name: "Item Setup",
+    icon: "ni ni-bag-17 text-primary",
+    component: Stockloading,
     layout: "/admin",
   },
   {
