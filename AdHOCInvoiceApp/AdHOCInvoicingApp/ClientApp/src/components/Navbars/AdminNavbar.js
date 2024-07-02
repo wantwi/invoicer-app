@@ -23,8 +23,9 @@ import { toast } from "react-toastify";
 import useCustomAxios from "hooks/useCustomAxios"
 import { BsFillGridFill } from "react-icons/bs";
 import { FaFaceDizzy } from "react-icons/fa6";
+import BRANCHIMG from "../../assets/img/BRANCHIMG.png";
 
-const AdminNavbar = (props) => {
+const AdminNavbar = ({ setisOpen }) => {
   const { getUser, user, logout, setSelectedBranch, selectedBranch } = useAuth();
   const axios = useCustomAxios()
   const [authurls, setAuthurls] = useState(null)
@@ -85,13 +86,16 @@ const AdminNavbar = (props) => {
     return () => { };
 
   }, []);
+  const handleBranchChange = () => {
+    setisOpen(true)
+  }
 
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
         <Container fluid>
           <h1 className="h1 mb-0 text-white text-uppercase d-none d-lg-inline-block">
-            {user?.companyName ? user?.companyName + " " + selectedBranch?.name : selectedBranch?.name}
+            {user?.companyName ? user?.companyName + " " + selectedBranch?.name || "" : selectedBranch?.name || ""}
           </h1>
           <Nav className="align-items-center d-none d-md-flex" navbar>
             <UncontrolledDropdown nav>
@@ -139,11 +143,9 @@ const AdminNavbar = (props) => {
                   <h6 className="text-overflow m-0">Welcome!</h6>
                 </DropdownItem>
                 <DropdownItem
-                  onClick={() => {
-                    setSelectedBranch(null)
-                  }}
+                  onClick={handleBranchChange}
                 >
-                  <i className="ni ni-user-run" />
+                  <img src={BRANCHIMG} style={{ width: 25, marginRight: 5 }} />
                   <span>Change Branch</span>
                 </DropdownItem>
                 <DropdownItem

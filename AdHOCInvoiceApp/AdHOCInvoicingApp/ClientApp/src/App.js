@@ -42,6 +42,10 @@ const App = () => {
           render={(props) => <AdminLayout {...props} />}
         />
         <Route
+          path="/device"
+          render={(props) => <AdminLayout {...props} />}
+        />
+        <Route
           path="/refunds"
           render={(props) => <AdminLayout {...props} />}
         />

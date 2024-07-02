@@ -12,13 +12,15 @@ function Loader() {
         justifyContent: 'center',
         alignItems: 'center',
         position: 'absolute',
-        // width: '100%',
+        width: '100%',
         height: '50vh',
-        left:0,right:270,top: 0, bottom:0,
+        // left: 0, right: 270, top: 0, bottom: 0,
+        placeContent: "center",
         zIndex: 9999999,
       }}
     >
       <CircularProgress size={48} />
+      <em>Loading...</em>
       {/* <Box sx={{ display: 'flex' }}>
       </Box> */}
     </div>

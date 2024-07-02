@@ -196,14 +196,14 @@ const SidebarComponent = (props) => {
   //  return arr.sort((a, b) => a.orderKey - b.orderKey);
   //  }
 
-    const sortByOrderKey = (menus) => {
-        return menus.map(menu => {
-            if (menu.menus && menu.menus.length > 0) {
-                menu.menus = sortByOrderKey(menu.menus);
-            }
-            return menu;
-        }).sort((a, b) => a.orderKey.localeCompare(b.orderKey));
-    };
+  const sortByOrderKey = (menus) => {
+    return menus.map(menu => {
+      if (menu.menus && menu.menus.length > 0) {
+        menu.menus = sortByOrderKey(menu.menus);
+      }
+      return menu;
+    }).sort((a, b) => a.orderKey.localeCompare(b.orderKey));
+  };
 
   const renderMenuItem = (menuItem) => {
     const active = isActive(menuItem.navicationPath);
@@ -378,7 +378,7 @@ const SidebarComponent = (props) => {
                   }),
                 }}
               >
-                {renderUserMenus(sortByOrderKey(routes))}
+                {renderUserMenus(sortByOrderKey(userMenus))}
               </Menu>
             </Sidebar>
 

@@ -38,13 +38,17 @@ import { useCustomPut } from "hooks/useCustomPut";
 import useAuth from "hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import CurrencyInput from "react-currency-input-field";
+import BranchPrompt from "components/Modals/BranchPrompt";
+import useCustomAxios from "hooks/useCustomAxios";
 
 const Items = () => {
     const queryClient = useQueryClient();
-    const { selectedBranch, user } = useAuth();
+    const axios = useCustomAxios()
+    const { selectedBranch, user, companySettings, setCompanySettings } = useAuth();
 
     const [formData, setFormData] = useState({
         companyId: user?.sub,
+        code: "",
         productName: "",
         description: "",
         taxable: false,
@@ -75,6 +79,10 @@ const Items = () => {
     const [value] = useDebounce(searchText, 500);
     const [isViewed, setIsViewed] = useState(false);
     const [hasDiscount, setHasDiscount] = useState(false);
+    const [open, setOpen] = useState(false)
+    const [codeTye, setCodeTye] = useState("")
+
+    console.log({ companySettings });
 
     const {
         refetch: getItemsList,
@@ -136,7 +144,8 @@ const Items = () => {
             taxRate: "",
             price: "",
             discount: 0,
-            discountType: ""
+            discountType: "",
+            code: ""
 
         });
         setCurrencyCode("");
@@ -302,7 +311,8 @@ const Items = () => {
                 isTaxInclusive: item?.isTaxInclusive,
                 otherLevies: item?.otherLevies,
                 discountType: item?.discountType,
-                discount: item?.discount
+                discount: item?.discount,
+                code: item?.code
             };
         });
         setCurrencyCode(item.currencyCode);
@@ -428,17 +438,63 @@ const Items = () => {
     }, [hasDiscount]);
 
 
+    useEffect(() => {
+
+        if (!companySettings) {
+            setOpen(true)
+        }
+
+        return () => {
+
+        }
+    }, [companySettings])
+
+
+    const handleChangeEvent = (e) => {
+
+        setCodeTye(e.target.value)
+
+    }
+
+    const updateComsetting = async () => {
+        try {
+            const result = await axios.put('/api/UpdateCompanyItemCode', { itemCodeSetting: codeTye })
+
+            setCompanySettings(codeTye)
+            setOpen(false)
+
+        } catch (error) {
+
+        }
+
+    }
+
+    const eventHandler = () => {
+
+        if (codeTye.length === 0) {
+            toast.info("You have not selected any option")
+            return
+        }
+        updateComsetting()
+
+    }
+
+
+
+
+
 
 
     return (
         <>
+            <BranchPrompt showimg={false} fontSize='0.8rem' placeholder={"Select code generation type"} data={[{ code: "CUSTOM", name: "User defined code" }, { code: "AUTO", name: "System generated" }]} branch={codeTye} loading={false} message="Would you like to use a system-generated item code or define your own item code? Please note that once you confirm your selection, you will not be able to change it." showPrompt={open} eventHandler={eventHandler} handleBranchChange={handleChangeEvent} />
             <UserHeader
                 message={"This is your products setup page. Manage your products here"}
                 pageName="Item Setup"
             />
             {(isPostLoading || isPutLoading) && <Loader />}
 
-            <ToastContainer />
+            {/* <ToastContainer /> */}
             <Container className="mt--7" fluid>
                 <Row className="mt-5">
                     {itemsList && isSearched ? (
@@ -519,13 +575,16 @@ const Items = () => {
                                 </CardHeader>
                                 <CardBody style={styles.body}>
                                     {/* {loading ? <Loader /> : null} */}
-                                    <Table className="align-items-center  table-flush" responsive>
+                                    <Table responsive>
                                         <thead className="thead-light">
                                             <tr>
+                                                <th style={{ width: "10%" }} scope="col">
+                                                    Code
+                                                </th>
                                                 <th style={{ width: "30%" }} scope="col">
                                                     Name
                                                 </th>
-                                                <th style={{ width: "10%" }} scope="col">
+                                                <th style={{ width: "5%" }} scope="col">
                                                     Currency
                                                 </th>
 
@@ -585,6 +644,7 @@ const Items = () => {
                                                 // style={{ cursor: 'pointer' }}
                                                 // onClick={() => handleEditItem(item)}
                                                 >
+                                                    <td>{item.code}</td>
                                                     <td
                                                         style={{ cursor: "pointer" }}
                                                         title={item.name}
@@ -617,14 +677,7 @@ const Items = () => {
                                                     <td style={{ textAlign: "right" }}>
                                                         {item.otherLevies}
                                                     </td>
-                                                    {/* <td style={{ textAlign: 'right' }}>
-                            <Button
-                              onClick={() => toggleStatus(item)}
-                              title='click to toggle Inactive or Active'
-                            >
-                              {item.status || 'A'}
-                            </Button>
-                          </td> */}
+
                                                     <td
                                                         style={{
                                                             textAlign: "right",
@@ -771,7 +824,32 @@ const Items = () => {
 
                                     <div className="" style={{ marginTop: -10 }}>
                                         <Row>
-                                            <Col lg="7">
+                                            <Col lg="4">
+                                                <FormGroup>
+                                                    <label
+                                                        className="form-control-label"
+                                                        htmlFor="input-username"
+                                                    >
+                                                        Code
+                                                    </label>{" "}
+                                                    <code style={{ color: "darkred" }}>*</code>
+                                                    <Input
+                                                        className="form-control font-sm"
+                                                        placeholder={companySettings === "AUTO" ? "AUTO" : "Item Code"}
+                                                        type="text"
+                                                        readOnly={companySettings === "AUTO" ?? true}
+                                                        disabled={itemSelected}
+                                                        value={formData.code}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                code: e.target.value,
+                                                            })
+                                                        }
+                                                    />
+                                                </FormGroup>
+                                            </Col>
+                                            <Col lg="8">
                                                 <FormGroup>
                                                     <label
                                                         className="form-control-label"
@@ -795,49 +873,8 @@ const Items = () => {
                                                     />
                                                 </FormGroup>
                                             </Col>
-                                            <Col lg="5">
-                                                <FormGroup>
-                                                    <label
-                                                        className="form-control-label"
-                                                        htmlFor="input-first-name"
-                                                    >
-                                                        Price
-                                                    </label>{" "}
-                                                    <code style={{ color: "darkred" }}>*</code>
-                                                    <CurrencyInput
 
-                                                        id="input-example2"
-                                                        name="price"
-                                                        className={`form-control form-control-sm text-right`}
-                                                        placeholder="0.00"
-                                                        defaultValue={formData.price}
-                                                        value={formData.price}
-                                                        decimalsLimit={2}
-                                                        onValueChange={(value, name) => setFormData({
-                                                            ...formData,
-                                                            price: value,
-                                                        })}
-                                                    />
-                                                    {/*<Input*/}
-                                                    {/*    className="form-control font-sm"*/}
-                                                    {/*    placeholder="price"*/}
-                                                    {/*    type="number"*/}
-                                                    {/*    value={formData.price}*/}
-                                                    {/*    onChange={(e) =>*/}
-                                                    {/*        setFormData({*/}
-                                                    {/*            ...formData,*/}
-                                                    {/*            price: e.target.value,*/}
-                                                    {/*        })*/}
-                                                    {/*    }*/}
-                                                    {/*    onBlur={() =>*/}
-                                                    {/*        setFormData((prev) => ({*/}
-                                                    {/*            ...prev,*/}
-                                                    {/*            price: Number(formData?.price).toFixed(4),*/}
-                                                    {/*        }))*/}
-                                                    {/*    }*/}
-                                                    {/*/>*/}
-                                                </FormGroup>
-                                            </Col>
+
                                             {/* <Col lg="3">
                         <FormGroup>
                           <Input
@@ -861,7 +898,33 @@ const Items = () => {
                       </Col> */}
                                         </Row>
                                         <Row style={{ marginTop: -20 }}>
-                                            <Col lg="7">
+                                            <Col lg="4">
+                                                <FormGroup>
+                                                    <label
+                                                        className="form-control-label"
+                                                        htmlFor="input-first-name"
+                                                    >
+                                                        Price
+                                                    </label>{" "}
+                                                    <code style={{ color: "darkred" }}>*</code>
+                                                    <CurrencyInput
+                                                        id="input-example2"
+                                                        name="price"
+                                                        className={`form-control form-control-sm text-right`}
+                                                        placeholder="0.00"
+                                                        defaultValue={formData.price}
+                                                        value={formData.price}
+                                                        decimalsLimit={2}
+                                                        onValueChange={(value, name) => setFormData({
+                                                            ...formData,
+                                                            price: value,
+                                                        })}
+                                                        style={{ marginTop: -8, height: 29 }}
+                                                    />
+
+                                                </FormGroup>
+                                            </Col>
+                                            <Col lg="4">
                                                 <FormGroup>
                                                     <label
                                                         className="form-control-label"
@@ -873,7 +936,7 @@ const Items = () => {
                                                             }
                                                         }}
                                                     >
-                                                        Select Currency{" "}
+                                                        Currency{" "}
                                                         <i
                                                             className={
                                                                 !showList
@@ -951,7 +1014,7 @@ const Items = () => {
                                                     )}
                                                 </FormGroup>
                                             </Col>
-                                            <Col sm="12" lg="5" className="mt-4">
+                                            <Col sm="12" lg="4" className="mt-4">
                                                 <FormGroup>
                                                     <input
                                                         className="form-control-checkbox"

@@ -244,7 +244,7 @@ const Refunds = () => {
             dayOfWeekSelRef?.current?.selectedIndex
           ]?.innerText
           : "No invoice matched your search: " + value;
-        toast.info(msg);
+        // toast.info(msg);
         setMessage(msg);
       } else {
         setMessage(null);

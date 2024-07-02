@@ -873,7 +873,7 @@ namespace AdHOCInvoicingApp.Controllers
 
             var response = await client.PostAsync(url, content);
 
-          
+
             var dataObj = string.Empty;
 
             if (response.IsSuccessStatusCode)
@@ -1315,6 +1315,47 @@ namespace AdHOCInvoicingApp.Controllers
             string url = $"{EvatAdHOCBaseUrl}v4/Notes";
 
             var response = await client.PostAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
+
+        [HttpGet("GetCompanyDetailsByCompanyId")]
+        public async Task<IActionResult> GetCompanyDetailsByCompanyId()
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v4/Company/GetCompanyDetailsByCompanyId/{user.Sub}";
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+        }
+
+        [HttpPut("UpdateCompanyItemCode")]
+        public async Task<IActionResult> UpdateCompanyItemCode([FromBody] ItemCodeSettingsDto data)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.CompanyId = new Guid(user.Sub);
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/Company/UpdateCompanyItemCode";
+
+            var response = await client.PutAsync(url, content);
 
             var dataObj = string.Empty;
             if (response.IsSuccessStatusCode)

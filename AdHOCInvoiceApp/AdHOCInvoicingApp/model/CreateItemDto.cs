@@ -91,6 +91,12 @@ namespace AdHOCInvoicingApp.model
         public string? invoiceNumber { get; set; }
     }
 
+    public class ItemCodeSettingsDto
+    {
+        public Guid CompanyId { get; set; }
+        public string ItemCodeSetting { get; set; }
+    }
+
 
 }
 

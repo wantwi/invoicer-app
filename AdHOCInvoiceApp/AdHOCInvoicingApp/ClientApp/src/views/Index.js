@@ -354,7 +354,7 @@ const Index = () => {
             dayOfWeekSelRef?.current?.selectedIndex
           ]?.innerText
           : "No invoice matched your search: " + value;
-        toast.info(msg);
+        // toast.info(msg);
         setMessage(msg);
         return;
       }
@@ -363,21 +363,39 @@ const Index = () => {
     (err) => { },
     {
       filterUrl: `/api/GetSalesInvoicesByCompanyId/${value}`,
+      isEnabled: false
     }
   );
+
   useEffect(() => {
-    if (pageNumber === 0) {
-      setPageInfo({
-        totalItems: 10,
-        pageNumber: 1,
-        pageSize: 10,
-        totalPages: 5,
-      });
-      setPageNumber(1);
+    if (selectedBranch?.code) {
+      if (pageNumber === 0) {
+        setPageInfo({
+          totalItems: 10,
+          pageNumber: 1,
+          pageSize: 10,
+          totalPages: 5,
+        });
+        setPageNumber(1);
+      }
+      refetch();
     }
-    refetch();
+
     return () => { };
-  }, [period, pageNumber]);
+  }, [period, pageNumber, selectedBranch?.code]);
+  // useEffect(() => {
+  //   if (pageNumber === 0) {
+  //     setPageInfo({
+  //       totalItems: 10,
+  //       pageNumber: 1,
+  //       pageSize: 10,
+  //       totalPages: 5,
+  //     });
+  //     setPageNumber(1);
+  //   }
+  //   refetch();
+  //   return () => { };
+  // }, [period, pageNumber]);
 
   useEffect(() => {
     if (value.length > 1) {
@@ -432,18 +450,18 @@ const Index = () => {
     try {
       setIsPostLoading(true)
       const response = await axios.post("/api/RetryInvoice", { id: rowData?.id, invoiceNumber: rowData?.invoiceNo })
-       
-        const resData = JSON.parse(response?.data?.data)
-        console.log({ resData });
-        if (resData.signatureStatus === "SUCCESS") {
-         toast.success("Invoice Retry Successful")
 
-       } else {
-            toast.error("Invoice denied signature. Please contact support.")
-       }
+      const resData = JSON.parse(response?.data?.data)
+      console.log({ resData });
+      if (resData.signatureStatus === "SUCCESS") {
+        toast.success("Invoice Retry Successful")
+
+      } else {
+        toast.error("Invoice denied signature. Please contact support.")
+      }
 
     } catch (error) {
-        toast.error("Invoice denied signature. Please contact support.")
+      toast.error("Invoice denied signature. Please contact support.")
     } finally {
       refetch()
       setShowPrompt(false)
@@ -474,7 +492,7 @@ const Index = () => {
     <>
       {isPostLoading ? <Loader /> : null}
       {/* {showRetryLoader || isFetching && <Loader />} */}
-          <RetryPrompt isRetryLoading={isPostLoading} isRemoveLoading={isPostLoading} handleClose={handleClosePrompt} confirmHandeler={confirmHandeler} cancelHandeler={cancelHandeler} title="No Signature Invoice" showPrompt={showPrompt} setShowPrompt={setShowPrompt} message="Sorry, this invoice is denied signature. Would you like to retry obtaining the signature or remove the invoice?" />
+      <RetryPrompt isRetryLoading={isPostLoading} isRemoveLoading={isPostLoading} handleClose={handleClosePrompt} confirmHandeler={confirmHandeler} cancelHandeler={cancelHandeler} title="No Signature Invoice" showPrompt={showPrompt} setShowPrompt={setShowPrompt} message="Sorry, this invoice is denied signature. Would you like to retry obtaining the signature or remove the invoice?" />
       <AppContext.Provider value={{ invoices, setInvoices }}>
 
         <Header

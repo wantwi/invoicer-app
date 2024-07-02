@@ -15,6 +15,7 @@ console.log({ branchInfo });
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [companySettings, setCompanySettings] = useState(null)
   const [selectedBranch, setSelectedBranch] = useState({
     name: branchInfo?.name || null,
     code: branchInfo?.code || null,
@@ -82,10 +83,10 @@ export const AuthProvider = ({ children }) => {
     },
   ];
 
-  const fecthBranches = async () => {
-    const res = await axios.get("/api/GetBranches");
-    return res?.data;
-  };
+  // const fecthBranches = async () => {
+  //   const res = await axios.get("/api/GetBranches");
+  //   return res?.data;
+  // };
 
   const { refetch: getUser, isLoading } = useQuery({
     queryKey: ["user"],
@@ -94,6 +95,7 @@ export const AuthProvider = ({ children }) => {
     onSuccess: onSuccessResponse,
     onError: onErrorResponse,
   });
+
   const {
     refetch: getBranches,
     data: branches,
@@ -102,7 +104,7 @@ export const AuthProvider = ({ children }) => {
   } = useQuery({
     enabled: false,
     queryKey: ["branches"],
-    queryFn: fecthBranches,
+    queryFn: () => { },
     cacheTime: Infinity,
     staleTime: Infinity
   });
@@ -126,6 +128,8 @@ export const AuthProvider = ({ children }) => {
         setSelectedBranch,
         selectedBranch,
         isErrorLoadingBranches,
+        companySettings,
+        setCompanySettings
       }}
     >
       {children}
