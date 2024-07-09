@@ -33,7 +33,7 @@ function MyDropzone({
     },
   });
 
-  console.log({dhajhds:acceptedFiles, previewData})
+  //console.log({dhajhds:acceptedFiles, previewData})
 
   
   const { user } = useAuth();
@@ -106,7 +106,10 @@ function MyDropzone({
 
 
   const processUpload = (arr) => {
-    let keys = [...new Set(arr)];
+      let keys = [...new Set(arr)];
+
+      console.log({ processUpload: keys })
+      let code = keys.filter((item) => item.Column === "A");
     let names = keys.filter((item) => item.Column === "A");
     let prices = keys.filter((item) => item.Column === "B");
     let descriptions = keys.filter((item) => item.Column === "C");
@@ -147,7 +150,9 @@ function MyDropzone({
       // ItemstoursimlevyapplicablesArr
       currenciesArr,
       CSTArr
-    );
+      );
+
+      console.log({ finalData })
 
     let postData = [];
     let res = [];
@@ -182,7 +187,8 @@ function MyDropzone({
     });
 
     const renderData = results.map((value) => ({
-        companyId: user?.sub,
+       companyId: user?.sub,
+      code: value.Code,
       name: value.ItemName,
       price: value.Price,
       description: value.Description,
@@ -193,7 +199,7 @@ function MyDropzone({
       currencyCode: value["Currency"],
     }));
 
-    console.log({results,renderData})
+
     setItemsList(renderData);
     setIsSearched(true);
   };

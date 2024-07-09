@@ -361,6 +361,7 @@ const Items = () => {
         setLoading(true);
         let postData = itemsList.map((item) => {
             return {
+                code: item.code || "",
                 name: item.name,
                 description: item.description,
                 taxable: item.istaxable,
@@ -482,7 +483,7 @@ const Items = () => {
 
 
 
-
+    //  {(isPostLoading || isPutLoading) && <Loader />}
 
 
     return (
@@ -492,7 +493,7 @@ const Items = () => {
                 message={"This is your products setup page. Manage your products here"}
                 pageName="Item Setup"
             />
-            {(isPostLoading || isPutLoading) && <Loader />}
+            {(isPutLoading) && <Loader />}
 
             {/* <ToastContainer /> */}
             <Container className="mt--7" fluid>

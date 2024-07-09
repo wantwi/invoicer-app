@@ -304,9 +304,7 @@ const Admin = (props) => {
         userMenus={userMenus}
         logo={{
           innerLink: "/index",
-
           imgSrc: graLogo,
-
           imgAlt: "...",
 
         }} />
