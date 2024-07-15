@@ -1,12 +1,14 @@
 
-import React, { useState } from "react";
-import { Modal, Button, ModalFooter } from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Modal, Button, ModalFooter, TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import PdfViewer from "components/PdfViewer/PdfViewer";
 import { useAuth } from "context/AuthContext";
 import { useCustomPost } from "hooks/useCustomPost";
 import ComfirmPrompt from "./ComfirmPrompt";
 import { useOverLayLoader } from "context/LoaderProvider";
 import { ToastContainer, toast } from "react-toastify";
+
+let isFirst = true
 
 function PrintPreview({
   setShowReport,
@@ -20,10 +22,15 @@ function PrintPreview({
   title="Invoice",
   isRefund=false,
   isActive=true,
-  refetch
+    refetch,
+    setPrintType = () => { },
+    printType = "",
+    showBtn=false
+
 }) {
   const [showPrompt, setShowPrompt] = useState(false)
- const {setShowLoader} = useOverLayLoader()
+    const { setShowLoader } = useOverLayLoader()
+    const [activeTab, setActiveTab] = useState(printType || "")
   
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -81,7 +88,15 @@ refetch()
     mutate(postData)
     setShowPrompt(false)
     setShowLoader(true)
-  }
+    }
+
+    const toggle = (tab) => {
+        setPrintType(tab)
+        setActiveTab(tab)
+
+    }
+
+
 
   return (
     <>
@@ -108,19 +123,55 @@ refetch()
               <FcPrint />
             </Button> */}
             <Button
-              aria-label="Close"
-              data-dismiss="modal"
-              type="button"
-              size="sm"
-              onClick={() => setShowReport(false)}
+                          aria-label="Close"
+                          data-dismiss="modal"
+                          type="button"
+                          size="sm"
+                          onClick={() => {
+                              setPrintType('')
+                              setShowReport(false)
+                          }}
             >
               <span aria-hidden={true}>×</span>
             </Button>
           </div>
-        </div>
-        {pdfData && (
-          <PdfViewer invoiceNo={selectedInvoiceNo} pdfData={pdfData} />
-        )}
+              </div>
+              {showBtn && <div className="pl-2">
+
+                  <Button size="sm" color={printType !== "A" ? "primary" : ""} onClick={() => { toggle('default'); }} value="default">A4 Size</Button>
+                  <Button color={printType === "A" ? "primary" : ""} size="sm" onClick={() => { toggle('A'); }} value="A">POS Receipt</Button>
+              </div>}
+             
+              {pdfData && (
+                  <PdfViewer invoiceNo={selectedInvoiceNo} pdfData={pdfData} />
+              )}
+              {/*<Nav tabs>*/}
+              {/*    <NavItem>*/}
+              {/*        <NavLink*/}
+                         
+              {/*            onClick={() => { toggle('default'); }}*/}
+              {/*        >*/}
+              {/*            A4 Size*/}
+              {/*        </NavLink>*/}
+              {/*    </NavItem>*/}
+              {/*    <NavItem>*/}
+              {/*        <NavLink*/}
+                         
+              {/*            onClick={() => { toggle('A'); }}*/}
+              {/*        >*/}
+              {/*           A7 Size*/}
+              {/*        </NavLink>*/}
+              {/*    </NavItem>*/}
+              {/*</Nav>*/}
+              {/*<TabContent activeTab={activeTab}>*/}
+              {/*    <TabPane tabId="default">*/}
+                      
+              {/*    </TabPane>*/}
+              {/*    <TabPane tabId="A">*/}
+                     
+              {/*    </TabPane>*/}
+              {/*</TabContent>*/}
+       
         {/* <div id="modal-body" className="modal-body">
          
         </div> */}

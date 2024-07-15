@@ -35,7 +35,7 @@ builder.Services.AddBff(option =>
 })
 .AddEntityFrameworkServerSideSessions(options =>
 {
-    
+
     options.UseSqlServer(apiSettingsData.ConfigrationEndpoint);
     options.EnableDetailedErrors(true);
 })

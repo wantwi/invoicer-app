@@ -22,6 +22,7 @@ import useCustomAxios from "hooks/useCustomAxios";
 import DatePicker from "react-datepicker";
 import { useAuth } from "hooks/useAuth";
 import { MultiSelect } from "react-multi-select-component";
+import { useGet } from "../hooks/useGet";
 
 const reportList = [
     { value: "JournalInvoiceReport", name: "Invoice Journal Report" },
@@ -72,13 +73,15 @@ const Reports = () => {
     const [intialValue, setInitialValue] = useState({});
     const [showBtn, setshowBtn] = useState(true);
     const submitBtn = useRef(null);
-    const { user, getBranches, branches } = useAuth();
+    const { user, getBranches } = useAuth();
     const [selectBranches, setSetselectBranches] = useState([]);
     const [reportURL, setReportURL] = useState({})
 
     const [showReportPramasModal, setShowReportPramasModal] = useState(false);
-    console.log({ branches });
+  
 
+    const { data: branches } = useGet("/api/GetBranches", ['user-branch'])
+    console.log({ branches });
     // useEffect(() => {
     //   toggle()
 
@@ -102,7 +105,7 @@ const Reports = () => {
         // )
         const { data } = await CustomAxios.get(`/api/GetReportMeta/Get${name}Meta`);
 
-        // console.log({ data });
+        console.log({ GetReportMeta: data });
 
         let userDetails = JSON.parse(
             sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -366,7 +369,7 @@ const Reports = () => {
                             <Col>
                                 <h3>Branch</h3>
                                 <MultiSelect
-                                    options={branches.map((x) => ({
+                                    options={branches?.map((x) => ({
                                         label: x?.name,
                                         value: x?.code,
                                     }))}

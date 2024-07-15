@@ -140,7 +140,19 @@ const Admin = (props) => {
 
 
 
-  const { data: userMenus, isLoading } = useGet("/api/GetMenus", ['user-menus'], (data) => {
+    const { data: userMenus, isLoading } = useGet("/api/GetMenus", ['user-menus'], (data) => {
+
+        console.log({ GetMenus: data })
+       
+        if (!data) {
+            const responseData = JSON.parse(data)
+
+            if (responseData?.StatusCode > 201) {
+
+            }
+        }
+     
+        
     if (!selectedBranch?.code) {
       setisOpen(true)
     } else {

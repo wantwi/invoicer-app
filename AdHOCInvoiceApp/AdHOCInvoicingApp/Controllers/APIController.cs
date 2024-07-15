@@ -201,12 +201,12 @@ namespace AdHOCInvoicingApp.Controllers
 
         }
 
-        [HttpPost("GenerateVATInvoiceReportAsync")]
-        public async Task<IActionResult> PostInvoice([FromBody] string invoiceNo)
+        [HttpPost("GenerateVATInvoiceReportAsync/{type}")]
+        public async Task<IActionResult> PostInvoice([FromBody] string invoiceNo, string type)
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateVATInvoiceReportAsync?Id={invoiceNo}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GenerateVATInvoiceReportAsync?Id={invoiceNo}&type={type}";
             // var response = await client.PostAsJsonAsync(url, invoiceNo);
 
             var content = new StringContent(JsonConvert.SerializeObject(invoiceNo), System.Text.Encoding.UTF8, "application/json");

@@ -11,7 +11,7 @@ export default function BranchPrompt({
   handleBranchChange,
   branch,
   loading,
-  data,
+  data=[],
   placeholder = "Select branch",
   fontSize = "1.5rem",
   showimg = true

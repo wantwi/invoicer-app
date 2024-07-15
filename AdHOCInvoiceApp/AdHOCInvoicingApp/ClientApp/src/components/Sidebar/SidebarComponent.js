@@ -196,8 +196,8 @@ const SidebarComponent = (props) => {
   //  return arr.sort((a, b) => a.orderKey - b.orderKey);
   //  }
 
-  const sortByOrderKey = (menus) => {
-    return menus.map(menu => {
+  const sortByOrderKey = (menus=[]) => {
+    return menus?.map(menu => {
       if (menu.menus && menu.menus.length > 0) {
         menu.menus = sortByOrderKey(menu.menus);
       }
