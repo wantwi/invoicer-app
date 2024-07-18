@@ -2,7 +2,7 @@ import React from 'react'
 const appVersion = process.env.REACT_APP_VERSION
 export const AppVersion = () => {
     return (
-        <span style={versionStyle}>v2.0.3</span>
+        <span style={versionStyle}>v{appVersion}</span>
     )
 }
 

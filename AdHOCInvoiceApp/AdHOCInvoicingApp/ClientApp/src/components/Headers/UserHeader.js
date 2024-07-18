@@ -49,7 +49,8 @@ const UserHeader = ({ message, pageName = "" }) => {
               <p
                 className="text-white text-small"
                 style={{ fontSize: 13, marginTop: -5, paddingTop: 0 }}
-              >
+                          >
+            
                 {message}
               </p>
             </Col>

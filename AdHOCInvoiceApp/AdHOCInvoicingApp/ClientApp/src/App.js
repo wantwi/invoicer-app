@@ -80,4 +80,4 @@ const App = () => {
 
 export default App;
 
-// console.log = console.warn = console.error = () => { }
+console.log = console.warn = console.error = () => { }

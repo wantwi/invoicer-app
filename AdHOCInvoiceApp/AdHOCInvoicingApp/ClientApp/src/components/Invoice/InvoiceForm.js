@@ -486,7 +486,7 @@ function InvoiceForm({ refetch }) {
                     `There are no exchange rates set for ${new Date(new Date(formData.date).toISOString().split("T")[0]).toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })}. Redirecting you to currency set up to add exchange rates`
                 );
                 setTimeout(() => {
-                    history.push("/admin/currency");
+                    history.push("/currency");
                 }, 3000);
             }
         }

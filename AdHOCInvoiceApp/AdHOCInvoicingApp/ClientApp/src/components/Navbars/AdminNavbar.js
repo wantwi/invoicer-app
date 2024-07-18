@@ -109,15 +109,13 @@ const AdminNavbar = ({ setisOpen }) => {
                   </Media>
                 </Media>
               </DropdownToggle>
-              <DropdownMenu className="dropdown-menu-arrow" right style={{ padding: 20, display: "grid", placeContent: "center" }}>
+                          <DropdownMenu className="dropdown-menu-arrow" right style={{zIndex:1000, padding: 20, display: "flex", gap: 20 }}>
+              
                 {userApps?.map(app => {
                   return (
-                    <div style={{ width: 70, height: 50, padding: 5, boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px", borderRadius: 10, textAlign: "center", display: "flex", flexDirection: "column" }}>
-                      {/* <DropdownItem className="noti-title" header tag="div"> */}
-
+                   
                       <a title={app?.name} href={app?.appPath} target="_blank" className="text-overflow m-0" style={{ color: "blue", fontSize: 12, fontWeight: "800" }}>{app?.name}</a>
-                      {/* </DropdownItem> */}
-                    </div>
+                     
                   )
                 })}
               </DropdownMenu>

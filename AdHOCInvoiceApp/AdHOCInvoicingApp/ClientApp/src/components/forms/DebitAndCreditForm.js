@@ -86,7 +86,7 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
           "There are no exchange rates set for today. Redirecting you to currency set up to add exchange rates"
         );
         setTimeout(() => {
-          history.push("/admin/currency");
+          history.push("/currency");
         }, 3000);
       }
     }
