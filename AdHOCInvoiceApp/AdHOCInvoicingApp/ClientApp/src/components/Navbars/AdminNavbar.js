@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 //import { logout } from "../../hooks/useAuth"
 import { useAuth } from "context/AuthContext";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 // reactstrap components
 import {
   DropdownMenu,
@@ -20,88 +20,97 @@ import {
   Media,
 } from "reactstrap";
 import { toast } from "react-toastify";
-import useCustomAxios from "hooks/useCustomAxios"
+import useCustomAxios from "hooks/useCustomAxios";
 import { BsFillGridFill } from "react-icons/bs";
-import { FaFaceDizzy } from "react-icons/fa6";
+import { FaBurger, FaFaceDizzy } from "react-icons/fa6";
 import BRANCHIMG from "../../assets/img/BRANCHIMG.png";
+import { MdMenu } from "react-icons/md";
 
-const AdminNavbar = ({ setisOpen }) => {
-  const { getUser, user, logout, setSelectedBranch, selectedBranch } = useAuth();
-  const axios = useCustomAxios()
-  const [authurls, setAuthurls] = useState(null)
+const AdminNavbar = ({ setisOpen, setShowSideBar, showSideBar }) => {
+  const { getUser, user, logout, setSelectedBranch, selectedBranch } =
+    useAuth();
+  const axios = useCustomAxios();
+  const [authurls, setAuthurls] = useState(null);
   useLayoutEffect(() => {
-
     const checkIsALoggedIn = async () => {
       try {
-        const res = await getUser()
+        const res = await getUser();
         if (!res) {
-          throw new Error()
+          throw new Error();
         }
       } catch (e) {
-        toast.error("Login to access this page")
-        login()
+        toast.error("Login to access this page");
+        login();
       }
-    }
-    checkIsALoggedIn()
-    return () => { };
+    };
+    checkIsALoggedIn();
+    return () => {};
   }, []);
 
   const [userApps, setUserApps] = useState([]);
   const apps = async () => {
-
     try {
-
       const res = await axios.get(`/api/GetApps`);
 
-      setUserApps(res?.data.filter(itm => itm?.id !== "00000000-0000-0000-0000-400000000000"));
+      setUserApps(
+        res?.data.filter(
+          (itm) => itm?.id !== "00000000-0000-0000-0000-400000000000"
+        )
+      );
 
       // .charAt(0).toUpperCase()
-
     } catch (error) {
-
       //toast.error("Could not fetch menus. Please try again");
-
     }
-
   };
-
-
 
   const getlinks = async () => {
     try {
-      const geturllinks = await axios.get('/api/UserInfo')
-      console.log({ geturllinks })
-      setAuthurls(geturllinks?.data)
-    } catch (error) {
-
-    }
-
-  }
-
+      const geturllinks = await axios.get("/api/UserInfo");
+      console.log({ geturllinks });
+      setAuthurls(geturllinks?.data);
+    } catch (error) {}
+  };
 
   useLayoutEffect(() => {
     apps();
-    getlinks()
+    getlinks();
 
-    return () => { };
-
+    return () => {};
   }, []);
   const handleBranchChange = () => {
-    setisOpen(true)
-  }
+    setisOpen(true);
+  };
 
   return (
     <>
-      <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
+      <Navbar
+        className="navbar-top navbar-dark"
+        expand="md"
+        id="navbar-main"
+        // style={{ position: "relative" }}
+      >
         <Container fluid>
+          {window.innerWidth > 450 && (
+            <MdMenu
+              size={30}
+              color="#fff"
+              className=" d-sm-none d-md-block"
+              style={{
+                cursor: "pointer",
+              }}
+              onClick={() => setShowSideBar(!showSideBar)}
+            />
+          )}
           <h1 className="h1 mb-0 text-white text-uppercase d-none d-lg-inline-block">
-            {user?.companyName ? user?.companyName + " " + selectedBranch?.name || "" : selectedBranch?.name || ""}
+            {user?.companyName
+              ? user?.companyName + " " + selectedBranch?.name || ""
+              : selectedBranch?.name || ""}
           </h1>
           <Nav className="align-items-center d-none d-md-flex" navbar>
             <UncontrolledDropdown nav>
               <DropdownToggle className="pr-0" nav>
                 <Media className="align-items-center">
-
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
                       <BsFillGridFill size="2em" />
@@ -109,14 +118,23 @@ const AdminNavbar = ({ setisOpen }) => {
                   </Media>
                 </Media>
               </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-arrow" right style={{zIndex:1000, padding: 20, display: "flex", gap: 20 }}>
-              
-                {userApps?.map(app => {
+              <DropdownMenu
+                className="dropdown-menu-arrow"
+                right
+                style={{ zIndex: 1000, padding: 20, display: "flex", gap: 20 }}
+              >
+                {userApps?.map((app) => {
                   return (
-                   
-                      <a title={app?.name} href={app?.appPath} target="_blank" className="text-overflow m-0" style={{ color: "blue", fontSize: 12, fontWeight: "800" }}>{app?.name}</a>
-                     
-                  )
+                    <a
+                      title={app?.name}
+                      href={app?.appPath}
+                      target="_blank"
+                      className="text-overflow m-0"
+                      style={{ color: "blue", fontSize: 12, fontWeight: "800" }}
+                    >
+                      {app?.name}
+                    </a>
+                  );
                 })}
               </DropdownMenu>
             </UncontrolledDropdown>
@@ -140,16 +158,12 @@ const AdminNavbar = ({ setisOpen }) => {
                 <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Welcome!</h6>
                 </DropdownItem>
-                <DropdownItem
-                  onClick={handleBranchChange}
-                >
+                <DropdownItem onClick={handleBranchChange}>
                   <img src={BRANCHIMG} style={{ width: 25, marginRight: 5 }} />
                   <span>Change Branch</span>
                 </DropdownItem>
                 <DropdownItem
-                  href={
-                    authurls?.authURL + "/identity/account/manage"
-                  }
+                  href={authurls?.authURL + "/identity/account/manage"}
                   tag={"a"}
                   target="_blank"
                 >

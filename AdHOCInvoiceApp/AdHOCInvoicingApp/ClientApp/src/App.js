@@ -29,30 +29,15 @@ const App = () => {
           path="/auth/logout"
           render={(props) => <BranchCompo loggingOut={true} />}
         />
-        <Route
-          path="/"
-          render={(props) => <AdminLayoutWrapper {...props} />}
-        />
+        <Route path="/" render={(props) => <AdminLayoutWrapper {...props} />} />
         <Route
           path="/customers"
           render={(props) => <AdminLayout {...props} />}
         />
-        <Route
-          path="/items"
-          render={(props) => <AdminLayout {...props} />}
-        />
-        <Route
-          path="/device"
-          render={(props) => <AdminLayout {...props} />}
-        />
-        <Route
-          path="/refunds"
-          render={(props) => <AdminLayout {...props} />}
-        />
-        <Route
-          path="/reports"
-          render={(props) => <AdminLayout {...props} />}
-        />
+        <Route path="/items" render={(props) => <AdminLayout {...props} />} />
+        <Route path="/device" render={(props) => <AdminLayout {...props} />} />
+        <Route path="/refunds" render={(props) => <AdminLayout {...props} />} />
+        <Route path="/reports" render={(props) => <AdminLayout {...props} />} />
         <Route
           path="/user-accounts"
           render={(props) => <AdminLayout {...props} />}
@@ -65,10 +50,7 @@ const App = () => {
           path="/dashboard"
           render={(props) => <AdminLayout {...props} />}
         />
-        <Route
-          path="/profile"
-          render={(props) => <AdminLayout {...props} />}
-        />
+        <Route path="/profile" render={(props) => <AdminLayout {...props} />} />
         <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
         <Redirect from="/" to="/auth/login" />
       </Switch>
@@ -80,4 +62,4 @@ const App = () => {
 
 export default App;
 
-console.log = console.warn = console.error = () => { }
+// console.log = console.warn = console.error = () => { }

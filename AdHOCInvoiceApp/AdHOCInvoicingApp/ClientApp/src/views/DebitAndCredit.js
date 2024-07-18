@@ -35,6 +35,8 @@ import useCustomAxios from "hooks/useCustomAxios";
 import { EvatTable } from "components/Tables/EvatTable";
 import ReactTooltip from "react-tooltip";
 import useAuth from "hooks/useAuth";
+import PageHeader from "components/Headers/PageHeader";
+import { MdNoteAlt } from "react-icons/md";
 
 export const PurchaseContext = createContext();
 const DebitAndCredit = () => {
@@ -66,7 +68,7 @@ const DebitAndCredit = () => {
   const [value] = useDebounce(invoiceQuery, 100);
   const [selectedRow, setSelectedRow] = useState(null);
   const { selectedBranch, user } = useAuth();
-  const [noteType, setNoteType] = useState("CREDIT")
+  const [noteType, setNoteType] = useState("CREDIT");
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
@@ -143,7 +145,7 @@ const DebitAndCredit = () => {
               className="badge-success"
               onClick={(e) => {
                 // loadPreview(value);
-               // console.log({getInvoiceById: row})
+                // console.log({getInvoiceById: row})
                 setSelectedRow(row?.values);
                 getInvoiceById(row?.values?.id);
               }}
@@ -164,12 +166,8 @@ const DebitAndCredit = () => {
   };
 
   const getInvoiceById = async (id) => {
-    
     setIsReportDownloading(true);
-    const res = await axios.post(
-      `/api/GenerateCreditReportAsync`,
-      id
-    );
+    const res = await axios.post(`/api/GenerateCreditReportAsync`, id);
     return res?.data;
   };
 
@@ -234,7 +232,6 @@ const DebitAndCredit = () => {
       // setPageInfo(result?.paging);
       // return obj;
     } else {
-
       // setPageInfo(result.notes?.paging);
       // return result;
     }
@@ -305,7 +302,7 @@ const DebitAndCredit = () => {
 
   useEffect(() => {
     refetch();
-    return () => { };
+    return () => {};
   }, [period, pageNumber]);
 
   useEffect(() => {
@@ -316,24 +313,22 @@ const DebitAndCredit = () => {
       setInvoices([]);
       refetch();
     }
-    return () => { };
+    return () => {};
   }, [value]);
 
-  const handleNoteTypeChange = (e)=>{
-     setNoteType(e.target.value)
-  }
+  const handleNoteTypeChange = (e) => {
+    setNoteType(e.target.value);
+  };
 
-  console.log({ invoices,pageInfo });
+  console.log({ invoices, pageInfo });
 
   useEffect(() => {
     setShowLoader(isLoading);
-  
-    return () => {
-      
-    }
-  }, [isLoading])
-  
-  console.log({isLoading, isError});
+
+    return () => {};
+  }, [isLoading]);
+
+  console.log({ isLoading, isError });
 
   return (
     <PurchaseContext.Provider value={{ invoices, setInvoices }}>
@@ -352,14 +347,33 @@ const DebitAndCredit = () => {
             <Col className="mb-5 mb-xl-0" xl="12">
               <Card className="shadow">
                 <CardHeader className="border-0">
-                  <Row className="align-items-center">
+                  <Row className="row justify-content-between">
                     <Col md="2">
-                    <select className="form-control" value={noteType} onChange={handleNoteTypeChange}>
-                      <option disabled selected>Select note type</option>
-                      <option value={"DEBIT"}>DEBIT</option>
-                      <option value={"CREDIT"}>CREDIT</option>
-                    </select>
+                      <select
+                        className="form-control form-control-sm mb-1"
+                        value={noteType}
+                        onChange={handleNoteTypeChange}
+                        style={{ fontSize: 12 }}
+                      >
+                        <option disabled selected>
+                          Select note type
+                        </option>
+                        <option value={"DEBIT"}>DEBIT</option>
+                        <option value={"CREDIT"}>CREDIT</option>
+                      </select>
                     </Col>
+                    <PageHeader
+                      color="primary"
+                      placeholder={"Search by Invoice No, or Customer name"}
+                      queryText={invoiceQuery}
+                      setQueryText={setinvoiceQuery}
+                      setShowModal={setShowNewInvoiceModal}
+                      showModal={showNewInvoiceModal}
+                      icon={<MdNoteAlt />}
+                      btnLable={"Add Note"}
+                    />
+                  </Row>
+                  <Row className="align-items-center" hidden>
                     <div className="col">
                       <Form
                         className="navbar-search navbar-search-light form-inline "

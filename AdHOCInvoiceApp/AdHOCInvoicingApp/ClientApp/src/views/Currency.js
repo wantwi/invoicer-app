@@ -151,26 +151,20 @@ const CurrencySetupWithReset = ({ reset }) => {
     return request.data.filter((item) => item.homeCurrency === false);
   };
 
-  const { data: currenciesLList = []  } = useQuery({
+  const { data: currenciesLList = [] } = useQuery({
     queryFn: getCurrencies,
     queryKey: "currencies",
   });
 
-  const { data: currencies = [], refetch,isLoading } = useQuery({
+  const {
+    data: currencies = [],
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ["currencies", filter.currency, filter.period],
     queryFn: getCurrency,
     onSuccess: (data) => {
-      setPageInfo(data)
-      // console.log({ data });
-      // let res = data?.map((item) => {
-      //   return {
-      //     name: item.name,
-      //     iso: item.code,
-      //     homeCurrency: item.homeCurrency,
-      //     rate: 0,
-      //   };
-      // });
-      // setCurrencies(res.filter((item) => item.homeCurrency === false));
+      setPageInfo(data);
     },
     enabled: Boolean(filter.currency || filter.period || pageNumber),
   });
@@ -278,7 +272,7 @@ const CurrencySetupWithReset = ({ reset }) => {
                 <EvatTable
                   isLoading={isLoading}
                   columns={columns}
-                  data={currencies?.data || [] }
+                  data={currencies?.data || []}
                   // sortKey="transactionDate"
                   // data2={invoices}
                   // setSelectedRow={setSelectedRow}

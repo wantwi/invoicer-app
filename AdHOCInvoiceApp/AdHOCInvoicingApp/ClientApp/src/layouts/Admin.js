@@ -4,7 +4,14 @@ import { useLocation, Route, Switch, Redirect } from "react-router-dom";
 
 // reactstrap components
 
-import { Button, Container, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
+import {
+  Button,
+  Container,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "reactstrap";
 
 // core components
 
@@ -37,15 +44,16 @@ import { useGet } from "hooks/useGet";
 
 import SidebarComponent from "components/Sidebar/SidebarComponent";
 import ProtectedRoute from "./ProtectedRoute";
-import * as FaIcons from "react-icons/fa"
+import * as FaIcons from "react-icons/fa";
 import BranchPrompt from "components/Modals/BranchPrompt";
 
-const branchInfo = JSON.parse(sessionStorage.getItem("BRANCH_INFO"))
+const branchInfo = JSON.parse(sessionStorage.getItem("BRANCH_INFO"));
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
   const [branch, setBranch] = useState("");
-  const [isOpen, setisOpen] = useState(false)
+  const [isOpen, setisOpen] = useState(false);
+  const [showSideBar, setShowSideBar] = useState(true);
 
   const [role, setRole] = useState(null);
 
@@ -56,7 +64,7 @@ const Admin = (props) => {
     setups: [],
     report: [],
     dashboard: [],
-  })
+  });
 
   const { selectedBranch, setSelectedBranch, setCompanySettings } = useAuth();
 
@@ -92,7 +100,6 @@ const Admin = (props) => {
 
   //       const usemenus = routes.filter((route) => menus.includes(route.path));
 
-
   //       console.log({ usemenus });
 
   //       setRoutes(result?.data);
@@ -125,43 +132,33 @@ const Admin = (props) => {
 
   const getRoutes = () => {
     return routesData.map((prop, key) => {
-
-      console.log({ prop })
-      return (
-        <Route
-          path={prop.path}
-          component={prop.component}
-          key={key}
-        />
-      );
-
+      console.log({ prop });
+      return <Route path={prop.path} component={prop.component} key={key} />;
     });
   };
 
+  const { data: userMenus, isLoading } = useGet(
+    "/api/GetMenus",
+    ["user-menus"],
+    (data) => {
+      console.log({ GetMenus: data });
 
+      if (!data) {
+        const responseData = JSON.parse(data);
 
-    const { data: userMenus, isLoading } = useGet("/api/GetMenus", ['user-menus'], (data) => {
-
-        console.log({ GetMenus: data })
-       
-        if (!data) {
-            const responseData = JSON.parse(data)
-
-            if (responseData?.StatusCode > 201) {
-
-            }
+        if (responseData?.StatusCode > 201) {
         }
-     
-        
-    if (!selectedBranch?.code) {
-      setisOpen(true)
-    } else {
-      setisOpen(false)
+      }
+
+      if (!selectedBranch?.code) {
+        setisOpen(true);
+      } else {
+        setisOpen(false);
+      }
     }
+  );
 
-  })
-
-  const { data } = useGet("/api/GetBranches", ['user-branch'])
+  const { data } = useGet("/api/GetBranches", ["user-branch"]);
 
   // const { data: settingsData } = useGet("/api/GetCompanyDetailsByCompanyId", ['company-settings'], (data) => {
   //   console.log({ compaySett: data });
@@ -172,15 +169,11 @@ const Admin = (props) => {
 
   const getCompanySetting = async () => {
     try {
-      const result = await axios.get("/api/GetCompanyDetailsByCompanyId")
+      const result = await axios.get("/api/GetCompanyDetailsByCompanyId");
 
-      setCompanySettings(result?.data?.itemSettings)
-
-    } catch (error) {
-
-    }
-
-  }
+      setCompanySettings(result?.data?.itemSettings);
+    } catch (error) {}
+  };
 
   // const getBrandText = (path) => {
   //   for (let i = 0; i < routes.length; i++) {
@@ -249,47 +242,36 @@ const Admin = (props) => {
   // };
 
   useEffect(() => {
-    getCompanySetting()
+    getCompanySetting();
 
-    return () => {
-
-    }
-  }, [])
-
+    return () => {};
+  }, []);
 
   useEffect(() => {
-
     if (branchInfo?.code) {
-      setisOpen(false)
+      setisOpen(false);
     }
 
-
-    return () => {
-
-    }
-  }, [selectedBranch])
+    return () => {};
+  }, [selectedBranch]);
 
   const handleBranchChange = (event) => {
     if (event.target.value) {
-      const item = data?.find(x => x?.code === event.target.value)
-      setBranch(item?.code)
+      const item = data?.find((x) => x?.code === event.target.value);
+      setBranch(item?.code);
     }
-
-  }
+  };
 
   const onBranchSelected = () => {
-    const item = data?.find(x => x?.code === branch)
-    sessionStorage.setItem("BRANCH_INFO", JSON.stringify(item))
-    setSelectedBranch(item)
-    setisOpen(false)
-  }
+    const item = data?.find((x) => x?.code === branch);
+    sessionStorage.setItem("BRANCH_INFO", JSON.stringify(item));
+    setSelectedBranch(item);
+    setisOpen(false);
+  };
 
   return (
     <ProtectedRoute>
-
-      {
-        isLoading ? <Loader /> : null
-      }
+      {isLoading ? <Loader /> : null}
       {/* <Modal isOpen={isOpen} className="modal-dialog-centered modal-lg">
         <ModalHeader style={{ background: "#14539A", height: 50, padding: "5px 20px" }}> <span><FaIcons.FaNetworkWired size={30} color="#fff" /></span> <span className="ml-2" style={{ fontSize: "1.2rem", color: "#fff" }}>Choose your branch</span></ModalHeader>
         <ModalBody>
@@ -308,46 +290,58 @@ const Admin = (props) => {
         </ModalFooter>
       </Modal> */}
 
-      <BranchPrompt showPrompt={isOpen} loading={isLoading} setshowPrompt={setisOpen} data={data} branch={branch} handleBranchChange={handleBranchChange} message="Please select your branch." eventHandler={onBranchSelected} />
+      <BranchPrompt
+        showPrompt={isOpen}
+        loading={isLoading}
+        setshowPrompt={setisOpen}
+        data={data}
+        branch={branch}
+        handleBranchChange={handleBranchChange}
+        message="Please select your branch."
+        eventHandler={onBranchSelected}
+      />
 
-
-      <SidebarComponent {...props}
-        routes={routes}
-        userMenus={userMenus}
-        logo={{
-          innerLink: "/index",
-          imgSrc: graLogo,
-          imgAlt: "...",
-
-        }} />
-
+      {showSideBar && (
+        <SidebarComponent
+          {...props}
+          routes={routes}
+          userMenus={userMenus}
+          logo={{
+            innerLink: "/index",
+            imgSrc: graLogo,
+            imgAlt: "...",
+          }}
+        />
+      )}
       <Suspense fallback={<Loader />}>
-        <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}>
-          <div className="main-content" ref={mainContent}>
-            <AdminNavbar
-              {...props}
-              brandText={getBrandText(props.location.pathname)}
-              setisOpen={setisOpen}
-            />
+        {/* <ErrorBoundary FallbackComponent={Fallback} onError={errorHandler}> */}
+        <div className="main-content" ref={mainContent}>
+          <AdminNavbar
+            {...props}
+            brandText={getBrandText(props.location.pathname)}
+            setisOpen={setisOpen}
+            setShowSideBar={setShowSideBar}
+            showSideBar={showSideBar}
+          />
 
-            <Switch>
-              {getRoutes()}
-              {/* <Route
+          <Switch>
+            {getRoutes()}
+            {/* <Route
                 path={"/stockloading"}
                 component={<Stockloading />}
                 key={key}
               /> */}
 
-              <Redirect from="*" to="/index" />
-            </Switch>
+            <Redirect from="*" to="/index" />
+          </Switch>
 
-            <Container fluid>
-              {/* {count} */}
+          <Container fluid>
+            {/* {count} */}
 
-              <AdminFooter />
-            </Container>
-          </div>
-        </ErrorBoundary>
+            <AdminFooter />
+          </Container>
+        </div>
+        {/* </ErrorBoundary> */}
       </Suspense>
     </ProtectedRoute>
   );

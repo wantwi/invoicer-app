@@ -82,12 +82,13 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
           `(GHS ${data[0].exchangeRate}/${data[0].currencyCode})`
         );
       } else {
+        setCurrency("GHS");
         toast.warning(
-          "There are no exchange rates set for today. Redirecting you to currency set up to add exchange rates"
+          "There are no exchange rates set for today. Please ensure the rate is set before you can proceed."
         );
-        setTimeout(() => {
-          history.push("/currency");
-        }, 3000);
+        // setTimeout(() => {
+        //   history.push("/currency");
+        // }, 3000);
       }
     }
   };
@@ -177,9 +178,7 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
       remarks: data?.reason,
       noteLines: data?.entries.map((x) => ({ invoiceId: x?.invoiceId })),
     };
-    console.log({ postData });
 
-    // return
     postNote(postData);
   };
 
@@ -187,8 +186,6 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
     prepend({});
   };
   const handleRemove = (index) => {
-    // if (getValues("entries").length === 1) return;
-
     remove(index);
   };
   useEffect(() => {
@@ -263,9 +260,6 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
     };
 
     mutate(postObj);
-    //console.log({postObj});
-
-    // refetch();
   };
 
   const entriesList = watch("entries");
@@ -276,7 +270,6 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
         (previousValue, currentValue) => previousValue + currentValue,
         0
       ) || 0;
-  //0 && invoiceDate.length > 0 && invoiceNo.length > 0
   const canAdd = invoiceNo.length > 0 ? true : false;
   const isValidAmt =
     Number(watch("amount")) === totalAmount
@@ -287,7 +280,11 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
 
   const isValidText =
     isValidAmt === "danger"
-      ? `Amount ${moneyInTxt(getValues("amount"),"en", 2)} should not be more than total invoice amount ${moneyInTxt(
+      ? `Amount ${moneyInTxt(
+          getValues("amount"),
+          "en",
+          2
+        )} should not be more than total invoice amount ${moneyInTxt(
           totalAmount,
           "en",
           2
@@ -402,25 +399,6 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
                   />
                 )}
               </FormGroup>
-
-              {/* <FormGroup>
-                <Label for="customerName" className="text-sm mb-0">
-                  Customer Name
-                </Label>
-                <Controller
-                  name="customerName"
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <Input
-                      size={"sm"}
-                      {...field}
-                      type="text"
-                      id="customerName"
-                    />
-                  )}
-                />
-              </FormGroup> */}
             </Col>
           </Row>
 
@@ -477,22 +455,6 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
                   decimalsLimit={2}
                   onValueChange={(value, name) => setValue(`amount`, value)}
                 />
-                {/* <Controller
-                  name="amount"
-                  control={control}
-                  defaultValue=""
-                  // rules={{
-                  //   required: 'This field is required',
-                  //   pattern: {
-                  //     value: /^-?[0-9]*[.,]?[0-9]+$/,
-                  //     message: 'Please enter a valid number.',
-                  //   },
-                  // }}
-                  render={({ field }) => (
-                    <Input size={"sm"} {...field} type="text" id="amount"/>
-                    
-                  )}
-                /> */}
               </FormGroup>
             </Col>
           </Row>
@@ -546,7 +508,9 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
                     />
                   </FormGroup>
                   {notValid ? (
-                    <Alert className="p-1 m-1" color="danger">Invoice No. is not valid</Alert>
+                    <Alert className="p-1 m-1" color="danger">
+                      Invoice No. is not valid
+                    </Alert>
                   ) : null}
                 </Col>
                 <Col md={6} hidden>
@@ -606,7 +570,11 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
                     size="sm"
                     type="submit"
                     color="success"
-                    disabled={entriesList.length > 0 && isValidAmt ==="success" ? false: true}
+                    disabled={
+                      entriesList.length > 0 && isValidAmt === "success"
+                        ? false
+                        : true
+                    }
                   >
                     Submit
                   </Button>
@@ -683,15 +651,17 @@ const NoteForm = ({ setShowNewInvoiceModal, refetch: refetchData }) => {
               </tbody>
             </Table>
             {isValidAmt === "danger" ? (
-                    <Alert className="p-1 m-1" color="danger" style={{background:"#d73d5c", borderColor:"#d73d5c"}}>{isValidText}</Alert>
-                  ) : null}
+              <Alert
+                className="p-1 m-1"
+                color="danger"
+                style={{ background: "#d73d5c", borderColor: "#d73d5c" }}
+              >
+                {isValidText}
+              </Alert>
+            ) : null}
           </Card>
         </Col>
       </Row>
-
-      {/* <Button type="button" color="primary" onClick={handleAppendEntry}>
-        Add Entry
-      </Button> */}
     </Form>
   );
 };
@@ -704,103 +674,3 @@ const styles = {
     position: "relative",
   },
 };
-
-{
-  /* <div
-className="table-responsive"
-style={{ maxHeight: "35vh", overflowY: "auto" }}
->
-<Table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Invoice Number</th>
-      <th>Date</th>
-      <th>Amount</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {fields.map((entry, index) => (
-      <tr key={entry?.id}>
-        <td>{fields.length - index}</td>
-        <td>
-          <>
-            <Controller
-              name={`entries[${index}].invoiceNo`}
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <>
-                  <Input
-                    size={"sm"}
-                    {...field}
-                    type="text"
-                    id={`entries[${index}].invoiceNo`}
-                    placeholder="Invoice number"
-                  />{" "}
-                </>
-              )}
-            />
-          </>
-        </td>
-        <td>
-          <>
-          {
-            entry.value
-          }
-            <Controller
-              name={`entries[${index}].date`}
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Input
-                  size={"sm"}
-                  {...field}
-                  type="date"
-                  id={`entries[${index}].date`}
-                />
-              )}
-            />
-          </>
-        </td>
-        <td>
-          <>
-            <Controller
-              name={`entries[${index}].amount`}
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Input
-                  size={"sm"}
-                  {...field}
-                  type="number"
-                  id={`entries[${index}].amount`}
-                />
-              )}
-            />
-          </>
-        </td>
-        <td>
-          <Button
-            hidden={index >= 1}
-            size="sm"
-            color="primary"
-            onClick={handleAppendEntry}
-          >
-            <i className="fa fa-plus"></i>
-          </Button>
-          <Button
-            size="sm"
-            className="btn-danger"
-            onClick={() => handleRemove(index)}
-          >
-            <i className="fa fa-trash"></i>
-          </Button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</Table>
-</div> */
-}

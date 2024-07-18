@@ -12,7 +12,7 @@ import { useLayoutEffect, useState } from "react";
 import { NavLink as NavLinkRRD, Link } from "react-router-dom";
 // nodejs library to set properties for components
 import { PropTypes } from "prop-types";
-import { Sidebar, Menu, MenuItem, SubMenu, } from 'react-pro-sidebar';
+import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
 
 // reactstrap components
 import {
@@ -47,7 +47,7 @@ import {
 } from "reactstrap";
 import { AppVersion } from "components/Footers/Footer";
 import { useLocation } from "react-router-dom";
-import "./sidebar.module.css"
+import "./sidebar.module.css";
 
 import { FaHandshakeSimple } from "react-icons/fa6";
 import { MdOutlineNoteAlt } from "react-icons/md";
@@ -65,22 +65,34 @@ import { RiFileChartFill } from "react-icons/ri";
 
 const getIcon = (name) => {
   switch (name) {
-    case "Transactions": return <FaHandshakeSimple size={22} />
-    case "Debit-Credit Note": return <MdNoteAlt size={20} />
-    case "Purchase": return <GiBoxUnpacking size={20} />
-    case "Exchange Rate Setup": return <MdCurrencyExchange size={20} />
-    case "Refund": return <FaHandHolding size={20} />
-    case "Purchase Return": return <FaPeopleCarryBox size={20} />
-    case "Reports": return <RiFileChartFill size={20} />
-    case "Item": return <FaCartPlus size={20} />
-    case "Dashboard": return <FaDesktop size={22} />
-    case "Sales": return <FaCartArrowDown size={20} />
-    case "Business Partner": return <FaUserTie size={20} />
-    case "Setup": return <FaCog size={22} />
-    default: return <FaCartArrowDown size={20} />
-
+    case "Transactions":
+      return <FaHandshakeSimple size={22} />;
+    case "Debit-Credit Note":
+      return <MdNoteAlt size={20} />;
+    case "Purchase":
+      return <GiBoxUnpacking size={20} />;
+    case "Exchange Rate Setup":
+      return <MdCurrencyExchange size={20} />;
+    case "Refund":
+      return <FaHandHolding size={20} />;
+    case "Purchase Return":
+      return <FaPeopleCarryBox size={20} />;
+    case "Reports":
+      return <RiFileChartFill size={20} />;
+    case "Item":
+      return <FaCartPlus size={20} />;
+    case "Dashboard":
+      return <FaDesktop size={22} />;
+    case "Sales":
+      return <FaCartArrowDown size={20} />;
+    case "Business Partner":
+      return <FaUserTie size={20} />;
+    case "Setup":
+      return <FaCog size={22} />;
+    default:
+      return <FaCartArrowDown size={20} />;
   }
-}
+};
 
 const SidebarComponent = (props) => {
   const location = useLocation();
@@ -120,7 +132,6 @@ const SidebarComponent = (props) => {
 
   const layout = "/admin";
 
-
   const { bgColor, routes, logo, userMenus = [] } = props;
   console.log({ routes });
   let navbarBrandProps;
@@ -150,8 +161,6 @@ const SidebarComponent = (props) => {
   const handleSubMenuClick = (id) => {
     setOpenMenuId((prevOpenMenuId) => (prevOpenMenuId === id ? null : id));
   };
-
-
 
   // const renderMenuItem = (menuItem) => {
   //   const isActive = menuItem.navicationPath === location.pathname;
@@ -196,20 +205,25 @@ const SidebarComponent = (props) => {
   //  return arr.sort((a, b) => a.orderKey - b.orderKey);
   //  }
 
-  const sortByOrderKey = (menus=[]) => {
-    return menus?.map(menu => {
-      if (menu.menus && menu.menus.length > 0) {
-        menu.menus = sortByOrderKey(menu.menus);
-      }
-      return menu;
-    }).sort((a, b) => a.orderKey.localeCompare(b.orderKey));
+  const sortByOrderKey = (menus = []) => {
+    return menus
+      ?.map((menu) => {
+        if (menu.menus && menu.menus.length > 0) {
+          menu.menus = sortByOrderKey(menu.menus);
+        }
+        return menu;
+      })
+      .sort((a, b) => a.orderKey.localeCompare(b.orderKey));
   };
 
   const renderMenuItem = (menuItem) => {
     const active = isActive(menuItem.navicationPath);
     return (
-      <MenuItem key={menuItem.id} component={<Link to={menuItem.navicationPath} />} active={active}
-        className={active ? "active" : ''}
+      <MenuItem
+        key={menuItem.id}
+        component={<Link to={menuItem.navicationPath} />}
+        active={active}
+        className={active ? "active" : ""}
         icon={getIcon(menuItem.name)}
       >
         {menuItem.name}
@@ -218,7 +232,14 @@ const SidebarComponent = (props) => {
   };
 
   const renderSubMenu = (submenu) => {
-    const hasActiveChild = submenu.menus.some(menuItem => isActive(menuItem.navicationPath) || (menuItem.menus && menuItem.menus.some(childItem => isActive(childItem.navicationPath))));
+    const hasActiveChild = submenu.menus.some(
+      (menuItem) =>
+        isActive(menuItem.navicationPath) ||
+        (menuItem.menus &&
+          menuItem.menus.some((childItem) =>
+            isActive(childItem.navicationPath)
+          ))
+    );
     const isOpen = openMenuId === submenu.id || hasActiveChild;
 
     return (
@@ -230,16 +251,19 @@ const SidebarComponent = (props) => {
         onOpenChange={() => handleSubMenuClick(submenu.id)}
         icon={getIcon(submenu.name)}
       >
-        {submenu.menus.map(menuItem => (
-          menuItem.menus.length > 0 ? renderSubMenu(menuItem) : renderMenuItem(menuItem)
-        ))}
+        {submenu.menus.map((menuItem) =>
+          menuItem.menus.length > 0
+            ? renderSubMenu(menuItem)
+            : renderMenuItem(menuItem)
+        )}
       </SubMenu>
     );
   };
 
-  const renderUserMenus = (menus) => menus.map(menu => (
-    menu.menus.length > 0 ? renderSubMenu(menu) : renderMenuItem(menu)
-  ));
+  const renderUserMenus = (menus) =>
+    menus.map((menu) =>
+      menu.menus.length > 0 ? renderSubMenu(menu) : renderMenuItem(menu)
+    );
 
   return (
     <Navbar
@@ -273,9 +297,7 @@ const SidebarComponent = (props) => {
           // style={{ marginTop: -100 }}
           style={{ background: "red" }}
         >
-
           <UncontrolledDropdown nav>
-
             <DropdownMenu className="dropdown-menu-arrow" right>
               <DropdownItem className="noti-title" header tag="div">
                 <h6 className="text-overflow m-0">Welcome!</h6>
@@ -355,26 +377,30 @@ const SidebarComponent = (props) => {
           <Nav navbar className="sideBar">
             <Sidebar>
               <Menu
-                style={{ background: "#f1f1fi", borderRight: '2px solid #e1e2e3', height: '80vh' }}
+                style={{
+                  background: "#f1f1fi",
+                  borderRight: "2px solid #e1e2e3",
+                  height: "80vh",
+                }}
                 menuItemStyles={{
                   button: ({ level, active, disabled, open, isSubmenu }) => ({
                     marginLeft: -10,
                     fontSize: 14,
-                    color: active ? '#ffffff' : undefined,
-                    backgroundColor: active ? '#5e72e4' : undefined,
+                    color: active ? "#ffffff" : undefined,
+                    backgroundColor: active ? "#5e72e4" : undefined,
                     borderLeft: active ? "5px solid #14539A" : undefined,
-                    '&:hover': {
-                      backgroundColor: active ? '#14539A' : undefined, // Red background on hover when active
+                    "&:hover": {
+                      backgroundColor: active ? "#14539A" : undefined, // Red background on hover when active
                     },
                   }),
                   label: ({ level, active, disabled, open, isSubmenu }) => ({
-                    color: active ? '#ffffff' : undefined,
+                    color: active ? "#ffffff" : undefined,
                   }),
                   icon: ({ level, active, disabled, open, isSubmenu }) => ({
-                    color: active ? '#ffffff' : undefined,
+                    color: active ? "#ffffff" : undefined,
                   }),
                   menuItem: ({ level, active, disabled, open, isSubmenu }) => ({
-                    color: active ? '#ffffff' : undefined,
+                    color: active ? "#ffffff" : undefined,
                   }),
                 }}
               >

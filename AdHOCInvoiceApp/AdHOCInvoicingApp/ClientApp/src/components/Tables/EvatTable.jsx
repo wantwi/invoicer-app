@@ -3,6 +3,7 @@ import { moneyInTxt } from "components/Invoice/InvoicePreview";
 import React from "react";
 import { usePagination, useTable, useSortBy } from "react-table";
 import Loader from "components/Modals/Loader";
+import { CircularProgress } from "@mui/material";
 
 export const EvatTable = ({
   columns=[],
@@ -43,12 +44,39 @@ export const EvatTable = ({
     usePagination
   );
   return (
-    <div id="evat-table-wrapper" style={{ position: "relative" }}>
+    <>
+    
+     <div id="evat-table-wrapper" style={{ position: "relative" }}>
+      <>
       {isLoading && (
-        <div id="table-loader-wrapper">
-          <Loader />
-        </div>
-      )}
+       
+       <div
+       style={{
+         display: "flex",
+         flexDirection: "column",
+         justifyContent: "center",
+         alignItems: "center",
+         position: "absolute",
+         width: "100%",
+         height: "100%",
+         top: 0,
+        
+         placeContent: "center",
+         zIndex: 9999999,
+         background: "#000",
+         opacity: 0.6,
+         color: "#fff",
+       }}
+     >
+      
+      <CircularProgress size={30} />
+      
+     </div>
+    
+   )}
+     
+      </>
+      
       <p
         id="table-info"
         className="text-info text-center"
@@ -139,5 +167,7 @@ export const EvatTable = ({
         </Table>
       </div>
     </div>
+    </>
+  
   );
 };

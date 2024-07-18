@@ -27,29 +27,28 @@ import "react-datepicker/dist/react-datepicker.css";
 import { LoaderProvider } from "context/LoaderProvider";
 
 const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            refetchOnMount: false,
-            refetchOnWindowFocus: false,
-        },
+  defaultOptions: {
+    queries: {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     },
+  },
 });
 
-if (process.env.NODE_ENV === 'production') {
-    console.log = () => { }
-    console.error = () => { }
-    console.debug = () => { }
+if (process.env.NODE_ENV === "production") {
+  // console.log = () => { }
+  // console.error = () => { }
+  // console.debug = () => { }
 }
-
 
 ReactDOM.render(
   <BrowserRouter basename={process.env.REACT_APP_BASENAME}>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <LoaderProvider>
-        <App />
+          <App />
         </LoaderProvider>
-        
+
         <ReactQueryDevtools initialIsOpen={false} />
       </AuthProvider>
     </QueryClientProvider>

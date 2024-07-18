@@ -37,7 +37,6 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   const { selectedBranch, user } = useAuth();
   const history = useHistory();
 
-
   const { invoices, setInvoices } = useContext(PurchaseContext);
   const {
     formData,
@@ -45,7 +44,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
     gridData,
     setGridData,
     setShowNewInvoiceModal,
-    // vatAndLeviesScheme, 
+    // vatAndLeviesScheme,
     // setvatAndLeviesScheme
   } = useContext(FormContext);
 
@@ -78,15 +77,14 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   const [vatType, setVatType] = useState(0);
 
   const [schemeDate, setSchemeDate] = useState(
-    `${new Date().getFullYear()}-${new Date().getMonth() + 1
+    `${new Date().getFullYear()}-${
+      new Date().getMonth() + 1
     }-${new Date().getDate()}`
   );
 
   let userDetails = JSON.parse(
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
   );
-
-
 
   // Get products list
 
@@ -211,8 +209,10 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
           quantity: Number(item.quantity),
           price: Number(item.price),
           nhil: (nhilRate / 100) * ((item.quantity * item.price * 100) / 121.9),
-          getf: (getfundRate / 100) * ((item.quantity * item.price * 100) / 121.9),
-          covid: (covidRate / 100) * ((item.quantity * item.price * 100) / 121.9),
+          getf:
+            (getfundRate / 100) * ((item.quantity * item.price * 100) / 121.9),
+          covid:
+            (covidRate / 100) * ((item.quantity * item.price * 100) / 121.9),
           otherLevies: csttourism,
           vatItemId: item.vatItemId,
           taxableAmount: (item.quantity * item.price * 100) / 121.9,
@@ -332,7 +332,9 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   };
 
   const checkIfRatesExist = async (currency) => {
-    let issuedDate = formData.date ? new Date(formData.date).toDateString() : null;
+    let issuedDate = formData.date
+      ? new Date(formData.date).toDateString()
+      : null;
     if (!issuedDate) {
       toast.info("Select invoice date first");
       return;
@@ -345,18 +347,22 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
     if (request) {
       const { data } = request;
       if (data.length > 0) {
-        console.log({ now: data })
+        console.log({ now: data });
         setForex(data[0].exchangeRate);
         setExchangeRate(
           "at GHS" + data[0]?.exchangeRate + " per " + data[0]?.currencyCode
         );
       } else {
+        setCurrency("GHS");
         toast.warning(
-          "There are no exchange rates set for this invoice date. Redirecting you to currency set up to add exchange rates"
+          "There are no exchange rates set for today. Please ensure the rate is set before you can proceed."
         );
-        setTimeout(() => {
-          history.push("/admin/currency");
-        }, 3000);
+        // toast.warning(
+        //   "There are no exchange rates set for this invoice date. Redirecting you to currency set up to add exchange rates"
+        // );
+        // setTimeout(() => {
+        //   history.push("/admin/currency");
+        // }, 3000);
       }
     }
   };
@@ -396,7 +402,8 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
       },
       {
         queryKey: ["suppliers"],
-        queryFn: () => makeCall(`/api/GetCompanySupplierslist/${selectedBranch?.code}`),
+        queryFn: () =>
+          makeCall(`/api/GetCompanySupplierslist/${selectedBranch?.code}`),
         cacheTime: 0,
         onSuccess: ({ data }) => {
           let filteredCustomers = data.filter(
@@ -486,13 +493,12 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   useEffect(() => {
     refetchTaxScheme();
 
-    return () => { };
+    return () => {};
   }, [vatType]);
 
   const handleVatTypeChange = (e) => {
-    setVatType(+e.target.value)
-  }
-
+    setVatType(+e.target.value);
+  };
 
   return (
     <>
@@ -551,7 +557,6 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
                   className="form-control font-sm"
                   value={vatType}
                   onChange={handleVatTypeChange}
-
                   style={{ height: 29, padding: "0px 5px" }}
                 >
                   <option value={0}>Standard Rate</option>
@@ -611,16 +616,17 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
                   disabled={isCurrencyDisabled}
                   style={{ height: 29, padding: "0px 5px" }}
                 >
-                  {currencies && currencies?.map((currency, index) => (
-                    <option
-                      key={index}
-                      name={currency.name}
-                      id={currency.code}
-                      value={currency.code}
-                    >
-                      {currency.code}
-                    </option>
-                  ))}
+                  {currencies &&
+                    currencies?.map((currency, index) => (
+                      <option
+                        key={index}
+                        name={currency.name}
+                        id={currency.code}
+                        value={currency.code}
+                      >
+                        {currency.code}
+                      </option>
+                    ))}
                 </select>
               </Col>
             </Row>
@@ -790,7 +796,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
                           })
                         }
                         value={formData?.isTaxable}
-                      // disabled
+                        // disabled
                       />
                       &nbsp; &nbsp;
                       <label htmlFor="isTaxable" className="form-control-label">
@@ -810,7 +816,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
                           })
                         }
                         value={formData?.isTaxInclusive}
-                      // disabled
+                        // disabled
                       />
                       &nbsp; &nbsp;
                       <label

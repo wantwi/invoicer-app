@@ -81,6 +81,7 @@ const Items = () => {
     const [hasDiscount, setHasDiscount] = useState(false);
     const [open, setOpen] = useState(false)
     const [codeTye, setCodeTye] = useState("")
+    const [isClicked, setIsClick] = useState(false);
 
     console.log({ companySettings });
 
@@ -96,6 +97,7 @@ const Items = () => {
         (data) => {
             setIsViewed(true);
             setitemSelected(false);
+            setIsClick(false);
             console.log({ fjkdl: data });
             if (data.length > 0) {
                 let results = data.map((item) => {
@@ -488,6 +490,8 @@ const Items = () => {
 
     return (
         <>
+
+{(isLoading) && isClicked ? <Loader /> : null }
             <BranchPrompt showimg={false} fontSize='0.8rem' placeholder={"Select code generation type"} data={[{ code: "CUSTOM", name: "User defined code" }, { code: "AUTO", name: "System generated" }]} branch={codeTye} loading={false} message="Would you like to use a system-generated item code or define your own item code? Please note that once you confirm your selection, you will not be able to change it." showPrompt={open} eventHandler={eventHandler} handleBranchChange={handleChangeEvent} />
             <UserHeader
                 message={"This is your products setup page. Manage your products here"}
@@ -765,6 +769,7 @@ const Items = () => {
                                                     getItemsList();
                                                     setIsviewMode(!isViewMode);
                                                     setshowBulkListButt(false);
+                                                    setIsClick(true);
                                                 }}
                                                 size="sm"
                                                 style={{

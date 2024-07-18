@@ -33,7 +33,7 @@ import PrintPreview from "components/Modals/PrintPreview";
 import useAuth from "hooks/useAuth";
 import Prompt from "components/Modals/Prompt";
 import InvoicePreviewRefund from "components/Modals/InvoicePreviewRefund";
-
+import PageHeader from "components/Headers/PageHeader";
 
 const Refunds = () => {
   const [pageNumber, setPageNumber] = useState(1);
@@ -76,7 +76,7 @@ const Refunds = () => {
   const [promptMessage, setPromptMessage] = useState("");
   const [refundType, setRefundType] = useState("Partial");
   const [refundTypeForPost, setRefundTypeForPost] = useState("");
-  const [isActive, setIsActive] = useState(true)
+  const [isActive, setIsActive] = useState(true);
   const [
     resetInvoicePreviewRefundComponent,
     setResetInvoicePreviewRefundComponent,
@@ -144,8 +144,10 @@ const Refunds = () => {
         className: "text-left",
         Cell: (data) => {
           console.log({ success: data?.row });
-          return (
-            data?.row?.original?.status === "ACTIVE" ? <Badge color="primary">{data?.row?.original?.status}</Badge> : <Badge color="danger">{data?.row?.original?.status}</Badge>
+          return data?.row?.original?.status === "ACTIVE" ? (
+            <Badge color="primary">{data?.row?.original?.status}</Badge>
+          ) : (
+            <Badge color="danger">{data?.row?.original?.status}</Badge>
           );
         },
         width: 150,
@@ -162,7 +164,9 @@ const Refunds = () => {
               style={{ padding: "2px 8px" }}
               className="badge-success"
               onClick={(e) => {
-                data?.row?.original?.status === "ACTIVE" ? setIsActive(true) : setIsActive(false)
+                data?.row?.original?.status === "ACTIVE"
+                  ? setIsActive(true)
+                  : setIsActive(false);
                 getPrintPDF(data?.row?.original?.id);
               }}
               title="Preview"
@@ -240,9 +244,9 @@ const Refunds = () => {
       if (data?.invoices?.items?.length === 0) {
         const msg = !value
           ? "No Invoice Available For " +
-          dayOfWeekSelRef?.current?.options[
-            dayOfWeekSelRef?.current?.selectedIndex
-          ]?.innerText
+            dayOfWeekSelRef?.current?.options[
+              dayOfWeekSelRef?.current?.selectedIndex
+            ]?.innerText
           : "No invoice matched your search: " + value;
         // toast.info(msg);
         setMessage(msg);
@@ -301,24 +305,24 @@ const Refunds = () => {
       setPageNumber(1);
     }
     refetch();
-    return () => { };
+    return () => {};
   }, [period, pageNumber]);
 
   useEffect(() => {
     if (value.length > 1) {
       refetch();
     }
-    return () => { };
+    return () => {};
   }, [value]);
 
   useEffect(() => {
     if (selectedRow.length > 0) {
       refetchGetById();
     }
-    return () => { };
+    return () => {};
   }, [selectedRow]);
 
-  console.log({ refunds })
+  console.log({ refunds });
 
   return (
     <>
@@ -336,7 +340,23 @@ const Refunds = () => {
           <Col className="mb-5 mb-xl-0" xl="12">
             <Card className="shadow">
               <CardHeader className="border-0">
-                <Row className="align-items-center">
+                <Row className="row justify-content-between">
+                  <PageHeader
+                    color="info"
+                    placeholder={
+                      "Search by Invoice No, Refund No or Customer name"
+                    }
+                    queryText={invoiceQuery}
+                    setQueryText={setinvoiceQuery}
+                    setShowModal={setOpen}
+                    showModal={open}
+                    icon={
+                      <img src={refund} alt="refund" style={{ height: 20 }} />
+                    }
+                    btnLable={"Refund Invoice"}
+                  />
+                </Row>
+                {/* <Row className="align-items-center">
                   <div className="col">
                     <Form
                       className="navbar-search navbar-search-light form-inline "
@@ -389,7 +409,7 @@ const Refunds = () => {
                       Refund Invoice
                     </Button>
                   </div>
-                </Row>
+                </Row> */}
               </CardHeader>
               <div style={styles.body}>
                 <EvatTable

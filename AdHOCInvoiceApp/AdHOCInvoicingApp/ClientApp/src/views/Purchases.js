@@ -35,8 +35,8 @@ import useCustomAxios from "hooks/useCustomAxios";
 import { EvatTable } from "components/Tables/EvatTable";
 import ReactTooltip from "react-tooltip";
 import useAuth from "hooks/useAuth";
-
-
+import PageHeader from "components/Headers/PageHeader";
+import { GiBoxUnpacking } from "react-icons/gi";
 
 export const PurchaseContext = createContext();
 const Purchases = () => {
@@ -102,7 +102,7 @@ const Purchases = () => {
               <span data-tip={value}>{value}</span>
               <ReactTooltip />
             </>
-          )
+          );
         },
         // minWidth: 340,
         width: "auto",
@@ -118,7 +118,7 @@ const Purchases = () => {
               <span data-tip={value}>{value}</span>
               <ReactTooltip />
             </>
-          )
+          );
         },
         // minWidth: 340,
         width: "auto",
@@ -139,29 +139,27 @@ const Purchases = () => {
         Header: () => <div align="center">View</div>,
         disableSortBy: true,
         className: " text-center table-action",
-        Cell: ({ row },) => {
+        Cell: ({ row }) => {
           return (
             <Button
               style={{ padding: "2px 8px" }}
               className="badge-success"
               onClick={(e) => {
                 // loadPreview(value);
-                setSelectedRow(row?.values)
-                getInvoiceById(row?.values?.id)
+                setSelectedRow(row?.values);
+                getInvoiceById(row?.values?.id);
               }}
               title="Preview"
             >
               <FaEye />
             </Button>
-          )
+          );
         },
         accessor: "id",
       },
     ],
     []
-  )
-
-
+  );
 
   const errorHandler = (err) => {
     return <h1>Something happened while previewing purchase</h1>;
@@ -170,10 +168,10 @@ const Purchases = () => {
   const getInvoiceById = async (id) => {
     setIsReportDownloading(true);
     const res = await axios.post(
-      `/api/GenerateVAPurchaseInvoiceReportAsync`, id
+      `/api/GenerateVAPurchaseInvoiceReportAsync`,
+      id
     );
     return res?.data;
-
   };
 
   const {
@@ -185,8 +183,8 @@ const Purchases = () => {
     queryFn: () => getInvoiceById(selectedRow?.id),
     enabled: Boolean(selectedRow?.id),
     onSuccess: (data) => {
-      let base64 = `data:application/pdf;base64,` + JSON.parse(data?.data)
-      const pdfContentType = "application/pdf"
+      let base64 = `data:application/pdf;base64,` + JSON.parse(data?.data);
+      const pdfContentType = "application/pdf";
 
       setIsReportDownloading(false);
       setSelectedRow(null);
@@ -195,7 +193,9 @@ const Purchases = () => {
     },
     onError: (res) => {
       setIsReportDownloading(false);
-      toast.error(res?.data || "Error. Unable to load preview. Please try again");
+      toast.error(
+        res?.data || "Error. Unable to load preview. Please try again"
+      );
     },
   });
 
@@ -207,7 +207,7 @@ const Purchases = () => {
   // }, [selectedRow]);
 
   const getInvoice = async (pageNumber, searchText) => {
-    setShowLoader(true)
+    setShowLoader(true);
     let url, result;
     if (searchText.length > 1) {
       url = `/api/GetPurchaseSearch/${period}/${pageNumber}/${pageSize}/${searchText}`;
@@ -216,14 +216,13 @@ const Purchases = () => {
     }
 
     const request = await axios.get(url);
-    if (typeof request?.data == 'string') {
-      setShowLoader(false)
+    if (typeof request?.data == "string") {
+      setShowLoader(false);
 
-
-      return
+      return;
     }
-    console.log({ request: typeof request?.data })
-    setShowLoader(false)
+    console.log({ request: typeof request?.data });
+    setShowLoader(false);
 
     if (searchText.length > 1) {
       result = request?.data;
@@ -267,8 +266,8 @@ const Purchases = () => {
       setMessage(null);
     },
     onError: (err) => {
-      console.log({ "treat": err })
-    }
+      console.log({ treat: err });
+    },
 
     //  placeholderData: true
   });
@@ -276,7 +275,7 @@ const Purchases = () => {
 
   useEffect(() => {
     refetch();
-    return () => { };
+    return () => {};
   }, [period, pageNumber]);
 
   useEffect(() => {
@@ -287,7 +286,7 @@ const Purchases = () => {
       setInvoices([]);
       refetch();
     }
-    return () => { };
+    return () => {};
   }, [value]);
 
   return (
@@ -307,13 +306,25 @@ const Purchases = () => {
           <Col className="mb-5 mb-xl-0" xl="12">
             <Card className="shadow">
               <CardHeader className="border-0">
-                <Row className="align-items-center">
+                <Row className="row justify-content-between">
+                  <PageHeader
+                    color="primary"
+                    placeholder={"Search by Invoice No. or Customer name"}
+                    queryText={invoiceQuery}
+                    setQueryText={setinvoiceQuery}
+                    setShowModal={setShowNewInvoiceModal}
+                    showModal={showNewInvoiceModal}
+                    icon={<GiBoxUnpacking />}
+                    btnLable={"Record Invoice"}
+                  />
+                </Row>
+                {/* <Row className="align-items-center" hidden>
                   <div className="col">
                     <Form
                       className="navbar-search navbar-search-light form-inline "
                       onSubmit={(e) => {
                         e.preventDefault();
-                        // handleSearchInvoice(e)
+                         handleSearchInvoice(e)
                       }}
                     >
                       <FormGroup className="mb-0">
@@ -333,15 +344,13 @@ const Purchases = () => {
                             value={invoiceQuery}
                             onChange={(e) => {
                               setinvoiceQuery(e.target.value);
-                              //handleSearchInvoice(e.target.value)
+                              handleSearchInvoice(e.target.value)
                             }}
                             style={{ width: 400 }}
                           />
                           <InputGroupAddon addonType="append">
-                            <InputGroupText
-                              onClick={() => setinvoiceQuery("")}
-                            >
-                              {/* {isFocus && <i className='fas fa-times' />} */}
+                            <InputGroupText onClick={() => setinvoiceQuery("")}>
+                              {isFocus && <i className='fas fa-times' />}
                             </InputGroupText>
                           </InputGroupAddon>
                         </InputGroup>
@@ -359,18 +368,17 @@ const Purchases = () => {
                       <FaEdit /> Record Invoice
                     </Button>
                   </div>
-                </Row>
+                </Row> */}
               </CardHeader>
               <div style={styles.body}>
                 <EvatTable
-                  isLoading={(showLoader || isReportDownloading)}
+                  isLoading={showLoader || isReportDownloading}
                   columns={columns}
                   data={invoices || []}
                   getPrintPDF={() => null}
                   message={message}
                   sortKey="date"
                 />
-
               </div>
 
               {pageInfo?.totalItems > 0 && (
@@ -437,9 +445,7 @@ const Purchases = () => {
           </Col>
         </Row>
         {showNewInvoiceModal ? (
-          <NewPurchaseInvoice
-            setShowNewInvoiceModal={setShowNewInvoiceModal}
-          />
+          <NewPurchaseInvoice setShowNewInvoiceModal={setShowNewInvoiceModal} />
         ) : null}
         {showReport && (
           <PrintPreview
@@ -453,7 +459,6 @@ const Purchases = () => {
           />
         )}
       </Container>
-
     </PurchaseContext.Provider>
   );
 };

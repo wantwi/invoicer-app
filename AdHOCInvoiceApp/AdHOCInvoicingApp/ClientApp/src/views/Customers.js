@@ -111,16 +111,16 @@ const Customers = () => {
   const [isCustomers, setIsCustomer] = useState(true);
   const [isViewed, setIsViewed] = useState(false);
   const [isViewed_sup, setIsViewed_sup] = useState(false);
-    const [cusType, setcusType] = useState("CUS");
-    const [isClicked, setIsClick] = useState(false)
+  const [cusType, setcusType] = useState("CUS");
+  const [isClicked, setIsClick] = useState(false);
 
   const customerRef = useRef();
   const clearBtn = useRef();
 
   console.log("this file rendered");
   const onSuccess = (data) => {
-      console.log("dhjshds", { data });
-      setIsClick(false)
+    console.log("dhjshds", { data });
+    setIsClick(false);
 
     if (data?.length == 0) {
       toast.info("No record available");
@@ -199,8 +199,8 @@ const Customers = () => {
       { isEnabled: false, queryTag: "?search=" }
     );
 
-    const handleGetCustomer = () => {
-        setIsClick(true)
+  const handleGetCustomer = () => {
+    setIsClick(true);
     setinvoiceQuery("");
     setSearchText("");
     setBusinessPartnerType("Customer List");
@@ -214,8 +214,8 @@ const Customers = () => {
     setshowBulkListButt(() => false);
   };
 
-    const handleGetSupplier = () => {
-        setIsClick(true)
+  const handleGetSupplier = () => {
+    setIsClick(true);
     setBusinessPartnerType("Supplier List");
     setinvoiceQuery("");
     setSearchText("");
@@ -411,7 +411,7 @@ const Customers = () => {
       setStatus(false);
     }
 
-    formik.setValues({...customer, customerType: customer.type});
+    formik.setValues({ ...customer, customerType: customer.type });
     setitemSelected(true);
   };
 
@@ -457,10 +457,9 @@ const Customers = () => {
     //}
   }, [formik]);
 
-   
   return (
-      <>
-          {(isLoadingSuppliers || isLoading) && isClicked ? <Loader /> : null }
+    <>
+      {(isLoadingSuppliers || isLoading) && isClicked ? <Loader /> : null}
       <UserHeader
         message={
           "This is your customer setup page. Manage your client list here"
