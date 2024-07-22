@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Card, Table } from "reactstrap";
+import { Badge, Card, Table } from "reactstrap";
 import graLogo from "../../assets/img/theme/gra.png";
 import companyLogo from "../../assets/img/theme/logo.png";
 import { FormContext } from "components/Modals/NewPurchaseInvoice";
@@ -31,9 +31,7 @@ export default function PurchaseInvoicePreview({ vatAndLeviesScheme }) {
     sessionStorage.getItem(process.env.REACT_APP_OIDC_USER)
   );
 
-
   const handleEditItem = (item, index) => {
-
     console.log({ item });
     setUpdateItemData({
       index: index,
@@ -142,6 +140,9 @@ export default function PurchaseInvoicePreview({ vatAndLeviesScheme }) {
             </tbody>
           </Table>
         </div>
+        <div>
+          <Badge color="primary">Item Count: {gridData.length}</Badge>
+        </div>
         <div style={styles.footer}>
           <div style={styles.total}>
             <h6 style={{ padding: 0, margin: 0 }}>
@@ -155,8 +156,8 @@ export default function PurchaseInvoicePreview({ vatAndLeviesScheme }) {
               {formData?.discountType
                 ? formData?.discountType === "general"
                   ? moneyInTxt(
-                    gridData.reduce((total, item) => total + item.discount, 0)
-                  )
+                      gridData.reduce((total, item) => total + item.discount, 0)
+                    )
                   : moneyInTxt(formData?.totalDiscount)
                 : "0"}
             </h6>
@@ -179,7 +180,8 @@ export default function PurchaseInvoicePreview({ vatAndLeviesScheme }) {
               )}{" "}
             </h6>
             <h6 style={{ padding: 0, margin: 0 }}>
-              (CST: {vatAndLeviesScheme?.cstRate}%) / (TOURISM: {vatAndLeviesScheme?.tourismRate}%):{" "}
+              (CST: {vatAndLeviesScheme?.cstRate}%) / (TOURISM:{" "}
+              {vatAndLeviesScheme?.tourismRate}%):{" "}
               {moneyInTxt(
                 gridData.reduce((total, item) => total + item.otherLevies, 0)
               )}{" "}
@@ -206,18 +208,18 @@ export default function PurchaseInvoicePreview({ vatAndLeviesScheme }) {
               {formData?.discountType
                 ? formData?.discountType === "selective"
                   ? moneyInTxt(
+                      gridData.reduce(
+                        (total, item) => total + item.totalPayable,
+                        0
+                      ) - formData?.totalDiscount
+                    )
+                  : moneyInTxt(formData?.totalDiscount)
+                : moneyInTxt(
                     gridData.reduce(
                       (total, item) => total + item.totalPayable,
                       0
-                    ) - formData?.totalDiscount
-                  )
-                  : moneyInTxt(formData?.totalDiscount)
-                : moneyInTxt(
-                  gridData.reduce(
-                    (total, item) => total + item.totalPayable,
-                    0
-                  )
-                )}
+                    )
+                  )}
             </h6>
           </div>
         </div>

@@ -14,6 +14,7 @@ import {
   Card,
   CardBody,
   Badge,
+  Label,
 } from "reactstrap";
 import { AppContext } from "views/Index";
 import { FormContext } from "components/Modals/NewInvoice";
@@ -71,11 +72,17 @@ const currenciesInit = [
   },
 ];
 
-function InvoiceForm({ refetch }) {
+function InvoiceForm({ refetch, setPrintType, printType, getPrintPDF }) {
   const history = useHistory();
   const queryClient = useQueryClient();
 
   const axios = useCustomAxios();
+
+  const handlePrintTypeChange = (e) => {
+    localStorage.setItem("printType", e.target.value);
+
+    setPrintType(e.target.value);
+  };
 
   // const searchInput = useRef()
   const { invoices } = useContext(AppContext);
@@ -109,6 +116,7 @@ function InvoiceForm({ refetch }) {
   const [defaultProductsList, setDefaultProductsList] = useState([]);
   const [poTaxes, setPOTaxes] = useState(null);
   const [showLoading, setShowLoading] = useState(false);
+  const [print, setPrint] = useState(false);
   // const [vatAndLeviesScheme, setvatAndLeviesScheme] = useState({
   //   covidRate: 0,
   //   cstRate: 0,
@@ -333,11 +341,23 @@ function InvoiceForm({ refetch }) {
         error.code = res?.status;
         throw error;
       } else {
+        if (res?.ErrorId) {
+          toast.error(res?.Message);
+          return;
+        }
         toast.success("Invoice successfully saved");
         refetch();
-        //queryClient.invalidateQueries({ queryKey: ["invoices", 1, 1, ""] });
-        setShowNewInvoiceModal(false);
-        setLoading(false);
+        if (print) {
+          // alert("No we print");
+
+          getPrintPDF(res?.id, res?.signatureStatus?.toUpperCase());
+
+          setShowNewInvoiceModal(false);
+          setLoading(false);
+        } else {
+          setShowNewInvoiceModal(false);
+          setLoading(false);
+        }
       }
     },
     onError: (error) => {
@@ -1271,7 +1291,7 @@ function InvoiceForm({ refetch }) {
                 </Row>
 
                 <Row>
-                  <Col lg="6">
+                  <Col lg="4">
                     <Button
                       disabled={
                         formData.quantity > 0 || formData?.price > 0 || loading
@@ -1287,20 +1307,75 @@ function InvoiceForm({ refetch }) {
                       ADD ITEM
                     </Button>
                   </Col>
-                  <Col lg="6">
+                  <Col lg="4">
                     <Button
                       disabled={loading}
                       color="success"
                       type="button"
-                      onClick={saveInvoice}
+                      onClick={() => {
+                        setPrint(false);
+                        saveInvoice();
+                      }}
                       style={{ width: "100%" }}
                       size="sm"
                     >
-                      {loading ? "Submitting..." : "SUBMIT INVOICE"}
+                      {loading ? "Submitting..." : "SUBMIT"}
+                    </Button>
+                  </Col>
+                  <Col lg="4">
+                    <Button
+                      disabled={loading}
+                      color="info"
+                      type="button"
+                      onClick={() => {
+                        setPrint(true);
+                        saveInvoice();
+                      }}
+                      style={{ width: "100%" }}
+                      size="sm"
+                    >
+                      {loading ? "Submitting..." : "SUBMIT & PRINT"}
                     </Button>
                   </Col>
                 </Row>
-                <Row></Row>
+                <Row className="mt-2 text-small">
+                  <Col md={6}>
+                    <small>Default Print Option:</small>
+                  </Col>
+                  <Col md={6}>
+                    <FormGroup
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <FormGroup check>
+                        <Label check>
+                          <Input
+                            type="radio"
+                            name="printType"
+                            checked={printType === "Default"}
+                            value={"Default"}
+                            onChange={handlePrintTypeChange}
+                          />{" "}
+                          <small>A4 Size</small>
+                        </Label>
+                      </FormGroup>
+                      <FormGroup check>
+                        <Label check>
+                          <Input
+                            type="radio"
+                            name="printType"
+                            checked={printType === "A"}
+                            value={"A"}
+                            onChange={handlePrintTypeChange}
+                          />{" "}
+                          <small>POS Receipt</small>
+                        </Label>
+                      </FormGroup>
+                    </FormGroup>
+                  </Col>
+                </Row>
               </>
             )}
           </Form>

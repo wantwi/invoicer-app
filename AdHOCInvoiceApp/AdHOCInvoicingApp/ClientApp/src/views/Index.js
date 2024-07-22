@@ -49,6 +49,8 @@ import PageHeader from "components/Headers/PageHeader";
 
 export const AppContext = createContext(null);
 
+const getPrintType = localStorage.getItem("printType");
+
 const Index = () => {
   const axios = useCustomAxios();
   const { selectedBranch } = useAuth();
@@ -88,7 +90,7 @@ const Index = () => {
   const [rowData, setRowData] = useState(null);
   const [refundTypeForPost, setRefundTypeForPost] = useState("");
   const [isReportLoading, setReportIsLoading] = useState(false);
-  const [printType, setPrintType] = useState("default");
+  const [printType, setPrintType] = useState(getPrintType || "default");
 
   const [
     resetInvoicePreviewRefundComponent,
@@ -247,10 +249,9 @@ const Index = () => {
     try {
       setReportIsLoading(true);
       setMessage("Fetching invoice detail...");
+
       const request = await axios.post(
-        `/api/GenerateVATInvoiceReportAsync/${
-          printType.length === 0 ? "default" : printType
-        }`,
+        `/api/GenerateVATInvoiceReportAsync/${printType || "Default"}`,
         invoiceNo
       );
       if (request) {
@@ -640,6 +641,9 @@ const Index = () => {
             <NewInvoice
               refetch={refetch}
               setShowNewInvoiceModal={setShowNewInvoiceModal}
+              setPrintType={setPrintType}
+              printType={printType}
+              getPrintPDF={getPrintPDF}
             />
           ) : null}
 

@@ -1,9 +1,9 @@
-import InvoiceForm from "../Invoice/InvoiceForm"
-import InvoicePreview from "../Invoice/InvoicePreview"
-import React, { useState, createContext } from "react"
-import { Modal, Button } from "reactstrap"
-import { ErrorBoundary } from "react-error-boundary"
-import Fallback from "components/Fallback"
+import InvoiceForm from "../Invoice/InvoiceForm";
+import InvoicePreview from "../Invoice/InvoicePreview";
+import React, { useState, createContext } from "react";
+import { Modal, Button } from "reactstrap";
+import { ErrorBoundary } from "react-error-boundary";
+import Fallback from "components/Fallback";
 
 const init = {
   customer: "",
@@ -20,19 +20,25 @@ const init = {
   totalDiscount: "",
   date: "",
   dueDate: "",
-  pon: ""
-}
+  pon: "",
+};
 
-export const FormContext = createContext(null)
+export const FormContext = createContext(null);
 
 const errorHandler = (error, errorInfo) => {
-  console.log("Logging", error, errorInfo)
-}
+  console.log("Logging", error, errorInfo);
+};
 
-function NewInvoice({ setShowNewInvoiceModal, refetch }) {
-  const [formData, setFormData] = useState(init)
-  const [gridData, setGridData] = useState([])
-  const [comments, setComments] = useState("")
+function NewInvoice({
+  setShowNewInvoiceModal,
+  refetch,
+  setPrintType,
+  printType,
+  getPrintPDF,
+}) {
+  const [formData, setFormData] = useState(init);
+  const [gridData, setGridData] = useState([]);
+  const [comments, setComments] = useState("");
   const [vatAndLeviesScheme, setvatAndLeviesScheme] = useState({
     covidRate: 0,
     cstRate: 0,
@@ -43,7 +49,7 @@ function NewInvoice({ setShowNewInvoiceModal, refetch }) {
     tourismRate: 0,
     trsmWithVat: 0,
     vatRate: 0,
-  })
+  });
 
   console.log({ vatAndLeviesScheme });
 
@@ -84,12 +90,12 @@ function NewInvoice({ setShowNewInvoiceModal, refetch }) {
           className="modal-body "
           style={{
             display: "flex",
-            minWidth: "40vw",
+            minWidth: "70vw",
             marginTop: -30,
             resize: "both",
             overflow: "auto",
             justifyContent: "center",
-            maxWidth: "max-content"
+            maxWidth: "80vw",
           }}
         >
           <FormContext.Provider
@@ -103,17 +109,21 @@ function NewInvoice({ setShowNewInvoiceModal, refetch }) {
               comments,
               setComments,
               vatAndLeviesScheme,
-              setvatAndLeviesScheme
+              setvatAndLeviesScheme,
             }}
           >
-            <InvoiceForm refetch={refetch} />
+            <InvoiceForm
+              refetch={refetch}
+              setPrintType={setPrintType}
+              printType={printType}
+              getPrintPDF={getPrintPDF}
+            />
             <InvoicePreview />
           </FormContext.Provider>
-
         </div>
       </Modal>
     </>
-  )
+  );
 }
 
-export default NewInvoice
+export default NewInvoice;
