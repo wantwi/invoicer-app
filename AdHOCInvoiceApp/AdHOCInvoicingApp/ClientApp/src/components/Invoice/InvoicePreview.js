@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Card, Table } from "reactstrap";
+import { Badge, Card, Table } from "reactstrap";
 import graLogo from "../../assets/img/theme/gra.png";
 import companyLogo from "../../assets/img/theme/logo.png";
 import { FormContext } from "components/Modals/NewInvoice";
@@ -189,8 +189,13 @@ function InvoicePreview() {
                 </tr>
               ))}
             </tbody>
-          </Table>
-        </div>
+                  </Table>
+         
+              </div>
+              <div>
+                  <Badge color="primary">Item Count: {gridData.length}</Badge>
+              </div>
+             
         <div style={styles.footer}>
           <div style={styles.total}>
             <h6 style={{ padding: 0, margin: 0 }}>

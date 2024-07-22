@@ -341,6 +341,7 @@ function InvoiceForm({ refetch }) {
       }
     },
     onError: (error) => {
+      console.log({ useMutationError: error });
       if (error?.response?.status === 500) {
         toast.error(
           error?.response?.data ||
@@ -350,7 +351,7 @@ function InvoiceForm({ refetch }) {
         setLoading(false);
         return;
       }
-      console.log({ useMutationError: error });
+
       toast.error(
         error?.message || "Invoice could not be saved. Please contact support."
       );
