@@ -96,7 +96,7 @@ function PrintPreview({
   };
 
   const toggle = (tab) => {
-    setPrintType(tab);
+    // setPrintType(tab);
     setActiveTab(tab);
     localStorage.setItem("printType", tab);
   };
@@ -146,6 +146,7 @@ function PrintPreview({
               color={printType !== "A" ? "primary" : ""}
               onClick={() => {
                 toggle("default");
+                setPrintType("default");
               }}
               value="default"
             >
@@ -156,6 +157,7 @@ function PrintPreview({
               size="sm"
               onClick={() => {
                 toggle("A");
+                setPrintType("A");
               }}
               value="A"
             >

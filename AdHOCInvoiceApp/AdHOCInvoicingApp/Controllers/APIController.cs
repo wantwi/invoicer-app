@@ -295,25 +295,6 @@ namespace AdHOCInvoicingApp.Controllers
                 dataObj = await response.Content.ReadAsStringAsync();
                 return new JsonResult(new { data = dataObj, status = response.StatusCode });
             }
-
-
-            // var response = await client.PostAsync(url, content);
-            // if (response.StatusCode.ToString() == "BadRequest")
-            // {
-            //     throw new Exception("Error Occurred");
-            // }
-            // else if (response.IsSuccessStatusCode)
-            // {
-            //     var result = await response.Content.ReadAsStringAsync();
-            //     return new JsonResult(new { result });
-            // }
-            // else
-            // {
-            //     var result = await response.Content.ReadAsStringAsync();
-            //     //return new JsonResult(new { result });
-            //     var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-            //     return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
-            // }
         }
 
         [HttpPost("AddExchangeRate/{branchCode}")]
@@ -712,22 +693,7 @@ namespace AdHOCInvoicingApp.Controllers
                 return new JsonResult(new { status = response.StatusCode, data = dataObj });
             }
 
-            //if (response.StatusCode.ToString() == "BadRequest")
-            //{
-            //    throw new Exception("Error Occurred");
-            //}
-            //else if (response.IsSuccessStatusCode)
-            //{
-            //    var result = await response.Content.ReadAsStringAsync();
-            //    return new JsonResult(new { result });
-            //}
-            //else
-            //{
-            //    var result = await response.Content.ReadAsStringAsync();
-            //    //return new JsonResult(new { result });
-            //    var error = JsonConvert.DeserializeObject<ErrorModel>(result);
-            //    return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
-            //}
+
         }
 
 
@@ -1444,6 +1410,125 @@ namespace AdHOCInvoicingApp.Controllers
             }
 
         }
+
+        [HttpGet("InvoiceDevice/{search}")]
+        public async Task<IActionResult> InvoiceDevice(string search)
+        {
+            var user = await UserInfo();
+            string url = $"{EvatAdHOCBaseUrl}v4/InvoiceDevice/GetByCompanyId/{user.Sub}?filter={search}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
+        [HttpGet("InvoiceDevice")]
+        public async Task<IActionResult> GetInvoiceDevice()
+        {
+            var user = await UserInfo();
+
+            string url = $"{EvatAdHOCBaseUrl}v4/InvoiceDevice/GetByCompanyId/{user.Sub}";
+
+            var response = await _hTTPClientInterface.MakeRequestAsync(await AccessToken(), url, "GET");
+            return Ok(response);
+
+        }
+
+        [HttpPost("InvoiceDevice")]
+        public async Task<IActionResult> InvoiceDevcie([FromBody] List<InvoiceDevice> dto)
+        {
+            var user = await UserInfo();
+            for (int i = 0; i < dto.Count; i++)
+            {
+                dto[i].CompanyId = user.Sub;
+
+            }
+
+            var client = _httpClientFactory.CreateClient();
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/InvoiceDevice";
+
+            var content = new StringContent(JsonConvert.SerializeObject(dto), System.Text.Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(url, content);
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
+
+        [HttpPut("InvoiceDevice/{id}")]
+        public async Task<IActionResult> UpdateInvoiceDevice([FromBody] InvoiceDevice data, string id)
+        {
+
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            data.CompanyId = user.Sub;
+
+            var content = new StringContent(JsonConvert.SerializeObject(data), System.Text.Encoding.UTF8, "application/json");
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/InvoiceDevice/{id}";
+
+            var response = await client.PutAsync(url, content);
+
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+        }
+
+        [HttpDelete("InvoiceDevice/{id}")]
+        public async Task<IActionResult> DeleteInvoiceDevice(string id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var user = await UserInfo();
+            client.SetBearerToken(await AccessToken());
+            string url = $"{EvatAdHOCBaseUrl}v4/InvoiceDevice/{id}/{user?.Sub}";
+
+            var response = await client.DeleteAsync(url);
+            var dataObj = string.Empty;
+            if (response.IsSuccessStatusCode)
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                if (dataObj == string.Empty)
+                {
+                    return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+                }
+                return new JsonResult(new { status = response.StatusCode.ToString(), data = dataObj });
+            }
+            else
+            {
+                dataObj = await response.Content.ReadAsStringAsync();
+                return new JsonResult(new { status = response.StatusCode, data = dataObj });
+            }
+
+
+        }
+
 
         public string GetSignatureUrl(string queryString)
         {

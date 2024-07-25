@@ -49,11 +49,11 @@ import { AppVersion } from "components/Footers/Footer";
 import { useLocation } from "react-router-dom";
 import "./sidebar.module.css";
 
-import { FaHandshakeSimple } from "react-icons/fa6";
+import { FaHandshakeSimple, FaMobile, FaMobileScreen } from "react-icons/fa6";
 import { MdOutlineNoteAlt } from "react-icons/md";
 import { FaCartArrowDown } from "react-icons/fa6";
 import { FaUserTie } from "react-icons/fa6";
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaMobileAlt } from "react-icons/fa";
 import { FaDesktop } from "react-icons/fa6";
 import { FaCartPlus } from "react-icons/fa";
 import { FaPeopleCarryBox } from "react-icons/fa6";
@@ -89,6 +89,8 @@ const getIcon = (name) => {
       return <FaUserTie size={20} />;
     case "Setup":
       return <FaCog size={22} />;
+    case "Device":
+      return <FaMobileScreen size={22} />;
     default:
       return <FaCartArrowDown size={20} />;
   }

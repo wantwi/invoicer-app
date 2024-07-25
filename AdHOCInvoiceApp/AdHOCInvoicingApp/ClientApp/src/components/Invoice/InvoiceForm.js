@@ -1354,8 +1354,8 @@ function InvoiceForm({ refetch, setPrintType, printType, getPrintPDF }) {
                           <Input
                             type="radio"
                             name="printType"
-                            checked={printType === "Default"}
-                            value={"Default"}
+                            checked={printType === "default"}
+                            value={"default"}
                             onChange={handlePrintTypeChange}
                           />{" "}
                           <small>A4 Size</small>

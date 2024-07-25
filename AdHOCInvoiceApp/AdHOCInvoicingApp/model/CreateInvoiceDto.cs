@@ -112,6 +112,34 @@ namespace AdHOCInvoicingApp.model
         public string NoteType { get; set; }
     }
 
+    public class InvoiceDevice
+    {
+        public string CompanyId { get; set; }
+        [Required]
+        public string SerialNumber { get; set; } = null!;
+        [Required]
+        public string Name { get; set; } = null!;
+        [Required]
+        public string Model { get; set; } = null!;
+        [Required]
+        public string Brand { get; set; } = null!;
+        public string Status { get; set; } = "A";
+    }
+
+    public class InvoiceDeviceUpdate
+    {
+        public string CompanyId { get; set; }
+        [Required]
+        public string SerialNumber { get; set; } = null!;
+        [Required]
+        public string Name { get; set; } = null!;
+        [Required]
+        public string Model { get; set; } = null!;
+        [Required]
+        public string Brand { get; set; } = null!;
+
+    }
+
 
 
 

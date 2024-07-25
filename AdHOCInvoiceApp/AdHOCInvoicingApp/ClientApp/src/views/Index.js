@@ -251,7 +251,7 @@ const Index = () => {
       setMessage("Fetching invoice detail...");
 
       const request = await axios.post(
-        `/api/GenerateVATInvoiceReportAsync/${printType || "Default"}`,
+        `/api/GenerateVATInvoiceReportAsync/${printType || "default"}`,
         invoiceNo
       );
       if (request) {
@@ -313,6 +313,7 @@ const Index = () => {
 
   useEffect(() => {
     setCurrencyFilter("GHS");
+    setPrintType(getPrintType || "default");
   }, []);
 
   console.log({ pageInfo });
