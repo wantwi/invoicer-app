@@ -803,7 +803,7 @@ namespace AdHOCInvoicingApp.Controllers
         {
             var client = _httpClientFactory.CreateClient();
             client.SetBearerToken(await AccessToken());
-            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseVATInvoiceReportAsync?Id={id}";
+            string url = $"{EvatAdHOCBaseUrl}v4/Reports/GeneratePurchaseReturnReportAsync?Id={id}";
             var response = await client.PostAsJsonAsync(url, id);
 
             if (response.StatusCode.ToString() == "BadRequest")
