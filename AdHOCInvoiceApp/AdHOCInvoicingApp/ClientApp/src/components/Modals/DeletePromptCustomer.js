@@ -121,6 +121,7 @@ export default function DeletePromptCustomer({
             type='button'
             onClick={() => handleDeleteCustomer(customerToDelete)}
           >
+            
             Yes
           </Button>
           <Button

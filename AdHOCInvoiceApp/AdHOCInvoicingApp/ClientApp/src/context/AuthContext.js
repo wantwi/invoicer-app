@@ -9,7 +9,7 @@ export const useAuth = () => useContext(AuthContext);
 //   process.env.REACT_APP_URL + "BRANCH_NAME"
 // ) || "";
 // let branchId = localStorage.getItem(process.env.REACT_APP_URL + "BRANCH_VALUE") || "";
-const branchInfo = JSON.parse(sessionStorage.getItem("BRANCH_INFO")) || {}
+const branchInfo = JSON.parse(localStorage.getItem("BRANCH_INFO")) || {}
 
 console.log({ branchInfo });
 
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     const logoutUrl = user["bff:logout_url"];
     // window.location.href = `${logoutUrl}&returnUrl=${process.env.REACT_APP_BASENAME}/admin/index`
-    window.location.href = `${logoutUrl}&returnUrl=/auth/logout`;
+    window.location.href = `${logoutUrl}&returnUrl=/auth/login`;
     //    window.location = `${logoutUrl}&returnUrl=${process.env.REACT_APP_POST_LOGOUT_REDIRECT}`
   };
 

@@ -47,7 +47,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import * as FaIcons from "react-icons/fa";
 import BranchPrompt from "components/Modals/BranchPrompt";
 
-const branchInfo = JSON.parse(sessionStorage.getItem("BRANCH_INFO"));
+const branchInfo = JSON.parse(localStorage.getItem("BRANCH_INFO"));
 
 const Admin = (props) => {
   const mainContent = React.useRef(null);
@@ -264,7 +264,7 @@ const Admin = (props) => {
 
   const onBranchSelected = () => {
     const item = data?.find((x) => x?.code === branch);
-    sessionStorage.setItem("BRANCH_INFO", JSON.stringify(item));
+    localStorage.setItem("BRANCH_INFO", JSON.stringify(item));
     setSelectedBranch(item);
     setisOpen(false);
   };

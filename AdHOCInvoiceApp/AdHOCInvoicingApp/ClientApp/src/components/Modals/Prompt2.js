@@ -73,8 +73,7 @@ export default function Prompt({
   });
 
   const postRefund = (invoice) => {
-    // const isPartialRefund = invoice?.invoiceItemsToPost.every((item) => Boolean(item?.refundQuantity))
-    // const isFullRefund = invoice?.invoiceItemsToPost.every((item) => item.quantity == 0)
+   
     let postData = {};
     let refundTypeVal = "";
     let temp = invoice?.invoiceItemsToPost.filter((item) =>
@@ -223,7 +222,7 @@ export default function Prompt({
         isOpen={showPrompt}
       >
         {" "}
-        {loading ? <Loader /> : null}
+        {/* {loading ? <Loader /> : null} */}
         <div className="modal-header">
           <h6 className="modal-title" id="modal-title-notification">
             Your attention is required
@@ -252,8 +251,9 @@ export default function Prompt({
             color="default"
             type="button"
             onClick={() => postRefund(refundInvoice)}
+            disabled={loading}
           >
-            Confirm
+           {loading ? "Please wait" : "Confirm"} 
           </Button>
           <Button
             className="text-white ml-auto"

@@ -204,7 +204,8 @@ function PrintPreview({
           {/* <button className="btn btn-sm btn-secondary"  onClick={() => setShowReport(false)} title="Close">Close</button> */}
           {isRefund ? (
             <button
-              hidden={!isActive}
+              // hidden={!isActive}
+              hidden
               className="btn btn-sm btn-danger"
               onClick={handleRefundCancel}
               title="Cancel Refund"

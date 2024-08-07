@@ -23,7 +23,7 @@ const Login = () => {
     }
   useEffect(() => {
       getConfigStatus()
-    sessionStorage.removeItem("BRANCH_INFO")
+   // sessionStorage.removeItem("BRANCH_INFO")
     
 
   }, []);

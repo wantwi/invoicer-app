@@ -50,7 +50,7 @@ export default function DeletePrompt({
 
   return (
       <>
-          {isLoading && <Loader /> }
+          {/* {isLoading && <Loader /> } */}
       <Modal
         className='modal-dialog-centered modal-danger'
         contentClassName='bg-gradient-danger'
@@ -85,8 +85,10 @@ export default function DeletePrompt({
             color='default'
             type='button'
             onClick={() => handleDeleteItem(itemToDelete)}
+            disabled={isLoading}
           >
-            Yes
+           
+            {isLoading ? "Please wait" : "Yes"} 
           </Button>
           <Button
             className='text-white ml-auto'

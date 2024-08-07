@@ -11,6 +11,7 @@ import {
     FormGroup,
     Input,
     Modal,
+    ModalBody,
     // Label,
 } from "reactstrap";
 import BoldReportViewer from "components/reportViewer/BoldReportViewer";
@@ -23,6 +24,22 @@ import DatePicker from "react-datepicker";
 import { useAuth } from "hooks/useAuth";
 import { MultiSelect } from "react-multi-select-component";
 import { useGet } from "../hooks/useGet";
+import { saveAs } from 'file-saver';
+import "./report.css"
+import Loader from "components/Modals/Loader"
+
+function formatDate(date) {
+  
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  
+  // Example usage:
+  const date = new Date();
+  console.log(formatDate(date)); // Output: "2024-08-07" (or the current date)
+  
 
 const reportList = [
     { value: "JournalInvoiceReport", name: "Invoice Journal Report" },
@@ -70,18 +87,22 @@ const Reports = () => {
     const [reportName, setReportName] = useState("");
     const [reportParam, setReportParam] = useState({});
     const [reportParams, setReportParams] = useState([]);
-    const [intialValue, setInitialValue] = useState({});
+    const [reportFile, setReportFile] = useState(null);
     const [showBtn, setshowBtn] = useState(true);
     const submitBtn = useRef(null);
     const { user, getBranches } = useAuth();
     const [selectBranches, setSetselectBranches] = useState([]);
     const [reportURL, setReportURL] = useState({})
+    const [dateFrom, setDateFrom] = useState("")
+    const [dateTo, setDateTo] = useState("")
+    const [isLoading, setisLoading] = useState(false)
 
     const [showReportPramasModal, setShowReportPramasModal] = useState(false);
   
 
+    const { data: reports } = useGet("/api/GetReports", ['report-list'])
     const { data: branches } = useGet("/api/GetBranches", ['user-branch'])
-    console.log({ branches });
+    console.log({ reports });
     // useEffect(() => {
     //   toggle()
 
@@ -145,22 +166,50 @@ const Reports = () => {
     };
 
     const handleChange = (e) => {
-        setReportParams([])
-        setSetselectBranches([])
+       // setReportParams([])
+       // setSetselectBranches([])
         setReportName(e.target.value);
 
-        getReportParameters(e.target.value);
+        //getReportParameters(e.target.value);
         e.target.value.length > 0 ? setshowBtn(true) : setshowBtn(false);
 
         closeModal();
     };
 
-    const handleSubmit = (values) => {
-        if (isNotNull()) {
+    const handleSubmit = async () => {
+
+        
+        try {
+            setisLoading(true)
+            const response = await CustomAxios.get(`/api/GetReports/${user?.sub}/${+reportName}/${formatDate(dateFrom)}/${formatDate(dateTo)}`)
+
+            //   const pdfBlob = new Blob([response.data.data], { type: 'application/pdf' });
+            //   saveAs(pdfBlob, 'downloadedFile.pdf');
+
+
+            console.log({responseCode: response});
+            
+              
+          
+
+            // const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+
+            // console.log({GetReprot: response?.data, pdfBlob});
+            // const pdfUrl = URL.createObjectURL(pdfBlob);
+            setReportFile(response?.data)
+            
+        } catch (error) {
+            console.error({errorRes: error});
+            
+        }finally{
+            setisLoading(false)
+        }
+       
+        
             setShowReportPramasModal(false);
             setShowReport(true);
 
-        }
+        // }
     };
 
     const closeModal = () => {
@@ -201,10 +250,16 @@ const Reports = () => {
         return () => { };
     }, []);
 
-    // console.log({ reportURL })
+    console.log({ reportFile })
 
     return (
         <>
+
+
+                {
+                    isLoading && <Loader/>
+                }
+
             <UserHeader
                 message={"This is your report page. View all reports here"}
                 pageName="Reports"
@@ -234,25 +289,13 @@ const Reports = () => {
                                                         style={{ height: 29, padding: "0px 5px" }}
                                                     >
                                                         <option value="">Select report</option>
-                                                        {reportList.map((item, i) => (
-                                                            <option key={i} value={item.value}>
-                                                                {item.name}
+                                                        {reports?.map((item, i) => (
+                                                            <option key={i} value={item.id}>
+                                                                {item.reportDesc}
                                                             </option>
                                                         ))}
                                                     </select>
-                                                    {/* <Input
-                            className="form-control font-sm"
-                            type="select"
-                            value={reportName}
-                            onChange={handleChange}
-                          >
-                            <option value="">Select report</option>
-                            {reportList.map((item, i) => (
-                              <option key={i} value={item.value}>
-                                {item.name}
-                              </option>
-                            ))}
-                          </Input> */}
+                                                   
                                                 </FormGroup>
                                             </Col>
                                         </Row>
@@ -272,14 +315,16 @@ const Reports = () => {
                                 </Row>
                             </CardHeader>
                             <CardBody className="mt--1">
+                               
                                 {showReport ? (
-                                    <BoldReportViewer
-                                        reportParam={{ ...reportParam, BranchCode: selectBranches.map(x => x?.value).join(",") }}
-                                        reportPath={reportPath}
-                                        setInitialValue={setInitialValue}
-                                        setShowReport={setShowReport}
-                                        reportURL={reportURL}
-                                    />
+                                     <embed src={`data:application/pdf;base64,${reportFile}`}  width="100%" height="800"/>
+                                    // <BoldReportViewer
+                                    //     reportParam={{ ...reportParam, BranchCode: selectBranches.map(x => x?.value).join(",") }}
+                                    //     reportPath={reportPath}
+                                    //     setInitialValue={setInitialValue}
+                                    //     setShowReport={setShowReport}
+                                    //     reportURL={reportURL}
+                                    // />
                                 ) : null}
                             </CardBody>
                         </Card>
@@ -291,7 +336,7 @@ const Reports = () => {
                 // style={{ width: '150%', height: '600px' }}
                 className="modal-dialog-centered modal-md"
                 isOpen={showReportPramasModal}
-                toggle={() => ""}
+                
             >
                 <div className="modal-header">
                     <h1 className="modal-title" id="exampleModalLabel">
@@ -307,85 +352,49 @@ const Reports = () => {
                         <span aria-hidden={true}>×</span>
                     </button>
                 </div>
-                {
-                    reportParams.length > 0 ? <div className="modal-body" id="report-modal">
-                        {reportParams.map((x, i) => {
-                            const { type, isRequired, placeholder, value, paramName } = x;
-                            return (
-                                <>
-                                    {
-                                        <FormGroup key={`${i}__${paramName}b`}>
-                                            <h3
-                                                hidden={
-                                                    paramName.toLowerCase() === "userid" ? true : false
-                                                }
-                                                className="mb-0"
-                                                key={`${i}__${paramName}a`}
-                                            >
-                                                {placeholder}{" "}
-                                            </h3>
-                                            {type.toLowerCase() === "date" ? (
-                                                <>
-                                                    <DatePicker
-                                                        id={paramName}
-                                                        name={paramName}
-                                                        maxDate={new Date()}
-                                                        placeholderText={placeholder}
-                                                        className="form-control"
-                                                        showIcon
-                                                        dateFormat="yyyy/MM/dd"
-                                                        selected={reportParam[paramName]}
-                                                        onChange={(e) => {
-                                                            setReportParam((prev) => ({
-                                                                ...prev,
-                                                                [paramName]: e,
-                                                            }));
-                                                        }}
-                                                        style={{ height: 29, padding: "0px 5px" }}
-                                                    />
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Input
-                                                        hidden={
-                                                            paramName.toLowerCase() === "userid" ? true : false
-                                                        }
-                                                        key={`${i}_${paramName}`}
-                                                        name={paramName}
-                                                        id={paramName}
-                                                        type={`${type.toLowerCase()}`}
-                                                        placeholder={placeholder}
-                                                        onChange={handleFormChange}
-                                                        value={reportParam.paramName}
-                                                    />
-                                                </>
-                                            )}
-                                        </FormGroup>
-                                    }
-                                </>
-                            );
-                        })}
-                        <Row>
-                            <Col>
-                                <h3>Branch</h3>
-                                <MultiSelect
-                                    options={branches?.map((x) => ({
-                                        label: x?.name,
-                                        value: x?.code,
-                                    }))}
-                                    value={selectBranches}
-                                    onChange={setSetselectBranches}
-                                    labelledBy="Select"
-                                />
-                            </Col>
-                        </Row>
-                        <br />
-
-                        <Row>
+                <ModalBody>
+                    
+                    <div style={{display:"flex", flexDirection:"column", gap:20, width:"100%"}} >
+                    <div >
+                            <DatePicker
+                                id={"dateFrom"}
+                                name={"dateFrom"}
+                                maxDate={new Date()}
+                                placeholderText={"Start Date"}
+                                className="form-control form-control-sm"
+                                showIcon
+                                dateFormat="yyyy/MM/dd"
+                                selected={dateFrom}
+                                onChange={(e) => {
+                                    setDateFrom(e);
+                                }}
+                                style={{ height: 29, padding: "0px 5px", width:"100%" }}
+                            />
+                        </div>
+                        <div>
+                            <DatePicker
+                                id={"dateTo"}
+                                name={"dateTo"}
+                                maxDate={new Date()}
+                                placeholderText={"End Date"}
+                                className="form-control form-control-sm"
+                                showIcon
+                                dateFormat="yyyy/MM/dd"
+                                selected={dateTo}
+                                onChange={(e) => {
+                                    setDateTo(e);
+                                }}
+                                style={{ height: 29, padding: "0px 5px", width:"100%" }}
+                            />
+                        </div>
+                    </div>
+                        
+                  
+                    <Row className="mt-2">
                             <Col xs={6}>
                                 <Button
                                     color="danger"
-                                    size="md"
+                                    size="sm"
                                     type="submit"
                                     onClick={closeModal}
                                     style={{ width: "100%" }}
@@ -396,8 +405,8 @@ const Reports = () => {
                             <Col xs={6}>
                                 <Button
                                     color="primary"
-                                    size="md"
-                                    type="submit"
+                                    size="sm"
+                                    type="button"
                                     onClick={handleSubmit}
                                     style={{ width: "100%" }}
                                 >
@@ -405,9 +414,7 @@ const Reports = () => {
                                 </Button>
                             </Col>
                         </Row>
-                    </div> : 'Loading report parameters...'
-                }
-
+                </ModalBody>
             </Modal>
         </>
     );

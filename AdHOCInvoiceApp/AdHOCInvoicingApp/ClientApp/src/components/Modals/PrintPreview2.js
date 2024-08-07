@@ -126,7 +126,7 @@ function PrintPreview({
         {/* OLD IMPLEMETATION HERE */}
         <ModalFooter>
         {/* <button className="btn btn-sm btn-secondary"  onClick={() => setShowReport(false)} title="Close">Close</button> */}
-         {isActive ? <button className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Purchase Return">Cancel Purchase Return</button>:null}
+         {isActive ? <button hidden className="btn btn-sm btn-danger" onClick={handleRefundCancel} title="Cancel Purchase Return">Cancel Purchase Return</button>:null}
         </ModalFooter>
       </Modal>
 
