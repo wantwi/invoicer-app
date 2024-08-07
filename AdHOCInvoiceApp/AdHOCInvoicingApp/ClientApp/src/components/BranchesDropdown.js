@@ -3,7 +3,7 @@ import useAuth from "hooks/useAuth";
 import graLogo2 from "../assets/img/brand/logo.png";
 
 const BranchCompo = ({ loggingOut = false }) => {
-  const { setSelectedBranch, branches } = useAuth();
+    const { setSelectedBranch, branches, logout } = useAuth();
   // const [branch, setbranch] = useState(second)
   const [branch,setBranch] = useState("");
   let branchRef = useRef();
@@ -45,8 +45,9 @@ const BranchCompo = ({ loggingOut = false }) => {
   useEffect(() => {
     let clearTimeOut = null;
     const delay = () =>
-      setTimeout(() => {
-        window.location.href = "https://evat-suite.persolqa.com";
+        setTimeout(() => {
+            logout()
+        //window.location.href = "https://evat-suite.persolqa.com";
       }, 1000);
     if (loggingOut) clearTimeOut = delay();
 

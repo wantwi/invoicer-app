@@ -26,20 +26,20 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<HTTPClientInterface, HTTPREQUEST>();
 builder.Services.AddControllers();
 
-builder.Services.AddBff(option =>
-{
-    option.EnableSessionCleanup = true;
-    option.SessionCleanupInterval = TimeSpan.FromMinutes(5);
-    option.RevokeRefreshTokenOnLogout = true;
+//builder.Services.AddBff(option =>
+//{
+//    option.EnableSessionCleanup = true;
+//    option.SessionCleanupInterval = TimeSpan.FromMinutes(5);
+//    option.RevokeRefreshTokenOnLogout = true;
 
-})
-.AddEntityFrameworkServerSideSessions(options =>
-{
+//})
+//.AddEntityFrameworkServerSideSessions(options =>
+//{
 
-    options.UseSqlServer(apiSettingsData.ConfigrationEndpoint);
-    options.EnableDetailedErrors(true);
-})
-.AddRemoteApis();
+//    options.UseSqlServer(apiSettingsData.ConfigrationEndpoint);
+//    options.EnableDetailedErrors(true);
+//})
+builder.Services.AddBff().AddRemoteApis();
 //.AddServerSideSessions();
 
 string basePath = AppDomain.CurrentDomain.BaseDirectory;
