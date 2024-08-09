@@ -31,7 +31,7 @@ export default function BranchPrompt({
         size="lg"
       >
         {" "}
-        {loading ? <Loader /> : null}
+        {/* {loading ? <Loader /> : null} */}
         <div className="modal-header">
           <h5 className="modal-title text-white" id="modal-title-notification">
             Your attention is required

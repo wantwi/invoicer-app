@@ -238,10 +238,7 @@ const Items = () => {
                     taxable: item.istaxable,
                     otherLevies: item.otherLevies,
                     isTaxInclusive: item.isTaxInclusive,
-                    code:
-                        "TXC00" +
-                        Math.ceil(Math.random() * 1000) +
-                        new Date().toISOString().substring(8, 10),
+                    code:item?.code || "NA",
                     currencyCode: item.currencyCode,
                     taxRate: item.istaxable ? 0.125 : 0,
                     price: Number(item.price),
@@ -283,6 +280,11 @@ const Items = () => {
     };
 
     const handleSaveOrUpdate = () => {
+
+        console.log({formData});
+
+      //  return
+        
         itemSelected ? updateItem(formData) : saveItem(formData);
     };
 
@@ -367,16 +369,16 @@ const Items = () => {
                 name: item.name,
                 description: item.description,
                 taxable: item.istaxable,
-                code:
-                    "TXC00" +
-                    Math.ceil(Math.random() * 1000) +
-                    new Date().toISOString().substring(8, 10),
+                // code:
+                //     "TXC00" +
+                //     Math.ceil(Math.random() * 1000) +
+                //     new Date().toISOString().substring(8, 10),
                 taxRate: item.istaxable ? 0.125 : 0,
                 price: Number(item.price),
                 companyId: user?.sub,
                 isTaxInclusive: item.isTaxInclusive,
                 currencyCode: item.currencyCode,
-                otherLevies: item.otherLevies,
+                otherLevies: item.otherLevies
             };
         });
 
@@ -843,7 +845,7 @@ const Items = () => {
                                                         className="form-control font-sm"
                                                         placeholder={companySettings === "AUTO" ? "AUTO" : "Item Code"}
                                                         type="text"
-                                                        readOnly={companySettings === "AUTO" ?? true}
+                                                        // readOnly={companySettings === "AUTO" ?? true}
                                                         disabled={itemSelected}
                                                         value={formData.code}
                                                         onChange={(e) =>
@@ -1072,6 +1074,27 @@ const Items = () => {
                                                 </FormGroup>
                                             </Col>
                                         </Row>
+                                        {/* <Row>
+                                        <Col md={3} sm={12}>
+                                                <label
+                                                    className="form-control-label"
+                                                    htmlFor="input-first-name"
+                                                >
+                                                   Service Type
+                                                </label>
+                                                <select
+                                                    className="form-control font-sm"
+                                                    value={otherLevies}
+                                                    onChange={(e) => setOtherLevies(e.target.value)}
+                                                    style={{ height: 29, padding: "0px 5px" }}
+                                                >
+                                                    <option value={"NON"}>None</option>
+                                                    <option value={"CST"}>CST</option>
+                                                    <option value={"TRSM"}>Tourism</option>
+                                                </select>
+                                            </Col>
+
+                                        </Row> */}
 
                                     </div>
                                     <hr className="my-1 mt-0" />

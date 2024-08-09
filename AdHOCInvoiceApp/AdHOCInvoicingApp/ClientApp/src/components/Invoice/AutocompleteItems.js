@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { Input, InputGroup, InputGroupAddon, InputGroupText } from "reactstrap";
 import ItemsSuggestionsList from "./ItemsSuggestionsList";
-import { AsyncTypeahead } from "react-bootstrap-typeahead"
+// import { AsyncTypeahead } from "react-bootstrap-typeahead"
 
 const SEARCH_URI = 'https://api.github.com/search/users';
 const AutocompleteItems = ({
@@ -82,23 +82,23 @@ const AutocompleteItems = ({
     setFilteredSuggestions(suggestions);
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [options, setOptions] = useState([]);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [options, setOptions] = useState([]);
 
-  const handleSearch = (query) => {
-    setIsLoading(true);
+  // const handleSearch = (query) => {
+  //   setIsLoading(true);
 
-    fetch(`${SEARCH_URI}?q=${query}+in:login&page=1&per_page=50`)
-      .then((resp) => resp.json())
-      .then(({ items }) => {
-        setOptions(items);
-        setIsLoading(false);
-      });
-  };
-  const filterBy = () => true;
+  //   fetch(`${SEARCH_URI}?q=${query}+in:login&page=1&per_page=50`)
+  //     .then((resp) => resp.json())
+  //     .then(({ items }) => {
+  //       setOptions(items);
+  //       setIsLoading(false);
+  //     });
+  // };
+  // const filterBy = () => true;
   return (
     <>
- <AsyncTypeahead
+ {/* <AsyncTypeahead
  size="sm"
       filterBy={filterBy}
       id="async-example"
@@ -122,7 +122,7 @@ const AutocompleteItems = ({
           <span>{option.login}</span>
         </>
       )}
-    />
+    /> */}
 
       <InputGroup className="input-group-alternative" onClick={onFocus}>
         <ItemSugestionInputField

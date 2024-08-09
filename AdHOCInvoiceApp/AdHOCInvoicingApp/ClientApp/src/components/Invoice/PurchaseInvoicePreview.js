@@ -33,7 +33,9 @@ export default function PurchaseInvoicePreview({ vatAndLeviesScheme }) {
 
   const handleEditItem = (item, index) => {
     console.log({ item });
+    // alert(JSON.stringify(vatAndLeviesScheme))
     setUpdateItemData({
+      ...item,
       index: index,
       itemName: item.itemName,
       quantity: item.quantity,

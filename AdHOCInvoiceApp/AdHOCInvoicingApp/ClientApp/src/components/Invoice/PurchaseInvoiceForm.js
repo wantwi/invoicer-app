@@ -30,6 +30,7 @@ import useAuth from "hooks/useAuth";
 import DatePicker from "react-datepicker";
 import { useCustomQueryById } from "hooks/useCustomQueryById";
 import { useHistory } from "react-router-dom";
+import { getPayableAmount } from "utils/util"
 
 function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   const queryClient = useQueryClient();
@@ -48,17 +49,17 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
     // setvatAndLeviesScheme
   } = useContext(FormContext);
 
-  const {
-    covidRate,
-    cstRate,
-    cstWithVat,
-    getfundRate,
-    nhilRate,
-    regularLeviesWithVat,
-    tourismRate,
-    trsmWithVat,
-    vatRate,
-  } = vatAndLeviesScheme;
+  // const {
+  //   covidRate,
+  //   cstRate,
+  //   cstWithVat,
+  //   getfundRate,
+  //   nhilRate,
+  //   regularLeviesWithVat,
+  //   tourismRate,
+  //   trsmWithVat,
+  //   vatRate,
+  // } = vatAndLeviesScheme;
 
   const [isItemAdded, setIsItemAdded] = useState(false);
 
@@ -145,16 +146,17 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   };
 
   const addRecordToData = (item) => {
-    // console.log(item)
+
+    // console.log({getPayableAmount: , item})
     // return
     let csttourism = 0;
-    if (item.trsmCst === "NON") {
-      csttourism = 0;
-    } else if (item.trsmCst === "CST") {
-      csttourism = (cstRate / 100) * item.price * item.quantity;
-    } else if (item.trsmCst === "TRSM") {
-      csttourism = (tourismRate / 100) * item.price * item.quantity;
-    }
+    // if (item.trsmCst === "NON") {
+    //   csttourism = 0;
+    // } else if (item.trsmCst === "CST") {
+    //   csttourism = (cstRate / 100) * item.price * item.quantity;
+    // } else if (item.trsmCst === "TRSM") {
+    //   csttourism = (tourismRate / 100) * item.price * item.quantity;
+    // }
 
     if (item.itemName === "") {
       toast.warning("Please select an item first");
@@ -165,79 +167,83 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
     } else if (item.invoiceNumber === "") {
       toast.warning("Please provide a value for invoice number");
     } else {
-      let obj = {};
-      let vatableAmt = 0;
-      let vat = 0;
-      let totalPayable = 0;
-      let isINC = false;
+      // let obj = {};
+      // let vatableAmt = 0;
+      // let vat = 0;
+      // let totalPayable = 0;
+      // let isINC = false;
 
       //console.log(item)
 
-      if (!item.isTaxInclusive) {
-        obj = {
-          taxable: isTaxable,
-          discount: Number(discount),
-          itemCode: item.itemCode,
-          itemName: item.itemName,
-          quantity: Number(item.quantity),
-          price: Number(item.price),
-          taxableAmount: item.quantity * item.price,
-          nhil: (nhilRate / 100) * item.quantity * item.price,
-          getf: (getfundRate / 100) * item.quantity * item.price,
-          covid: (covidRate / 100) * item.quantity * item.price,
-          otherLevies: csttourism,
-          vatItemId: item.vatItemId,
-        };
+      // if (!item.isTaxInclusive) {
+      //   obj = {
+      //     taxable: isTaxable,
+      //     discount: Number(discount),
+      //     itemCode: item.itemCode,
+      //     itemName: item.itemName,
+      //     quantity: Number(item.quantity),
+      //     price: Number(item.price),
+      //     taxableAmount: item.quantity * item.price,
+      //     nhil: (nhilRate / 100) * item.quantity * item.price,
+      //     getf: (getfundRate / 100) * item.quantity * item.price,
+      //     covid: (covidRate / 100) * item.quantity * item.price,
+      //     otherLevies: csttourism,
+      //     vatItemId: item.vatItemId,
+      //   };
 
-        if (isTaxable) {
-          vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
-          vat = (vatRate / 100) * vatableAmt;
-        } else {
-          obj.nhil = 0;
-          obj.getf = 0;
-          obj.covid = 0;
-          vatableAmt = obj.taxableAmount;
-          // vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid
-        }
-        totalPayable = vatableAmt + vat + obj.otherLevies - obj.discount;
-      } else {
-        isINC = true;
-        obj = {
-          discount: Number(discount) || 0,
-          itemCode: item.itemCode, //'ITM' + Math.floor(Math.random() * 1000 + 1),
-          itemName: item.itemName,
-          quantity: Number(item.quantity),
-          price: Number(item.price),
-          nhil: (nhilRate / 100) * ((item.quantity * item.price * 100) / 121.9),
-          getf:
-            (getfundRate / 100) * ((item.quantity * item.price * 100) / 121.9),
-          covid:
-            (covidRate / 100) * ((item.quantity * item.price * 100) / 121.9),
-          otherLevies: csttourism,
-          vatItemId: item.vatItemId,
-          taxableAmount: (item.quantity * item.price * 100) / 121.9,
-        };
+      //   if (isTaxable) {
+      //     vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
+      //     vat = (vatRate / 100) * vatableAmt;
+      //   } else {
+      //     obj.nhil = 0;
+      //     obj.getf = 0;
+      //     obj.covid = 0;
+      //     vatableAmt = obj.taxableAmount;
+      //     // vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid
+      //   }
+      //   totalPayable = vatableAmt + vat + obj.otherLevies - obj.discount;
+      // } else {
+      //   isINC = true;
+      //   obj = {
+      //     discount: Number(discount) || 0,
+      //     itemCode: item.itemCode, //'ITM' + Math.floor(Math.random() * 1000 + 1),
+      //     itemName: item.itemName,
+      //     quantity: Number(item.quantity),
+      //     price: Number(item.price),
+      //     nhil: (nhilRate / 100) * ((item.quantity * item.price * 100) / 121.9),
+      //     getf:
+      //       (getfundRate / 100) * ((item.quantity * item.price * 100) / 121.9),
+      //     covid:
+      //       (covidRate / 100) * ((item.quantity * item.price * 100) / 121.9),
+      //     otherLevies: csttourism,
+      //     vatItemId: item.vatItemId,
+      //     taxableAmount: (item.quantity * item.price * 100) / 121.9,
+      //   };
 
-        if (isTaxable) {
-          vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
-          vat = 0.15 * vatableAmt;
-        } else {
-          obj.nhil = 0;
-          obj.getf = 0;
-          obj.covid = 0;
-          vatableAmt = obj.taxableAmount;
-        }
-        let inclusiveAmt = item.quantity * item.price;
-        totalPayable = inclusiveAmt - discount;
-      }
+      //   if (isTaxable) {
+      //     vatableAmt = obj.taxableAmount + obj.nhil + obj.getf + obj.covid;
+      //     vat = 0.15 * vatableAmt;
+      //   } else {
+      //     obj.nhil = 0;
+      //     obj.getf = 0;
+      //     obj.covid = 0;
+      //     vatableAmt = obj.taxableAmount;
+      //   }
+      //   let inclusiveAmt = item.quantity * item.price;
+      //   totalPayable = inclusiveAmt - discount;
+      // }
 
-      let gridItem = {
-        ...obj,
-        vatableAmt,
-        vat,
-        totalPayable,
-        isINC,
-      };
+      let gridItem = getPayableAmount({...item,
+        otherLevies: item?.trsmCst
+      }, 0, vatAndLeviesScheme)
+      
+      // {
+      //   ...obj,
+      //   vatableAmt,
+      //   vat,
+      //   totalPayable,
+      //   isINC,
+      // };
       setGridData((gridData) => [
         ...gridData,
         {
@@ -249,6 +255,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
           isTaxable: item?.isTaxable,
           isTaxInclusive: item?.isTaxInclusive,
           trsmCst: item?.trsmCst,
+          otherLevies:item?.trsmCst,
           ...gridItem,
         },
       ]);
@@ -286,7 +293,7 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
   );
 
   const saveInvoice = async () => {
-    console.log({ formData });
+    
     if (!formData?.date) {
       toast.warn("Invoice date is required");
       return;
@@ -314,15 +321,18 @@ function PurchaseInvoiceForm({ vatAndLeviesScheme, setvatAndLeviesScheme }) {
       // branchId: selectedBranch?.code,
       invoiceItems: gridData?.map((item) => ({
         // itemName: item?.itemName,
-        unitPrice: item?.price,
+        unitPrice: item?.totalPayable,
         itemDiscount: item?.itemDiscount,
         quantity: item?.quantity,
         vatItemId: item?.vatItemId,
         isTaxable: item?.isTaxable,
-        isTaxInclusive: item?.isTaxInclusive,
+        isTaxInclusive: true,
         trsmCst: item?.trsmCst,
       })),
     };
+
+    // console.log({ gridData, postData });
+    // return
     if (isItemAdded) {
       setLoading(true);
       mutate(postData);

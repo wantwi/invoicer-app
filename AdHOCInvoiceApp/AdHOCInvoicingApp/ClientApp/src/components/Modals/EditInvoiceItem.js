@@ -28,12 +28,12 @@ function EditInvoiceItem({
   setGridData,
   showDiscountField,
   isPO = false, formData,
-  // vatAndLeviesScheme
+   vatAndLeviesScheme
 }) {
-  const {
-    vatAndLeviesScheme,
-    setvatAndLeviesScheme
-  } = useContext(FormContext);
+  // const {
+  //   vatAndLeviesScheme,
+  //   setvatAndLeviesScheme
+  // } = useContext(FormContext);
 
 
 
