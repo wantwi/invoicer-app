@@ -238,10 +238,10 @@ const Items = () => {
                     taxable: item.istaxable,
                     otherLevies: item.otherLevies,
                     isTaxInclusive: item.isTaxInclusive,
-                    code:
-                        "TXC00" +
-                        Math.ceil(Math.random() * 1000) +
-                        new Date().toISOString().substring(8, 10),
+                    //code:
+                    //    "TXC00" +
+                    //    Math.ceil(Math.random() * 1000) +
+                    //    new Date().toISOString().substring(8, 10),
                     currencyCode: item.currencyCode,
                     taxRate: item.istaxable ? 0.125 : 0,
                     price: Number(item.price),
@@ -367,10 +367,10 @@ const Items = () => {
                 name: item.name,
                 description: item.description,
                 taxable: item.istaxable,
-                code:
-                    "TXC00" +
-                    Math.ceil(Math.random() * 1000) +
-                    new Date().toISOString().substring(8, 10),
+                //code:
+                //    "TXC00" +
+                //    Math.ceil(Math.random() * 1000) +
+                //    new Date().toISOString().substring(8, 10),
                 taxRate: item.istaxable ? 0.125 : 0,
                 price: Number(item.price),
                 companyId: user?.sub,
