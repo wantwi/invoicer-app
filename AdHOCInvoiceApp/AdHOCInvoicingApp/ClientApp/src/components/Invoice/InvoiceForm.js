@@ -1170,16 +1170,16 @@ function InvoiceForm({ refetch, setPrintType, printType, getPrintPDF }) {
                         (formData.isTaxInclusive ? "-Tax Incl." : "-Tax Excl.")}
                     </label>
                     <CurrencyInput
-                      min={1}
+                      min={0}
                       id="price"
                       name="price"
                       className={`form-control form-control-alternative form-control-sm text-right`}
                       placeholder="0.00"
                       defaultValue={formData.price}
                       value={formData.price}
-                      decimalsLimit={3}
+                      decimalsLimit={4}
                       onValueChange={(value, name) => {
-                        value < 1
+                        value < 0
                           ? setFormData({
                               ...formData,
                               price: 0,
