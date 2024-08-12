@@ -394,7 +394,7 @@ function InvoiceForm({ refetch, setPrintType, printType, getPrintPDF }) {
   const addRecordToData = (item) => {
     // setIsCurrencyDisbled(true)
 
-    if (item?.price < 1 || item?.price === "" || item?.price === undefined) {
+    if (item?.price < 0 || item?.price === "" || item?.price === undefined) {
       toast.error("Invalid price value");
       return;
     }
